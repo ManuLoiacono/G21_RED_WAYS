@@ -268,6 +268,14 @@ async function main() {
     if (window.matchMedia("(max-width: 900px)").matches) panel.setCollapsed(true);
   });
 
+  // Any calculation-relevant edit (destination, tasks, times, profile, mode, preferences)
+  // invalidates the result on screen.
+  panel.onStale(() => {
+    lastResponse = null;
+    routes.clear();
+    results.clear();
+  });
+
   // A simulated response is our own fixture: rebuild it in the new language. Engine responses
   // are shown as they came (their texts are the engine's).
   onLanguageChange(() => {
@@ -294,12 +302,7 @@ async function main() {
       if (entity.label) entity.label.text = new Cesium.ConstantProperty(poiTitle(p));
     }
   });
-  panel.onDestinationChange((id) => {
-    highlightDestination(poiEntities, id);
-    // Changing the destination invalidates the previous result.
-    routes.clear();
-    results.clear();
-  });
+  panel.onDestinationChange((id) => highlightDestination(poiEntities, id));
 
   viewer.screenSpaceEventHandler.setInputAction((click: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
     const picked = viewer.scene.pick(click.position);

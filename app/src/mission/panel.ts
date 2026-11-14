@@ -1,5 +1,5 @@
 import { requestPlan, SERVICE_URL } from "./api";
-import { toPlanRequest } from "./request";
+import { calculationKey, toPlanRequest } from "./request";
 import type { PlanResponse } from "./response";
 import { onLanguageChange, t } from "../i18n";
 import { esc, fmtNumber } from "../ui/format";
@@ -26,6 +26,8 @@ export interface MissionPanel {
   onDestinationChange(cb: (poiId: string) => void): void;
   /** Runs after every change to the mission (and once on registration) with the current state. */
   onChange(cb: (state: Readonly<MissionState>) => void): void;
+  /** Runs when the shown result no longer matches the form (any calculation-relevant edit). */
+  onStale(cb: () => void): void;
   getRequest(): PlanRequest;
   setCollapsed(value: boolean): void;
 }
@@ -58,6 +60,11 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
   let collapsed = false;
   let customTaskCount = 0;
   const invalid = new Set<string>();
+  /** Increases with every submit; a response for an older submit is discarded. */
+  let submitSeq = 0;
+  /** Calculation key of the result on screen (null when there is none or it is stale). */
+  let shownKey: string | null = null;
+  const staleListeners: (() => void)[] = [];
   const destinationListeners: ((id: string) => void)[] = [];
   const changeListeners: ((s: Readonly<MissionState>) => void)[] = [];
 
@@ -340,12 +347,21 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
       return;
     }
     const req = getRequest();
+    const key = calculationKey(req);
+    const seq = ++submitSeq;
     const submit = root.querySelector<HTMLButtonElement>('button[type="submit"]');
     if (submit) submit.disabled = true;
     setStatus(t("mp.status.calculating"));
     const res = await requestPlan(req);
+    if (seq !== submitSeq) return; // a newer submit owns the status and the result
     if (submit) submit.disabled = false;
+    // The form changed while waiting: this answer is for inputs that are no longer on screen.
+    if (key !== calculationKey(getRequest())) {
+      setStatus(t("mp.status.discarded"), "error");
+      return;
+    }
     if (res.ok) {
+      shownKey = key;
       setStatus(
         res.simulated ? t("mp.status.simulated", { url: SERVICE_URL }) : t("mp.status.received"),
         res.simulated ? "error" : "info",
@@ -369,6 +385,11 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
     const req = getRequest();
     if (pre) pre.textContent = JSON.stringify(req, null, 2);
     Object.assign(window, { lastPlanRequest: req });
+    if (shownKey !== null && calculationKey(req) !== shownKey) {
+      shownKey = null;
+      setStatus(t("mp.status.stale"));
+      staleListeners.forEach((cb) => cb());
+    }
     changeListeners.forEach((cb) => cb(state));
   }
 
@@ -420,6 +441,9 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
     onChange(cb) {
       changeListeners.push(cb);
       cb(state);
+    },
+    onStale(cb) {
+      staleListeners.push(cb);
     },
     getRequest,
     setCollapsed(value) {
