@@ -1,0 +1,371 @@
+{
+  "schema_version": 0,
+  "fixture": false,
+  "mode": "hindcast",
+  "cutoff_utc": "2025-10-25T00:00:00Z",
+  "issued_for_sol": 4709,
+  "issued_for_date_utc": "2025-11-04",
+  "inputs": "REMS observations up to issued_for_sol; models and climatology frozen at cutoff_utc",
+  "forecasts": [
+    {
+      "variable": "max_temp_c",
+      "target_sol": 4710,
+      "target_date_utc": "2025-11-05",
+      "lead_sols": 1,
+      "p10": -5.67,
+      "p50": -1.67,
+      "p90": 2.18,
+      "observed": -10.0,
+      "baseline_climatology": -6.14,
+      "baseline_persistence": -1.0,
+      "model_id": "A2_ridge_a100_v1",
+      "interval_method": "residual_quantiles",
+      "provenance": {
+        "class": "atmosferica",
+        "mission": "MSL",
+        "instrument": "REMS",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json",
+        "fetched_at": "2026-11-14T18:31:18Z",
+        "product": "ml/A2"
+      }
+    },
+    {
+      "variable": "max_temp_c",
+      "target_sol": 4712,
+      "target_date_utc": "2025-11-07",
+      "lead_sols": 3,
+      "p10": -6.2,
+      "p50": -1.68,
+      "p90": 2.76,
+      "observed": -9.0,
+      "baseline_climatology": -5.64,
+      "baseline_persistence": -1.0,
+      "model_id": "A2_ridge_a100_v1",
+      "interval_method": "residual_quantiles",
+      "provenance": {
+        "class": "atmosferica",
+        "mission": "MSL",
+        "instrument": "REMS",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json",
+        "fetched_at": "2026-11-14T18:31:18Z",
+        "product": "ml/A2"
+      }
+    },
+    {
+      "variable": "max_temp_c",
+      "target_sol": 4714,
+      "target_date_utc": "2025-11-09",
+      "lead_sols": 5,
+      "p10": -6.73,
+      "p50": -2.02,
+      "p90": 2.67,
+      "observed": -2.0,
+      "baseline_climatology": -5.44,
+      "baseline_persistence": -1.0,
+      "model_id": "A2_ridge_a100_v1",
+      "interval_method": "residual_quantiles",
+      "provenance": {
+        "class": "atmosferica",
+        "mission": "MSL",
+        "instrument": "REMS",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json",
+        "fetched_at": "2026-11-14T18:31:18Z",
+        "product": "ml/A2"
+      }
+    },
+    {
+      "variable": "min_temp_c",
+      "target_sol": 4710,
+      "target_date_utc": "2025-11-05",
+      "lead_sols": 1,
+      "p10": -75.94,
+      "p50": -74.14,
+      "p90": -73.16,
+      "observed": -73.0,
+      "baseline_climatology": -73.08,
+      "baseline_persistence": -74.0,
+      "model_id": "A2_lgbm_q_v1",
+      "interval_method": "native",
+      "provenance": {
+        "class": "atmosferica",
+        "mission": "MSL",
+        "instrument": "REMS",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json",
+        "fetched_at": "2026-11-14T18:31:18Z",
+        "product": "ml/A2"
+      }
+    },
+    {
+      "variable": "min_temp_c",
+      "target_sol": 4712,
+      "target_date_utc": "2025-11-07",
+      "lead_sols": 3,
+      "p10": -75.5,
+      "p50": -74.21,
+      "p90": -72.62,
+      "observed": -74.0,
+      "baseline_climatology": -73.12,
+      "baseline_persistence": -74.0,
+      "model_id": "A2_lgbm_q_v1",
+      "interval_method": "native",
+      "provenance": {
+        "class": "atmosferica",
+        "mission": "MSL",
+        "instrument": "REMS",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json",
+        "fetched_at": "2026-11-14T18:31:18Z",
+        "product": "ml/A2"
+      }
+    },
+    {
+      "variable": "min_temp_c",
+      "target_sol": 4714,
+      "target_date_utc": "2025-11-09",
+      "lead_sols": 5,
+      "p10": -75.61,
+      "p50": -74.28,
+      "p90": -72.7,
+      "observed": -74.0,
+      "baseline_climatology": -73.02,
+      "baseline_persistence": -74.0,
+      "model_id": "A2_lgbm_q_v1",
+      "interval_method": "native",
+      "provenance": {
+        "class": "atmosferica",
+        "mission": "MSL",
+        "instrument": "REMS",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json",
+        "fetched_at": "2026-11-14T18:31:18Z",
+        "product": "ml/A2"
+      }
+    },
+    {
+      "variable": "pressure_pa",
+      "target_sol": 4710,
+      "target_date_utc": "2025-11-05",
+      "lead_sols": 1,
+      "p10": 689.79,
+      "p50": 691.46,
+      "p90": 693.05,
+      "observed": 692.0,
+      "baseline_climatology": 688.02,
+      "baseline_persistence": 691.0,
+      "model_id": "A1_lgbm_norm_v1",
+      "interval_method": "residual_quantiles",
+      "provenance": {
+        "class": "atmosferica",
+        "mission": "MSL",
+        "instrument": "REMS",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json",
+        "fetched_at": "2026-11-14T18:31:18Z",
+        "product": "ml/A1"
+      }
+    },
+    {
+      "variable": "pressure_pa",
+      "target_sol": 4712,
+      "target_date_utc": "2025-11-07",
+      "lead_sols": 3,
+      "p10": 689.53,
+      "p50": 691.6,
+      "p90": 693.5,
+      "observed": 693.0,
+      "baseline_climatology": 689.05,
+      "baseline_persistence": 691.0,
+      "model_id": "A1_lgbm_norm_v1",
+      "interval_method": "residual_quantiles",
+      "provenance": {
+        "class": "atmosferica",
+        "mission": "MSL",
+        "instrument": "REMS",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json",
+        "fetched_at": "2026-11-14T18:31:18Z",
+        "product": "ml/A1"
+      }
+    },
+    {
+      "variable": "pressure_pa",
+      "target_sol": 4714,
+      "target_date_utc": "2025-11-09",
+      "lead_sols": 5,
+      "p10": 689.8,
+      "p50": 692.03,
+      "p90": 694.11,
+      "observed": 692.0,
+      "baseline_climatology": 690.05,
+      "baseline_persistence": 691.0,
+      "model_id": "A1_lgbm_norm_v1",
+      "interval_method": "residual_quantiles",
+      "provenance": {
+        "class": "atmosferica",
+        "mission": "MSL",
+        "instrument": "REMS",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json",
+        "fetched_at": "2026-11-14T18:31:18Z",
+        "product": "ml/A1"
+      }
+    },
+    {
+      "variable": "pressure_pa",
+      "target_sol": 4719,
+      "target_date_utc": "2025-11-14",
+      "lead_sols": 10,
+      "p10": 692.9,
+      "p50": 695.44,
+      "p90": 697.81,
+      "observed": 696.0,
+      "baseline_climatology": 693.33,
+      "baseline_persistence": 691.0,
+      "model_id": "A1_ridge_norm_a100_v1",
+      "interval_method": "residual_quantiles",
+      "provenance": {
+        "class": "atmosferica",
+        "mission": "MSL",
+        "instrument": "REMS",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json",
+        "fetched_at": "2026-11-14T18:31:18Z",
+        "product": "ml/A1"
+      }
+    }
+  ],
+  "skill_summary": {
+    "pressure_pa": {
+      "evaluated_on": "final_window_targets",
+      "climatology_reference": "clim_elev",
+      "by_lead": {
+        "1": {
+          "model_id": "A1_lgbm_norm_v1",
+          "mae": 0.8268,
+          "mae_climatology": 2.7261,
+          "skill": 0.6967,
+          "mae_persistence": 0.878,
+          "skill_vs_persistence": 0.0584,
+          "coverage_p10_p90": 0.9024,
+          "n": 41
+        },
+        "3": {
+          "model_id": "A1_lgbm_norm_v1",
+          "mae": 0.8211,
+          "mae_climatology": 2.7178,
+          "skill": 0.6979,
+          "mae_persistence": 2.1707,
+          "skill_vs_persistence": 0.6217,
+          "coverage_p10_p90": 0.9512,
+          "n": 41
+        },
+        "5": {
+          "model_id": "A1_lgbm_norm_v1",
+          "mae": 0.8624,
+          "mae_climatology": 2.7095,
+          "skill": 0.6817,
+          "mae_persistence": 3.122,
+          "skill_vs_persistence": 0.7238,
+          "coverage_p10_p90": 0.9268,
+          "n": 41
+        },
+        "10": {
+          "model_id": "A1_ridge_norm_a100_v1",
+          "mae": 1.1286,
+          "mae_climatology": 2.6887,
+          "skill": 0.5802,
+          "mae_persistence": 5.5366,
+          "skill_vs_persistence": 0.7962,
+          "coverage_p10_p90": 0.9024,
+          "n": 41
+        }
+      }
+    },
+    "min_temp_c": {
+      "evaluated_on": "final_window_targets",
+      "climatology_reference": "climatology",
+      "by_lead": {
+        "1": {
+          "model_id": "A2_lgbm_q_v1",
+          "mae": 0.7184,
+          "mae_climatology": 0.9881,
+          "skill": 0.2729,
+          "mae_persistence": 0.7317,
+          "skill_vs_persistence": 0.0182,
+          "coverage_p10_p90": 0.9024,
+          "n": 41
+        },
+        "3": {
+          "model_id": "A2_lgbm_q_v1",
+          "mae": 0.8096,
+          "mae_climatology": 0.9881,
+          "skill": 0.1806,
+          "mae_persistence": 0.7561,
+          "skill_vs_persistence": -0.0708,
+          "coverage_p10_p90": 0.9268,
+          "n": 41
+        },
+        "5": {
+          "model_id": "A2_lgbm_q_v1",
+          "mae": 0.7162,
+          "mae_climatology": 0.9881,
+          "skill": 0.2751,
+          "mae_persistence": 0.8537,
+          "skill_vs_persistence": 0.161,
+          "coverage_p10_p90": 0.878,
+          "n": 41
+        }
+      }
+    },
+    "max_temp_c": {
+      "evaluated_on": "final_window_targets",
+      "climatology_reference": "climatology",
+      "by_lead": {
+        "1": {
+          "model_id": "A2_ridge_a100_v1",
+          "mae": 1.6749,
+          "mae_climatology": 2.9274,
+          "skill": 0.4278,
+          "mae_persistence": 1.7805,
+          "skill_vs_persistence": 0.0593,
+          "coverage_p10_p90": 0.9024,
+          "n": 41
+        },
+        "3": {
+          "model_id": "A2_ridge_a100_v1",
+          "mae": 1.8103,
+          "mae_climatology": 2.9274,
+          "skill": 0.3816,
+          "mae_persistence": 2.5122,
+          "skill_vs_persistence": 0.2794,
+          "coverage_p10_p90": 0.9512,
+          "n": 41
+        },
+        "5": {
+          "model_id": "A2_ridge_a100_v1",
+          "mae": 1.9099,
+          "mae_climatology": 2.9274,
+          "skill": 0.3476,
+          "mae_persistence": 2.1463,
+          "skill_vs_persistence": 0.1102,
+          "coverage_p10_p90": 0.9268,
+          "n": 41
+        }
+      }
+    }
+  }
+}
