@@ -142,6 +142,52 @@ Muestra: un archivo por año (día 298 = 25/10, o el último disponible), de 201
 La dosis sube hacia 2019–2020 (mínimo solar: más rayos cósmicos galácticos) y baja en 2013–2014 y 2024–2025 (máximos solares). Es lo esperado y respalda usar manchas solares en B1.
 
 
+## ML-08 — DS-R y B1 (dosis de fondo)
+
+- **DS-R** (`rad_daily.parquet`): 407657 observaciones de RAD (17490 marcadas y descartadas: sin marca: 390167, Cmds: 14164, DAN: 2853, High Temp: 310, DAN,Cmds: 148, Cmds,High Temp: 9, DAN,High Temp: 4, Cary: 1, Eddie,Cmds: 1). 4536 soles con dosis válida (≥ 48 observaciones limpias), soles 310–4995; 4239 antes del corte. Ventana final: 41 de 41 soles con dosis.
+- **Asignación a soles:** `sol = floor(MSD + 137,42/360) − 49269` (MSD de `marstime`). Coincide con el 100 % de los pares sol–fecha de REMS. Control: la primera observación de cada sol cae el mismo día de la fecha REMS en 2232 soles y el día anterior en 2247 (sobre 4479; nunca más lejos).
+- **Variable:** `dose_b_rtgcorr_ugy_day` = dosis en el detector B (silicio), corregida por el MMRTG, en µGy/día. No es dosis en tejido humano ni dosis equivalente.
+- **Referencia:** media móvil de los últimos 27 soles hasta el sol de emisión (`ma27`). Elegido por validación, por horizonte: 1 sol → `lgbm`, 3 sol → `lgbm`, 5 sol → `lgbm`, 10 sol → `ma27`.
+- **Chequeo físico** (descriptivo, dentro de la muestra, 4088 soles antes del corte): dosis = 224.624 -0.0062 × presión_Pa -0.7005 × manchas(27–90 d); R² = 0.6121. Correlación dosis–presión 0.0621, dosis–manchas -0.7823. Presión, manchas, estación y tiempo están parcialmente confundidos: no leer los coeficientes como efectos causales aislados.
+
+| Candidato | Parte | Horizonte (soles) | n | MAE (µGy/día) | Mejora vs. media móvil 27 soles | Mejora vs. persistencia | Cobertura p10–p90 |
+|---|---|---|---|---|---|---|---|
+| persistence | validación | 1 | 4128 | 3.12 | 0.38 | -0.00 | 0.80 |
+| persistence | validación | 3 | 4114 | 4.75 | 0.12 | -0.00 | 0.80 |
+| persistence | validación | 5 | 4106 | 5.51 | 0.01 | 0.00 | 0.80 |
+| persistence | validación | 10 | 4102 | 6.53 | -0.10 | -0.00 | 0.79 |
+| ma27 | validación | 1 | 4128 | 5.06 | -0.00 | -0.62 | 0.79 |
+| ma27 | validación | 3 | 4114 | 5.37 | 0.00 | -0.13 | 0.79 |
+| ma27 | validación | 5 | 4106 | 5.56 | 0.00 | -0.01 | 0.79 |
+| ma27 | validación | 10 | 4102 | 5.95 | -0.00 | 0.09 | 0.79 |
+| lgbm | validación | 1 | 4128 | 3.10 | 0.39 | 0.01 | 0.80 |
+| lgbm | validación | 3 | 4114 | 4.41 | 0.18 | 0.07 | 0.80 |
+| lgbm | validación | 5 | 4106 | 5.16 | 0.07 | 0.06 | 0.79 |
+| lgbm | validación | 10 | 4102 | 6.10 | -0.03 | 0.06 | 0.78 |
+| ridge_a100 | validación | 1 | 4128 | 4.58 | 0.10 | -0.47 | 0.79 |
+| ridge_a100 | validación | 3 | 4114 | 5.63 | -0.05 | -0.19 | 0.79 |
+| ridge_a100 | validación | 5 | 4106 | 5.78 | -0.04 | -0.05 | 0.79 |
+| ridge_a100 | validación | 10 | 4102 | 6.08 | -0.02 | 0.07 | 0.79 |
+| persistence | ventana final | 1 | 41 | 2.95 | 0.30 | -0.00 | 0.78 |
+| persistence | ventana final | 3 | 41 | 4.50 | -0.01 | 0.00 | 0.73 |
+| persistence | ventana final | 5 | 41 | 5.47 | -0.16 | 0.00 | 0.71 |
+| persistence | ventana final | 10 | 41 | 6.70 | -0.36 | 0.00 | 0.78 |
+| ma27 | ventana final | 1 | 41 | 4.19 | 0.00 | -0.42 | 0.78 |
+| ma27 | ventana final | 3 | 41 | 4.47 | -0.00 | 0.01 | 0.78 |
+| ma27 | ventana final | 5 | 41 | 4.70 | -0.00 | 0.14 | 0.78 |
+| ma27 | ventana final | 10 | 41 | 4.93 | -0.00 | 0.26 | 0.80 |
+| lgbm | ventana final | 1 | 41 | 2.52 | 0.40 | 0.15 | 0.88 |
+| lgbm | ventana final | 3 | 41 | 4.14 | 0.08 | 0.08 | 0.76 |
+| lgbm | ventana final | 5 | 41 | 4.28 | 0.09 | 0.22 | 0.78 |
+| lgbm | ventana final | 10 | 41 | 5.89 | -0.19 | 0.12 | 0.76 |
+| ridge_a100 | ventana final | 1 | 41 | 6.39 | -0.52 | -1.16 | 0.51 |
+| ridge_a100 | ventana final | 3 | 41 | 7.48 | -0.67 | -0.66 | 0.59 |
+| ridge_a100 | ventana final | 5 | 41 | 7.56 | -0.61 | -0.38 | 0.61 |
+| ridge_a100 | ventana final | 10 | 41 | 8.39 | -0.70 | -0.25 | 0.59 |
+
+**Tormentas de partículas solares:** la serie incluye días con dosis muy por encima del fondo (máximo diario 1692 µGy/día en el año marciano 37). Se dejaron en los datos: B1 no las predice ni las filtra. Afectan la media móvil durante 27 soles y pesan en el MAE de validación. Detectarlas es tarea de B2/C1.
+
+
 ## Limitaciones
 
 - **REMS es un resumen diario de divulgación** (CAB): valores enteros en °C y Pa, sin flags de calidad. Hay mínimas atípicas de −99/−100 °C (p. ej., soles 2803 y 2805) que se dejaron como están.
@@ -151,3 +197,4 @@ La dosis sube hacia 2019–2020 (mínimo solar: más rayos cósmicos galácticos
 - **Intervalos:** los modelos puntuales (Ridge y persistencia) usan cuantiles de residuos de los otros años. **LightGBM por cuantiles subcubre en validación** (p10–p90 cubre ~0,65–0,69 en lugar de 0,80 en `min_temp_c`). No se recalibró después de mirar la ventana final; una calibración conformal elegida solo por validación queda como mejora pendiente.
 - Los hiperparámetros de LightGBM son fijos (no se ajustaron); `alpha` de Ridge sale de una grilla chica elegida por validación.
 - Son predicciones de un **modelo sobre datos históricos** (`kind: modelado`), no un pronóstico operativo ni clima actual.
+- **RAD (B1):** caché compacta (solo la serie de dosis por observación); los CDF completos se guardan solo para la ventana final. Las manchas solares de SILSO se usan con sus valores actuales: al 25/10/2025 algunos eran provisorios y pudieron revisarse después (efecto chico, no medido).

@@ -16,9 +16,10 @@ def _fmt(x, nd=2):
     return "—" if x is None else f"{x:.{nd}f}"
 
 
-def _table(metrics: dict, cands: list[str], unit: str, labels: dict[str, str]) -> list[str]:
+def _table(metrics: dict, cands: list[str], unit: str, labels: dict[str, str], ref_key: str = "climatology",
+           ref_label: str = "climatología") -> list[str]:
     lines = [
-        f"| Candidato | Parte | Horizonte (soles) | n | MAE ({unit}) | Mejora vs. climatología | Mejora vs. persistencia | Cobertura p10–p90 |",
+        f"| Candidato | Parte | Horizonte (soles) | n | MAE ({unit}) | Mejora vs. {ref_label} | Mejora vs. persistencia | Cobertura p10–p90 |",
         "|---|---|---|---|---|---|---|---|",
     ]
     for part, part_label in (("cv", "validación"), ("final", "ventana final")):
@@ -26,7 +27,7 @@ def _table(metrics: dict, cands: list[str], unit: str, labels: dict[str, str]) -
             for lead, m in metrics[part][cand].items():
                 lines.append(
                     f"| {labels.get(cand, cand)} | {part_label} | {lead} | {m['n']} | {_fmt(m['mae'])} | "
-                    f"{_fmt(m.get('skill_vs_climatology'))} | {_fmt(m.get('skill_vs_persistence'))} | "
+                    f"{_fmt(m.get(f'skill_vs_{ref_key}'))} | {_fmt(m.get('skill_vs_persistence'))} | "
                     f"{_fmt(m.get('coverage_p10_p90'))} |"
                 )
     return lines
@@ -60,6 +61,38 @@ def _rad_section() -> list[str]:
         e = med.get("Total Dose E")
         lines.append(f"| {smp['file'][15:19]} | `{smp['file']}` | {smp['n_obs']} | {flagged} | {_fmt(b) if b == b else '—'} | {_fmt(e) if e == e else '—'} |")
     lines += ["", "La dosis sube hacia 2019–2020 (mínimo solar: más rayos cósmicos galácticos) y baja en 2013–2014 y 2024–2025 (máximos solares). Es lo esperado y respalda usar manchas solares en B1.", ""]
+    return lines
+
+
+def _b1_section() -> list[str]:
+    path = config.ARTIFACTS_DIR / "B1_dose" / "metrics.json"
+    if not path.exists():
+        return []
+    b1 = _load("B1_dose")
+    ds = json.loads((config.PROCESSED_DIR / "rad_daily_summary.json").read_text(encoding="utf-8"))
+    ph = b1["physics_check"]
+    chk = ds["sol_assignment_check"]["first_obs_day_minus_rems_date_days"]
+    flags_txt = ", ".join(f"{k or 'sin marca'}: {v}" for k, v in ds["flags"].items())
+    lines = [
+        "", "## ML-08 — DS-R y B1 (dosis de fondo)", "",
+        f"- **DS-R** (`rad_daily.parquet`): {ds['n_observations']} observaciones de RAD ({ds['n_observations_flagged']} marcadas y descartadas: {flags_txt}). "
+        f"{ds['n_sols_with_dose']} soles con dosis válida (≥ {ds['min_clean_obs_per_sol']} observaciones limpias), soles {ds['sol_range_with_dose'][0]}–{ds['sol_range_with_dose'][1]}; {ds['n_sols_with_dose_before_cutoff']} antes del corte. "
+        f"Ventana final: {ds['test_window']['n_sols_with_dose']} de {ds['test_window']['n_sols']} soles con dosis.",
+        f"- **Asignación a soles:** `sol = floor(MSD + 137,42/360) − 49269` (MSD de `marstime`). Coincide con el 100 % de los pares sol–fecha de REMS. Control: la primera observación de cada sol cae el mismo día de la fecha REMS en {chk.get('0', 0)} soles y el día anterior en {chk.get('-1', 0)} (sobre {ds['sol_assignment_check']['n']}; nunca más lejos).",
+        f"- **Variable:** `{b1['variable']}` = dosis en el detector B (silicio), corregida por el MMRTG, en µGy/día. No es dosis en tejido humano ni dosis equivalente.",
+        f"- **Referencia:** media móvil de los últimos 27 soles hasta el sol de emisión (`ma27`). Elegido por validación, por horizonte: {', '.join(f'{k} sol → `{v}`' for k, v in b1['selected_by_cv'].items())}.",
+        f"- **Chequeo físico** (descriptivo, dentro de la muestra, {ph['n']} soles antes del corte): dosis = {ph['intercept_ugy_day']} {ph['slope_ugy_day_per_pa']:+} × presión_Pa {ph['slope_ugy_day_per_sunspot']:+} × manchas(27–90 d); R² = {ph['r2']}. Correlación dosis–presión {ph['corr_dose_pressure']}, dosis–manchas {ph['corr_dose_ssn_27_90d']}. Presión, manchas, estación y tiempo están parcialmente confundidos: no leer los coeficientes como efectos causales aislados.",
+        "",
+    ]
+    cands = ["persistence", "ma27", *sorted(set(b1["best_ml_model_by_cv"].values()))]
+    lines += _table(b1["metrics"], cands, "µGy/día", {}, ref_key="moving_average", ref_label="media móvil 27 soles")
+    lines += [
+        "",
+        "**Tormentas de partículas solares:** la serie incluye días con dosis muy por encima del fondo (máximo diario "
+        f"{max(r['max'] for r in ds['dose_by_mars_year']):.0f} µGy/día en el año marciano 37). Se dejaron en los datos: B1 no las predice ni las filtra. "
+        "Afectan la media móvil durante 27 soles y pesan en el MAE de validación. Detectarlas es tarea de B2/C1.",
+        "",
+    ]
     return lines
 
 
@@ -97,6 +130,7 @@ def build() -> str:
                 f"Elegido por validación, por horizonte: {', '.join(f'{k} sol → `{v}`' for k, v in r['selected_by_cv'].items())}.", ""]
         out += _table(r["metrics"], cands, "°C", {})
     out += _rad_section()
+    out += _b1_section()
     out += [
         "",
         "## Limitaciones",
@@ -109,6 +143,7 @@ def build() -> str:
         "- **Intervalos:** los modelos puntuales (Ridge y persistencia) usan cuantiles de residuos de los otros años. **LightGBM por cuantiles subcubre en validación** (p10–p90 cubre ~0,65–0,69 en lugar de 0,80 en `min_temp_c`). No se recalibró después de mirar la ventana final; una calibración conformal elegida solo por validación queda como mejora pendiente.",
         "- Los hiperparámetros de LightGBM son fijos (no se ajustaron); `alpha` de Ridge sale de una grilla chica elegida por validación.",
         "- Son predicciones de un **modelo sobre datos históricos** (`kind: modelado`), no un pronóstico operativo ni clima actual.",
+        "- **RAD (B1):** caché compacta (solo la serie de dosis por observación); los CDF completos se guardan solo para la ventana final. Las manchas solares de SILSO se usan con sus valores actuales: al 25/10/2025 algunos eran provisorios y pudieron revisarse después (efecto chico, no medido).",
         "",
     ]
     return "\n".join(out)
