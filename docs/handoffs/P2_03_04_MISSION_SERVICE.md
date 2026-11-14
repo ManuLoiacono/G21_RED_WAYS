@@ -46,7 +46,7 @@ Local `HEAD` and the fetched tracking ref `origin/p2/directed-routing` both reso
 
 Use a fresh implementation session on `p2/mission-service`, starting from `f1c4b2a` plus this handoff update. Preserve unrelated local files. This session owns pure mission evaluation in `engine/` and a local service in `service/`; shared exchange additions remain proposals until the consumers review them. Do not edit the teammate-owned app or fabricate a P3 parcel to present as real.
 
-Immediate task boundary: implement increment 1 only, verify it, commit and push the feature branch, then return a handoff for integration review. Increments 2 and 3 below describe the subsequent sequence; do not start them in this first invocation. Do not wait for real weather, RAD, a final parcel or consumer approval to build clearly labeled synthetic mission-evaluation cases.
+Current task boundary after integration review: increment 1 was delivered in `69ba3b9` and its checks/examples independently passed review. The next invocation implements increment 2 only using `P2_03_INCREMENT2_PROVIDERS_AND_EXCHANGE.md`, then stops for review before increment 3. Do not wait for real weather, RAD, a final parcel or consumer approval to build clearly labeled synthetic provider/exchange cases; do not claim those cases complete real integration.
 
 | Increment | Scope | Completion check |
 | --- | --- | --- |
