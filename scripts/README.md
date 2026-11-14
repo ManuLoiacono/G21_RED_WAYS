@@ -23,3 +23,13 @@ dispersión residual 0,9 m). Las posiciones de Curiosity (`MSL_waypoints`) tambi
 del DTM: unos (−43, +33) m, y `elev_geoid` ≈ DTM − 17,9 m (563 puntos, dispersión 2,2 m).
 Para dibujar sobre la escena algo que esté en coordenadas del DTM (por ejemplo, las rutas del motor),
 hay que aplicarle el mismo desplazamiento.
+
+## `build_themis_parcel.py` — material suelto (THEMIS nocturno, P1)
+
+Recorta el mosaico THEMIS de infrarrojo nocturno MC-23 Aeolis (Mars Odyssey, 100 m/px, CC0) a la parcela, leyendo solo esa ventana por HTTP. Escribe `app/src/thermal/themis_nir_parcel.json` (~4 KB, versionado): 30 × 30 valores de 8 bits, la caja en coordenadas del DTM y los percentiles 2 y 98 usados para mostrarlo.
+
+```bash
+.venv/bin/python scripts/build_themis_parcel.py   # --bbox W S E N para otra zona
+```
+
+Limitaciones: es **cualitativo** (brillo, no inercia térmica); cada píxel promedia 100 × 100 m; el registro de THEMIS contra el DTM no está medido. La app lo usa solo como advertencia, relativa a la parcela.

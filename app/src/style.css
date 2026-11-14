@@ -384,3 +384,12 @@ dialog.pano:not([data-state="ready"]) .pano-overview { display: none; }
 @media (prefers-reduced-motion: reduce) { .pano-hint { transition: none; } dialog.pano[data-state="loading"] .pano-state::before { animation: none; } }
 .ly-action { margin-left: auto; margin-right: 8px; padding: 1px 9px; font-size: 12px; border-radius: 5px; border: 1px solid #c792ff; background: none; color: #c792ff; cursor: pointer; }
 .ly-action:hover { background: rgba(199, 146, 255, 0.15); }
+
+/* Layer legends (e.g. THEMIS loose material) */
+.ly-legend { margin-top: 6px; font-size: 11px; color: var(--ui-muted); }
+.ly-ramp { height: 14px; border-radius: 3px; border: 1px solid rgba(255, 255, 255, 0.15); background-color: rgba(255, 255, 255, 0.04); overflow: hidden; }
+.ly-ramp span { display: block; height: 100%; }
+.ly-ramp-labels { display: flex; justify-content: space-between; margin-top: 2px; }
+.ly-ramp-labels span:first-child { color: #ffaa28; }
+.ly-note { margin: 4px 0 0; line-height: 1.35; }
+#cursorReadout .ro-thermal dd { color: #ffaa28; }

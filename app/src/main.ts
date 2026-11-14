@@ -23,6 +23,8 @@ import { createPanoramaViewer } from "./panoramas/viewer";
 import { createCursorReadout } from "./ui/readout";
 import { ElevationGrid } from "./terrain/elevationGrid";
 import { addParcelOutline } from "./terrain/parcel";
+import { addThermalLayer, LEGEND_STYLE } from "./thermal/themis";
+import { esc } from "./ui/format";
 import { createMissionContext, setUpSettingsMenu } from "./ui/hud";
 
 // ---------------------------------------------------------------------------
@@ -180,6 +182,8 @@ async function main() {
 
   // Parcel outline in red, moved like the HiRISE mesh (same shift as its metadata, if built).
   const parcelOutline = addParcelOutline(viewer, hirise?.metadata.horizontal_shift_m);
+  // Loose-material warning (THEMIS night IR, qualitative), moved the same way. Off by default.
+  const thermal = addThermalLayer(viewer, hirise?.metadata.horizontal_shift_m);
 
   // Top bar: mission context (center) and the "Layers" panel (left).
   const context = createMissionContext(document.getElementById("hudContext")!, pois);
@@ -222,7 +226,13 @@ async function main() {
       dataClass: "termica",
       name: "layers.themis",
       origin: "Mars Odyssey · THEMIS",
-      status: () => "pending",
+      sourceId: "themis_nir",
+      status: () => "loaded",
+      visibility: { get: () => thermal.isVisible(), set: (on) => thermal.setVisible(on) },
+      legend: () =>
+        `<div class="ly-ramp"><span style="${LEGEND_STYLE}"></span></div>
+         <div class="ly-ramp-labels"><span>${esc(t("layers.themis.looser"))}</span><span>${esc(t("layers.themis.firmer"))}</span></div>
+         <p class="ly-note">${esc(t("layers.themis.note"))}</p>`,
     },
     {
       id: "parcel",
@@ -304,7 +314,9 @@ async function main() {
   hideLoading();
 
   // Cursor readout: position, DTM elevation and slope (highlighted above the profile's maximum).
-  const readout = createCursorReadout(viewer, await elevationGrid);
+  const readout = createCursorReadout(viewer, await elevationGrid, (lon, lat) =>
+    thermal.isVisible() ? thermal.sample(lon, lat) : null,
+  );
   panel.onChange((state) => readout.setSlopeLimit(state.profile.max_slope_deg));
 
   panoLayer = addPanoramas(viewer); // points appear on their own; does not delay the mission points
