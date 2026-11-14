@@ -110,7 +110,7 @@ Plan: `docs/ML_PREDICCION.md`. Resultados: `docs/ML_RESULTADOS.md`. Solo toca `m
 | [x] ML-04 | P0 | **A1 presión** | Métricas vs. baselines en validación y en la ventana final |
 | [x] ML-05 | P0 | **A2 temperatura con cuantiles** | Métricas + cobertura del p10–p90 |
 | [~] ML-06 | P0 | `export/` + `contracts/forecast.example.json` (borrador) | JSON por sol de la ventana; P1 y P2 avisados (falta avisar) |
-| [ ] ML-07 | P1 | `sources/rad.py`: leer un CDF y reportar variables, unidades y calidad | Informe en `docs/ML_RESULTADOS.md` |
+| [x] ML-07 | P1 | `sources/rad.py`: leer un CDF y reportar variables, unidades y calidad | Informe en `docs/ML_RESULTADOS.md` |
 | [ ] ML-08 | P1 | **DS-R** + **B1 dosis de fondo** (con S6 manchas solares) | Métricas vs. media móvil |
 | [ ] ML-09 | P1 | **DS-S** (DONKI 2013–2025) + **C1 evaluación** contra MAVEN y RAD | Tabla de aciertos, falsas alarmas y error en horas, con `n` |
 | [ ] ML-10 | P2 | B2 eventos, D-proxy polvo, C2 corrección de DONKI, A3 UV | Solo si ML-00 a ML-09 están cerrados |

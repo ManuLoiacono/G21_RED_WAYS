@@ -32,6 +32,37 @@ def _table(metrics: dict, cands: list[str], unit: str, labels: dict[str, str]) -
     return lines
 
 
+def _rad_section() -> list[str]:
+    path = config.PROCESSED_DIR / "rad_inspection.json"
+    if not path.exists():
+        return []
+    ins = json.loads(path.read_text(encoding="utf-8"))
+    s25 = next(s for s in ins["samples"] if "2025298" in s["file"])
+    same = all(ins["variables_identical_to_2025"].values())
+    lines = [
+        "", "## ML-07 — Lectura de los CDF de RAD", "",
+        "Muestra: un archivo por año (día 298 = 25/10, o el último disponible), de 2012 a 2026. Script: `python -m ml.evaluation.inspect_rad` → `data/processed/ml/rad_inspection.json`.",
+        "",
+        f"- **Variables:** {'las mismas 17 en todos los años muestreados' if same else 'CAMBIAN entre años (ver JSON)'}. La de dosis es `DOSIMETRY_TOTAL` (3 columnas) en **{s25['dose_units']}** (µGy/día; no mGy). También hay `DOSIMETRY_TIMESLICE` (16 subintervalos por observación), histogramas LET y de neutros, `ALIVE_TIME` y `FLAGGED_DATA`.",
+        f"- **Columnas de dosis:** {', '.join(f'`{l}`' for l in s25['dose_labels'])}. B es silicio; E es plástico equivalente a tejido. Solo la segunda columna dice estar corregida por el MMRTG (fuente nuclear del rover); la diferencia B total − B corregida ronda 57–66 µGy/día en la muestra. **No está documentado si E está corregida por el MMRTG** ⚠️.",
+        f"- **Cadencia:** una observación cada ~{s25['spacing_s_median']:.0f} s (~17 min), {s25['n_obs']} por día en 2025; `ALIVE_TIME` mediana {s25['alive_time_s_median']:.0f} s. En 2013–2014 la cadencia también es ~1024 s, pero hay días con menos observaciones.",
+        "- **Calidad:** `FLAGGED_DATA` vale vacío (dato bueno), `Cmds` (comandos) o `DAN` (actividad del instrumento DAN). Su descripción dice que lo marcado debe quitarse para uso científico; en la muestra las observaciones marcadas dan dosis más bajas. Se descartan. Valores ≤ 0 o iguales a FILLVAL se tratan como faltantes (el archivo de 2012 tiene B total = 0 y B corregida = NaN).",
+        "- **Cobertura:** 2012 tiene solo 2 días (puesta en marcha) y la serie útil empieza el 22/03/2013 (día 81). Hay huecos de 1 a 30 días por año. 2026 llega al día 315.",
+        "- **Versiones:** conviven v00–v09; se usa la mayor de cada día. Las versiones bajas recientes (v00–v02 en 2026) son preliminares.",
+        "",
+        "| Año | Archivo | Obs. | Marcadas | Mediana B corregida (µGy/día) | Mediana E (µGy/día) |",
+        "|---|---|---|---|---|---|",
+    ]
+    for smp in ins["samples"]:
+        med = smp["dose_median_clean"]
+        flagged = smp["n_obs"] - smp["flags"].get("", 0)
+        b = med.get("RTG Corrected Dose B")
+        e = med.get("Total Dose E")
+        lines.append(f"| {smp['file'][15:19]} | `{smp['file']}` | {smp['n_obs']} | {flagged} | {_fmt(b) if b == b else '—'} | {_fmt(e) if e == e else '—'} |")
+    lines += ["", "La dosis sube hacia 2019–2020 (mínimo solar: más rayos cósmicos galácticos) y baja en 2013–2014 y 2024–2025 (máximos solares). Es lo esperado y respalda usar manchas solares en B1.", ""]
+    return lines
+
+
 def build() -> str:
     summary = json.loads((config.PROCESSED_DIR / "daily_weather_summary.json").read_text(encoding="utf-8"))
     a1, a2 = _load("A1_pressure"), _load("A2_temperature")
@@ -65,6 +96,7 @@ def build() -> str:
         out += ["", f"## A2 — `{var}`", "",
                 f"Elegido por validación, por horizonte: {', '.join(f'{k} sol → `{v}`' for k, v in r['selected_by_cv'].items())}.", ""]
         out += _table(r["metrics"], cands, "°C", {})
+    out += _rad_section()
     out += [
         "",
         "## Limitaciones",

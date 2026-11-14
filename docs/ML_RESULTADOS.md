@@ -110,6 +110,38 @@ Elegido por validación, por horizonte: 1 sol → `ridge_a100`, 3 sol → `ridge
 | ridge_a100 | ventana final | 3 | 41 | 1.81 | 0.38 | 0.28 | 0.95 |
 | ridge_a100 | ventana final | 5 | 41 | 1.91 | 0.35 | 0.11 | 0.93 |
 
+## ML-07 — Lectura de los CDF de RAD
+
+Muestra: un archivo por año (día 298 = 25/10, o el último disponible), de 2012 a 2026. Script: `python -m ml.evaluation.inspect_rad` → `data/processed/ml/rad_inspection.json`.
+
+- **Variables:** las mismas 17 en todos los años muestreados. La de dosis es `DOSIMETRY_TOTAL` (3 columnas) en **uGray/day** (µGy/día; no mGy). También hay `DOSIMETRY_TIMESLICE` (16 subintervalos por observación), histogramas LET y de neutros, `ALIVE_TIME` y `FLAGGED_DATA`.
+- **Columnas de dosis:** `Total Dose B`, `RTG Corrected Dose B`, `Total Dose E`. B es silicio; E es plástico equivalente a tejido. Solo la segunda columna dice estar corregida por el MMRTG (fuente nuclear del rover); la diferencia B total − B corregida ronda 57–66 µGy/día en la muestra. **No está documentado si E está corregida por el MMRTG** ⚠️.
+- **Cadencia:** una observación cada ~1026 s (~17 min), 84 por día en 2025; `ALIVE_TIME` mediana 933 s. En 2013–2014 la cadencia también es ~1024 s, pero hay días con menos observaciones.
+- **Calidad:** `FLAGGED_DATA` vale vacío (dato bueno), `Cmds` (comandos) o `DAN` (actividad del instrumento DAN). Su descripción dice que lo marcado debe quitarse para uso científico; en la muestra las observaciones marcadas dan dosis más bajas. Se descartan. Valores ≤ 0 o iguales a FILLVAL se tratan como faltantes (el archivo de 2012 tiene B total = 0 y B corregida = NaN).
+- **Cobertura:** 2012 tiene solo 2 días (puesta en marcha) y la serie útil empieza el 22/03/2013 (día 81). Hay huecos de 1 a 30 días por año. 2026 llega al día 315.
+- **Versiones:** conviven v00–v09; se usa la mayor de cada día. Las versiones bajas recientes (v00–v02 en 2026) son preliminares.
+
+| Año | Archivo | Obs. | Marcadas | Mediana B corregida (µGy/día) | Mediana E (µGy/día) |
+|---|---|---|---|---|---|
+| 2012 | `msl_rad_obs-l2_2012231_v02.cdf` | 25 | 13 | — | 142.08 |
+| 2013 | `msl_rad_obs-l2_2013298_v02.cdf` | 39 | 1 | 147.28 | 209.58 |
+| 2014 | `msl_rad_obs-l2_2014298_v02.cdf` | 87 | 5 | 135.06 | 199.34 |
+| 2015 | `msl_rad_obs-l2_2015298_v04.cdf` | 86 | 8 | 154.91 | 220.96 |
+| 2016 | `msl_rad_obs-l2_2016298_v04.cdf` | 87 | 7 | 190.10 | 261.44 |
+| 2017 | `msl_rad_obs-l2_2017298_v04.cdf` | 86 | 4 | 194.21 | 274.90 |
+| 2018 | `msl_rad_obs-l2_2018298_v04.cdf` | 86 | 3 | 216.86 | 303.14 |
+| 2019 | `msl_rad_obs-l2_2019298_v04.cdf` | 84 | 2 | 218.46 | 309.56 |
+| 2020 | `msl_rad_obs-l2_2020298_v04.cdf` | 85 | 3 | 218.12 | 313.27 |
+| 2021 | `msl_rad_obs-l2_2021298_v04.cdf` | 86 | 5 | 208.03 | 289.73 |
+| 2022 | `msl_rad_obs-l2_2022298_v04.cdf` | 85 | 3 | 165.98 | 234.25 |
+| 2023 | `msl_rad_obs-l2_2023298_v05.cdf` | 85 | 3 | 125.16 | 178.25 |
+| 2024 | `msl_rad_obs-l2_2024298_v03.cdf` | 86 | 3 | 109.24 | 156.55 |
+| 2025 | `msl_rad_obs-l2_2025298_v04.cdf` | 84 | 2 | 109.95 | 157.09 |
+| 2026 | `msl_rad_obs-l2_2026298_v03.cdf` | 84 | 2 | 129.60 | 184.83 |
+
+La dosis sube hacia 2019–2020 (mínimo solar: más rayos cósmicos galácticos) y baja en 2013–2014 y 2024–2025 (máximos solares). Es lo esperado y respalda usar manchas solares en B1.
+
+
 ## Limitaciones
 
 - **REMS es un resumen diario de divulgación** (CAB): valores enteros en °C y Pa, sin flags de calidad. Hay mínimas atípicas de −99/−100 °C (p. ej., soles 2803 y 2805) que se dejaron como están.
