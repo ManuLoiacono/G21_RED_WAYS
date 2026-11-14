@@ -23,3 +23,36 @@ dispersión residual 0,9 m). Las posiciones de Curiosity (`MSL_waypoints`) tambi
 del DTM: unos (−43, +33) m, y `elev_geoid` ≈ DTM − 17,9 m (563 puntos, dispersión 2,2 m).
 Para dibujar sobre la escena algo que esté en coordenadas del DTM (por ejemplo, las rutas del motor),
 hay que aplicarle el mismo desplazamiento.
+
+## Analytical Gale package
+
+From the repository root on Windows (Python 3.11):
+
+```powershell
+& 'C:\Users\Usuario\anaconda3\python.exe' -m venv .venv
+& '.\.venv\Scripts\python.exe' -m pip install -r scripts/analytical-requirements.txt
+& '.\.venv\Scripts\python.exe' -m scripts.prepare_gale
+& '.\.venv\Scripts\python.exe' -m unittest scripts.tests.test_prepare_gale -q
+```
+
+`data/processed/gale/analytical/manifest.json` records the exact native window, source CRS,
+2-native-pixel search resolution (2.023493589 m), row direction, cell centres, masks, source-array
+SHA-256 identities and processing policies. The ~2.96 km square search domain uses whole blocks
+strictly inside the reviewed bounds and a one-native-pixel derivative halo. No whole-Gale graph.
+`terrain.npz` is generated and ignored by Git. It includes unchanged native float32 elevations
+with their original nodata sentinel, plus conservative analytical arrays. Search elevations are
+block means; native central-difference slopes are aggregated by maximum. A missing sample in
+any 3x3 derivative stencil blocks the whole affected search cell. No zero filling occurs.
+
+No scientific exclusion layer was delivered: its explicit mask is all false, independently of
+coverage and the engine's team/grade restrictions. Unknown small rocks and material hazards are
+not assessed. The locations are hypothetical engineering choices; the manifest records their
+selection and rejected preliminary locations. No terrain values or constraints were altered to
+connect them. Changing source arrays or policies changes the content identity; the service never
+chooses a newest file. `--factor 4` is available only as an explicit, separately identified
+preparation; the delivered benchmark uses factor 2 and did not hit a resource bound.
+
+The geographic/display metadata adopts P1's existing source-latitude convention and provisional
+(-25 east, +35 north, +56.2 up) registration. Raw historical registration samples were not present;
+the reported 0.9 m height spread is prior evidence, not a new numerical or horizontal accuracy
+claim. Panorama +71.2 m never enters this package's elevations or movement costs.
