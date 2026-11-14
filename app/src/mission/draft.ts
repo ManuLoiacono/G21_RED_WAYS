@@ -34,8 +34,21 @@ export interface Health {
   schema_version: typeof DRAFT_SCHEMA;
   contract_status: string;
   scope: string;
-  geographic_conversion: "unavailable";
+  geographic_conversion: "unavailable" | "available";
+  default_parcel: { id: string; version: string };
   registered_parcels: { id: string; version: string; fixture: boolean }[];
+}
+export interface GeographicAdapter {
+  id: "gale-eqc-scene-v1";
+  projection: "spherical_equirectangular";
+  radius_m: number;
+  central_meridian_deg: 0;
+  standard_parallel_deg: 0;
+  latitude_convention: "source_latitude_direct_to_cesium_mars";
+  horizontal_shift_m: { east: number; north: number };
+  vertical_offset_m: number;
+  registration_status: string;
+  evidence: string;
 }
 export interface Parcel {
   schema_version: typeof DRAFT_SCHEMA;
@@ -43,10 +56,14 @@ export interface Parcel {
   version: string;
   fixture: boolean;
   coordinate_frame: "parcel_metric";
-  geographic_conversion: "unavailable";
+  geographic_conversion: "unavailable" | "available";
+  geographic_adapter: GeographicAdapter | null;
+  bounds_lonlat: { west: number; south: number; east: number; north: number } | null;
+  scenarios: { id: string; version: string; fixture: boolean }[];
+  planning_defaults: { origin_poi_id: string; destination_poi_id: string; scenario: PlanRequest["scenario"]; departure_utc: string };
   reference_description: string;
   grid: { shape: Pair; spacing_m: Pair; origin_center_xy_m: Pair; row_direction: string };
-  pois: { id: string; xy_m: Pair }[];
+  pois: { id: string; xy_m: Pair; classification: string }[];
 }
 export interface PlanRequest {
   schema_version: typeof DRAFT_SCHEMA;
@@ -119,6 +136,7 @@ export interface PlanResponse {
   status: string;
   calculation_origin: "engine";
   input_provenance: { fixture: boolean; movement_parameters_evidence: string; geographic_conversion: string };
+  geographic_adapter: GeographicAdapter | null;
   alternatives: Alternative[];
   resolved_team: { kind: string; identity: CatalogEntry["identity"]; parameters: Parameters; payload_kg: number }[];
   environment: { missing_required: string[]; missing_optional_variables: string[]; decision_records: Record<string, unknown>[]; clock_mapping: Record<string, unknown>; snapshot: Record<string, unknown> };

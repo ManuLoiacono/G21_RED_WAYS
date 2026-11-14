@@ -27,7 +27,7 @@ export function createResultsPanel(root: HTMLElement) {
     root.innerHTML = `
       <header class="mp-head"><h2>${esc(t("rs.title"))}</h2><button type="button" data-act="collapse" aria-expanded="${!collapsed}" aria-label="${esc(t(collapsed ? "rs.show" : "rs.hide"))}">${collapsed ? "+" : "−"}</button></header>
       <div class="mp-body">
-        <p class="mp-note">${esc(t("nav.engineCalculated"))} ${r.input_provenance.fixture ? esc(t("nav.synthetic")) : ""} ${infoButton("navigation_draft", t("nav.provenance"))}</p>
+        <p class="mp-note">${esc(t("nav.engineCalculated"))} ${esc(t(r.geographic_adapter ? "nav.realTerrain" : "nav.synthetic"))} ${infoButton("navigation_draft", t("nav.provenance"))}</p>
         <p class="rs-summary">${esc(t("nav.assessment"))}: <span class="rs-badge" data-status="${esc(r.status)}">${esc(statusLabel(r.assessment))}</span></p>
         <p>${esc(t("nav.search"))}: ${esc(label("search", r.search_status))}</p>
         ${r.alternatives.length === 0 ? `<p>${esc(t("rs.noAlternatives"))}</p>` : ""}

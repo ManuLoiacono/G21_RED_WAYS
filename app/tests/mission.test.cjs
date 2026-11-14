@@ -65,6 +65,27 @@ test("reverted edits, newer submits and mismatched echoes reject late responses"
   assert.equal(gate.accepts(newer, { request_echo: newer }, state), false);
 });
 
+test("metadata selects the exact advertised default and keeps synthetic discovery", { skip: !service }, async () => {
+  browserLabels();
+  const { loadMetadata, loadParcel } = require("../src/mission/api.ts");
+  const originalFetch = global.fetch;
+  try {
+    global.fetch = (url, options) => {
+      const parsed = new URL(url);
+      return originalFetch(service + parsed.pathname + parsed.search, options);
+    };
+    const result = await loadMetadata();
+    assert.ok(result.ok, result.error);
+    assert.deepEqual({ id: result.data.parcel.id, version: result.data.parcel.version }, result.data.health.default_parcel);
+    const synthetic = await loadParcel("synthetic_metric_demo", "v1");
+    assert.ok(synthetic.ok);
+    assert.equal(synthetic.data.geographic_adapter, null);
+    const request = baselineRequest({ ...result.data, parcel: synthetic.data });
+    assert.equal((await post(request)).alternatives[0].metrics.elapsed_s, 800);
+    assert.equal((await loadParcel("synthetic_metric_demo", "unregistered-version")).ok, false);
+  } finally { global.fetch = originalFetch; }
+});
+
 test("calculated task, participant and daylight boundaries preserve draft semantics", { skip: !service }, async () => {
   const baseline = require("../../service/examples/request.example.json");
   const cases = [

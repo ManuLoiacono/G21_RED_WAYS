@@ -1,6 +1,18 @@
 # Draft prepared-planning exchange for P1/P3 review
 
-Status: **unaccepted draft** `p2-plan-draft-1`, distinct from shared v0 and from any future accepted v1. `service.exchange.decode_request` is the strict executable mapping. `plan_draft(PreparedPlanner(fixture_registry()), payload)` returns a calculated, finite JSON-compatible response. The local HTTP adapter now exposes this unchanged draft; see [HTTP_API.md](HTTP_API.md). No real parcel adapter or UI migration is implemented.
+Status: **unaccepted draft** `p2-plan-draft-1`, distinct from shared v0 and from any future accepted v1. `service.exchange.decode_request` is the strict executable mapping. `plan_draft(PreparedPlanner(fixture_registry()), payload)` returns a calculated, finite JSON-compatible response. The local HTTP adapter and frontend explicitly consume this draft; see [HTTP_API.md](HTTP_API.md).
+
+The additive Gale extension registers a trusted analytical package through `service.gale`.
+The complete [real-terrain request](examples/gale.request.json) uses registered POIs, the unchanged
+team model and a deliberately missing-daylight development scenario. A versioned
+`geographic_adapter` accompanies metadata and responses (null for synthetic cases). For
+`gale-eqc-scene-v1`, native equirectangular x/y map to lon/lat with the manifest radius; the
+scene shift is applied once afterward. The inverse removes that shift once. Source latitude
+is passed directly to Cesium Mars; no extra geodetic conversion. Vertical display offset never
+changes analytical metrics. Requested metric coordinates and effective centre/elevation are
+separate location fields. The frontend validates these fields before rendering. See the
+[delivery evidence](../docs/handoffs/GALE_ROUTING_DELIVERY.md); paragraphs below describing
+synthetic-only behavior apply to the original regression package, not the Gale extension.
 
 ## Runnable request and calculated response examples
 

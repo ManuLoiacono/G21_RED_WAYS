@@ -1,6 +1,6 @@
 # Prepared planning service and local draft HTTP adapter
 
-Increment 2 provides framework-independent prepared planning. Increment 3 adds a standard-library, loopback-only HTTP adapter; see [HTTP_API.md](HTTP_API.md) for startup, configured origins and supported routes. Shared v0 `contracts/` and `app/` remain unchanged. Planning calls no live APIs.
+Increment 2 provides framework-independent prepared planning. Increment 3 adds a standard-library, loopback-only HTTP adapter; see [HTTP_API.md](HTTP_API.md) for startup, configured origins and supported routes. The Gale extension adds exact local analytical package registration and matching frontend metadata discovery. Shared v0 `contracts/` remains unchanged. Planning calls no live APIs.
 
 ## Registered packages and adapters (delivery A)
 

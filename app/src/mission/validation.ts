@@ -14,16 +14,27 @@ const parameters = (x: unknown) => object(x) && ["flat_speed_m_s", "max_ascent_d
 const identity = (x: unknown) => object(x) && str(x.profile_id) && str(x.name);
 const finiteJson = (x: unknown): boolean => typeof x === "number" ? Number.isFinite(x) :
   Array.isArray(x) ? x.every(finiteJson) : object(x) ? Object.values(x).every(finiteJson) : true;
+const geographicState = (x: unknown) => x === "unavailable" || x === "available";
+export const isGeographicAdapter = (a: unknown) => object(a) && finiteJson(a) && a.id === "gale-eqc-scene-v1" &&
+  a.projection === "spherical_equirectangular" && num(a.radius_m) && a.radius_m === 3396190 &&
+  a.central_meridian_deg === 0 && a.standard_parallel_deg === 0 &&
+  a.latitude_convention === "source_latitude_direct_to_cesium_mars" && object(a.horizontal_shift_m) &&
+  num(a.horizontal_shift_m.east) && num(a.horizontal_shift_m.north) && num(a.vertical_offset_m) && str(a.registration_status) && str(a.evidence);
 
 export function isHealth(x: unknown): x is Health {
-  return object(x) && x.schema_version === DRAFT_SCHEMA && str(x.contract_status) && str(x.scope) && x.geographic_conversion === "unavailable" &&
+  return object(x) && x.schema_version === DRAFT_SCHEMA && str(x.contract_status) && str(x.scope) && geographicState(x.geographic_conversion) &&
+    object(x.default_parcel) && str(x.default_parcel.id) && str(x.default_parcel.version) &&
     list(x.registered_parcels, (p) => str(p.id) && str(p.version) && typeof p.fixture === "boolean");
 }
 export function isParcel(x: unknown): x is Parcel {
   return object(x) && x.schema_version === DRAFT_SCHEMA && str(x.id) && str(x.version) && typeof x.fixture === "boolean" &&
-    x.coordinate_frame === "parcel_metric" && x.geographic_conversion === "unavailable" && str(x.reference_description) &&
+    x.coordinate_frame === "parcel_metric" && geographicState(x.geographic_conversion) && str(x.reference_description) &&
+    (x.geographic_conversion === "available" ? isGeographicAdapter(x.geographic_adapter) && object(x.bounds_lonlat) && ["west", "south", "east", "north"].every((k) => object(x.bounds_lonlat) && num(x.bounds_lonlat[k])) : x.geographic_adapter === null) &&
+    list(x.scenarios, (s) => str(s.id) && str(s.version) && typeof s.fixture === "boolean") &&
+    object(x.planning_defaults) && str(x.planning_defaults.origin_poi_id) && str(x.planning_defaults.destination_poi_id) && str(x.planning_defaults.departure_utc) &&
+    object(x.planning_defaults.scenario) && str(x.planning_defaults.scenario.id) && str(x.planning_defaults.scenario.version) && str(x.planning_defaults.scenario.as_of_utc) &&
     object(x.grid) && pair(x.grid.shape) && pair(x.grid.spacing_m) && pair(x.grid.origin_center_xy_m) && str(x.grid.row_direction) &&
-    list(x.pois, (p) => str(p.id) && pair(p.xy_m));
+    list(x.pois, (p) => str(p.id) && pair(p.xy_m) && str(p.classification));
 }
 export function isCatalogs(x: unknown): x is Catalogs {
   if (!object(x) || !object(x.catalog) || !object(x.mission_templates)) return false;
@@ -54,6 +65,7 @@ export function isDraftResponse(x: unknown): x is PlanResponse {
     object(x.request_echo) && str(x.request_echo.request_id) && Number.isInteger(x.request_echo.revision) && (x.request_echo.revision as number) >= 0 &&
     assessment(x.assessment) && str(x.search_status) && x.status === (x.assessment ?? x.search_status) &&
     object(x.input_provenance) && typeof x.input_provenance.fixture === "boolean" && str(x.input_provenance.movement_parameters_evidence) && str(x.input_provenance.geographic_conversion) &&
+    (x.input_provenance.geographic_conversion === "available" ? isGeographicAdapter(x.geographic_adapter) : x.input_provenance.geographic_conversion === "unavailable" && x.geographic_adapter === null) &&
     list(x.alternatives, (a) => str(a.id) && str(a.criterion) && assessment(a.assessment) && str(a.search_status) && a.coordinate_frame === "parcel_metric" &&
       leg(a.outbound) && leg(a.return) && metrics(a.metrics) && list(a.checks, check)) &&
     list(x.resolved_team, (p) => str(p.kind) && identity(p.identity) && parameters(p.parameters) && num(p.payload_kg)) &&

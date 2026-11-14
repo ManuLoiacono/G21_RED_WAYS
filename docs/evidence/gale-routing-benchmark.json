@@ -1,0 +1,218 @@
+{
+  "terrain_fixture": false,
+  "environment_fixture": true,
+  "request": {
+    "schema_version": "p2-plan-draft-1",
+    "request_id": "gale-first-geographic-review",
+    "revision": 0,
+    "parcel": {
+      "id": "gale_hirise_019698",
+      "version": "native2-v1"
+    },
+    "scenario": {
+      "id": "gale_development_missing_daylight",
+      "version": "v1",
+      "as_of_utc": "2025-10-25T12:00:00Z"
+    },
+    "origin": {
+      "type": "poi",
+      "poi_id": "base"
+    },
+    "destination": {
+      "type": "poi",
+      "poi_id": "sample"
+    },
+    "team": {
+      "catalog_version": "synthetic-team-v1",
+      "humans": [
+        {
+          "profile_id": "explorer_01",
+          "payload_kg": 0
+        }
+      ],
+      "robots": [
+        {
+          "profile_id": "support_rover",
+          "payload_kg": 0
+        }
+      ]
+    },
+    "mission": {
+      "template_id": "reconnaissance",
+      "template_version": "synthetic-mission-templates-v1",
+      "tasks": [
+        {
+          "id": "visual_reconnaissance",
+          "duration_s": 600
+        }
+      ],
+      "time_budget_s": 21600,
+      "reserve_s": 1800,
+      "departure_utc": "2025-10-25T12:00:00Z"
+    },
+    "criterion": "fastest"
+  },
+  "versions": {
+    "backend": "directed-eight-neighbor-csr-v1/scipy-1.11.4",
+    "catalog": "synthetic-team-v1",
+    "data": "89841fb7875d22c00dbd9f64fb3c8ee781fc7ddbbc38a386e833eb6d0da7291a",
+    "masks": "89841fb7875d22c00dbd9f64fb3c8ee781fc7ddbbc38a386e833eb6d0da7291a",
+    "mission": "complete-mission-v1",
+    "movement": "synthetic_constant_speed_v1",
+    "parcel": "native2-v1",
+    "parcel_content_id": "89841fb7875d22c00dbd9f64fb3c8ee781fc7ddbbc38a386e833eb6d0da7291a",
+    "scenario": "v1",
+    "slope": "native-central-difference-3x3-valid-max-block-mean-elevation-v1",
+    "templates": "synthetic-mission-templates-v1"
+  },
+  "locations": {
+    "destination": {
+      "adapter_id": "gale-eqc-scene-v1",
+      "cell": [
+        790,
+        1317
+      ],
+      "effective_elevation_m": -3328.9900512695312,
+      "effective_xy_m": [
+        8144640.154805867,
+        -286119.9700135037
+      ],
+      "geographic_conversion": "available",
+      "requested": {
+        "frame": null,
+        "poi_id": "sample",
+        "type": "poi",
+        "xy_m": null
+      },
+      "requested_xy_m": [
+        8144639.813189891,
+        -286118.96494499914
+      ]
+    },
+    "origin": {
+      "adapter_id": "gale-eqc-scene-v1",
+      "cell": [
+        731,
+        1288
+      ],
+      "effective_elevation_m": -3339.572265625,
+      "effective_xy_m": [
+        8144581.473491781,
+        -286000.58389174327
+      ],
+      "geographic_conversion": "available",
+      "requested": {
+        "frame": null,
+        "poi_id": "base",
+        "type": "poi",
+        "xy_m": null
+      },
+      "requested_xy_m": [
+        8144580.538492368,
+        -286000.41554995254
+      ]
+    }
+  },
+  "grid": {
+    "shape": [
+      1463,
+      1463
+    ],
+    "spacing_m": [
+      2.023493589159021,
+      2.023493589159021
+    ],
+    "nodes": 2140369,
+    "traversable_nodes": 496561,
+    "directed_edges": 2834284
+  },
+  "runtime": {
+    "python": "3.11.7",
+    "numpy": "1.26.4",
+    "scipy": "1.11.4",
+    "platform": "Windows-10-10.0.26300-SP0"
+  },
+  "timing_s": {
+    "package_load": 1.5554513999959454,
+    "graph_build": 4.087095899973065,
+    "two_source_searches": 0.6096037000534125,
+    "reconstruction": 0.047259600018151104
+  },
+  "process_peak_rss_bytes": {
+    "after_imports": 53342208,
+    "after_package_load": 154210304,
+    "after_graph_build": 154210304,
+    "after_two_source_searches": 351354880,
+    "after_reconstruction": 351354880
+  },
+  "storage_bytes": {
+    "csr": 42572888,
+    "search_arrays": 51368856
+  },
+  "assessment": "insufficient_evidence",
+  "search_status": "complete",
+  "missing_required": [
+    "daylight"
+  ],
+  "legs": {
+    "outbound": {
+      "ascent_m": 10.65496826171875,
+      "descent_m": 0.07275390625,
+      "duration_s": 539.2080915339404,
+      "horizontal_distance_m": 149.4160220668453,
+      "reason": null,
+      "search_cost_s": 539.2080915339403,
+      "status": "found",
+      "vertices": 62
+    },
+    "return": {
+      "ascent_m": 0.07275390625,
+      "descent_m": 10.65496826171875,
+      "duration_s": 579.529436795662,
+      "horizontal_distance_m": 149.4160220668453,
+      "reason": null,
+      "search_cost_s": 579.5294367956619,
+      "status": "found",
+      "vertices": 62
+    }
+  },
+  "metrics": {
+    "daylight_departure_margin_s": null,
+    "daylight_reserved_return_margin_s": null,
+    "elapsed_s": 1718.7375283296024,
+    "estimated_return_offset_s": 1818.7375283296024,
+    "mission_margin_s": 18081.262471670398,
+    "outbound_s": 539.2080915339404,
+    "participant_margins": [
+      {
+        "kind": "human",
+        "margin_s": 18081.262471670398,
+        "max_sortie_s": 21600.0,
+        "model_id": "synthetic_constant_speed_v1",
+        "participant_id": "explorer_01"
+      },
+      {
+        "kind": "robot",
+        "margin_s": 14481.262471670398,
+        "max_sortie_s": 18000.0,
+        "model_id": "synthetic_constant_speed_v1",
+        "participant_id": "support_rover"
+      }
+    ],
+    "reserve_s": 1800.0,
+    "reserved_deadline_offset_s": 3618.7375283296024,
+    "reserved_total_s": 3518.7375283296024,
+    "return_s": 579.529436795662,
+    "tasks_s": 600.0,
+    "temporal_budget_limiting_constraints": [
+      "participants[1].max_sortie_s"
+    ],
+    "temporal_budget_limiting_margin_s": 14481.262471670398,
+    "temporal_budget_limiting_participant_ids": [
+      "support_rover"
+    ],
+    "time_budget_s": 21600.0,
+    "unavailable_totals_reason": null
+  },
+  "memory_note": "OS process high-water RSS includes runtime, imports, native workspaces and allocator retention; not incremental allocation."
+}
