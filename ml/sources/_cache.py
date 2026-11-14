@@ -17,7 +17,8 @@ log = logging.getLogger(__name__)
 USER_AGENT = "g21-red-ways-ml/0.1 (research hindcast)"
 
 
-def fetch_cached(url: str, dest: Path, timeout_s: float = 120.0) -> Path:
+def fetch_cached(url: str, dest: Path, timeout_s: float = 120.0, params: dict | None = None,
+                 secret_params: dict | None = None) -> Path:
     """Download `url` to `dest` unless it already exists. Writes `<dest>.meta.json` with provenance.
 
     The URL stored in the metadata must never contain secrets (callers pass key-free URLs).
@@ -27,13 +28,20 @@ def fetch_cached(url: str, dest: Path, timeout_s: float = 120.0) -> Path:
         return dest
     dest.parent.mkdir(parents=True, exist_ok=True)
     log.info("downloading %s", url)
-    resp = requests.get(url, timeout=timeout_s, headers={"User-Agent": USER_AGENT})
-    resp.raise_for_status()
+    query = {**(params or {}), **(secret_params or {})}
+    try:
+        resp = requests.get(url, params=query or None, timeout=timeout_s, headers={"User-Agent": USER_AGENT})
+    except requests.RequestException as exc:
+        # Never propagate messages that may contain secret query parameters.
+        raise RuntimeError(f"request failed for {url} ({type(exc).__name__})") from None
+    if not resp.ok:
+        raise RuntimeError(f"HTTP {resp.status_code} for {url} params={params}")
     tmp = dest.with_suffix(dest.suffix + ".part")
     tmp.write_bytes(resp.content)
     tmp.replace(dest)
     meta = {
         "url": url,
+        "params": params or {},
         "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "bytes": len(resp.content),
         "content_type": resp.headers.get("Content-Type"),
