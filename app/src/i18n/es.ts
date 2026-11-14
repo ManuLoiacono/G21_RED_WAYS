@@ -334,6 +334,9 @@ export const es = {
   "pano.metaObserved": "observado",
   "source.rover_panoramas.note3": "El negro son partes no fotografiadas: el visor recorta a la franja completa sin rellenar nada. La brújula usa el azimut que publica NASA para Navcam.",
   "pano.metaStretched": "contraste realzado solo para verla mejor",
+  "pano.metaSphere": "vista 360° en perspectiva desde la posición del rover; la altura del horizonte en el mosaico es estimada",
+  "pano.mode360": "Vista 360° en perspectiva (como Street View)",
+  "pano.modeFlat": "Ver el mosaico plano, como lo publica la NASA",
 } as const;
 
 export type MessageKey = keyof typeof es;

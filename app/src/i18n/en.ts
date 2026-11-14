@@ -330,4 +330,7 @@ export const en: Record<MessageKey, string> = {
   "pano.metaObserved": "observed",
   "source.rover_panoramas.note3": "Black areas were not photographed: the viewer crops to the full band without filling anything in. The compass uses the azimuth NASA publishes for Navcam.",
   "pano.metaStretched": "contrast enhanced for viewing only",
+  "pano.metaSphere": "360° perspective view from the rover's position; the horizon row in the mosaic is estimated",
+  "pano.mode360": "360° perspective view (like Street View)",
+  "pano.modeFlat": "Show the flat mosaic, as NASA publishes it",
 };

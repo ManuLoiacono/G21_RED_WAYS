@@ -1,16 +1,22 @@
 import { onLanguageChange, t } from "../i18n";
 import { esc } from "../ui/format";
 import { panoTitle, type Panorama } from "./panoramas";
+import { createSphereView } from "./sphere";
 
 /**
- * Viewer for a rover 360° panorama (a flat cylindrical mosaic, as NASA publishes it).
+ * Viewer for a rover 360° panorama (a cylindrical mosaic, as NASA publishes it).
+ *
+ * Two modes (button "360°"):
+ * - 360° (default when WebGL2 works): perspective view from the rover's position, like Street
+ *   View, drawn by `sphere.ts`. The horizon row is estimated (see there).
+ * - Flat: the mosaic as published, scrolled sideways.
  *
  * - Drag (mouse or finger) to look around; the image wraps, since it covers 360°.
  * - Wheel, pinch or the +/− buttons zoom around the pointer; when zoomed, dragging also pans
  *   vertically.
  * - Black areas are parts the rover did not photograph. On load the viewer finds the horizontal
- *   band that is fully covered and shows only that; a button shows the whole mosaic. Nothing is
- *   filled in or invented.
+ *   band that is fully covered; it opens full screen with the whole mosaic and a button crops to
+ *   that band. Nothing is filled in or invented.
  * - Compass: only when NASA gives the azimuth at the center of the image (Navcam pages). It
  *   assumes azimuth grows to the right, as in JPL cylindrical mosaics.
  * - The overview strip shows the whole panorama and the part on screen; clicking it jumps there.
@@ -28,6 +34,12 @@ const ROW_COVERED = 0.995;
 const MIN_BAND = 0.15;
 /** Maximum height of the overview strip, in CSS pixels. */
 const OVERVIEW_MAX_H = 90;
+/** Widest vertical field of view of the 360° mode at zoom 1, radians. */
+const SPHERE_MAX_FOV = (100 * Math.PI) / 180;
+/** At zoom 1 the 360° view shows this share of the photographed band's height (perspective
+ * corners reach a bit further than the screen center). */
+const SPHERE_FILL = 0.85;
+const TAU = 2 * Math.PI;
 
 export interface PanoramaViewer {
   open(p: Panorama): void;
@@ -118,6 +130,7 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
     <div class="pano-head">
       <h2 class="pano-title"></h2>
       <div class="pano-tools">
+        <button type="button" data-act="mode" class="pano-mode">360°</button>
         <button type="button" data-act="crop">⇕</button>
         <button type="button" data-act="zoom-out">−</button>
         <button type="button" data-act="zoom-in">+</button>
@@ -128,6 +141,7 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
     </div>
     <div class="pano-stage" tabindex="0" role="img">
       <div class="pano-track">${img.repeat(COPIES)}</div>
+      <canvas class="pano-sphere"></canvas>
       <div class="pano-compass" aria-hidden="true"></div>
       <div class="pano-heading"></div>
       <div class="pano-state" aria-live="polite"></div>
@@ -154,6 +168,15 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
   const overviewImg = frame.querySelector("img")!;
   const windows = Array.from(frame.querySelectorAll<HTMLSpanElement>(".pano-window"));
   const cropBtn = q<HTMLButtonElement>('[data-act="crop"]');
+  const modeBtn = q<HTMLButtonElement>('[data-act="mode"]');
+  const sphere = createSphereView(q<HTMLCanvasElement>(".pano-sphere"));
+  /** The current image could be uploaded to WebGL (else only the flat mode is offered). */
+  let sphereReady = false;
+  /** The user's last choice, kept across panoramas. */
+  let preferSphere = true;
+  const isSphere = () => sphereReady && preferSphere;
+  /** 360° mode: mosaic fraction at the screen center (yaw). */
+  let yaw = 0.5;
 
   let current: Panorama | null = null;
   let loadState: "loading" | "ready" | "error" = "loading";
@@ -184,8 +207,45 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
     return { w: h * aspect, h };
   };
 
+  // --- 360° mode geometry ---------------------------------------------------
+  /** Estimated row of the horizon: middle of the photographed band (not published by NASA). */
+  const horizon = () => (band ? (band[0] + band[1]) / 2 : 0.5);
+  /** Vertical field of view of the 360° mode, radians. */
+  const fovV = () => {
+    const [r0, r1] = range();
+    return Math.min(((r1 - r0) * TAU * SPHERE_FILL) / aspect, SPHERE_MAX_FOV) / zoom;
+  };
+  /** Focal length of the 360° mode in CSS pixels. */
+  const focal = () => stage.clientHeight / 2 / Math.tan(fovV() / 2);
+  /** Mosaic fraction at the middle of the screen, in either mode. */
+  const centerFrac = () => (isSphere() ? yaw : wrap(u + stage.clientWidth / (2 * size().w)));
+
+  function layoutSphere() {
+    const sw = stage.clientWidth;
+    const sh = stage.clientHeight;
+    const [r0, r1] = range();
+    const fov = fovV();
+    const half = ((fov / 2) * aspect) / TAU; // half the view height, in mosaic fractions
+    v = r1 - r0 <= 2 * half ? (r0 + r1) / 2 : Math.min(r1 - half, Math.max(r0 + half, v));
+    sphere?.render({ yaw, center: v, fovV: fov, aspect, horizon: horizon(), range: [r0, r1], stretch });
+    const hfov = 2 * Math.atan((Math.tan(fov / 2) * sw) / sh);
+    const vw = Math.min(1, hfov / TAU);
+    const vh = Math.min(r1 - r0, 2 * half);
+    drawOverview(wrap(yaw - vw / 2), vw, Math.max(r0, v - vh / 2), vh);
+
+    // Compass: where each azimuth on the horizon lands on screen (in front of the viewer only).
+    const f = focal();
+    const pitch = ((horizon() - v) * TAU) / aspect;
+    drawCompass((x) => {
+      const a = (wrap(x - yaw + 0.5) - 0.5) * TAU;
+      return Math.abs(a) < Math.PI / 2 - 0.05 ? [sw / 2 + (f * Math.tan(a)) / Math.cos(pitch)] : [];
+    }, sw);
+  }
+
   function layout() {
     if (loadState !== "ready") return;
+    stage.classList.toggle("sphere", isSphere());
+    if (isSphere()) return layoutSphere();
     const { w, h } = size();
     const sw = stage.clientWidth;
     const sh = stage.clientHeight;
@@ -200,20 +260,23 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
       el.style.transform = `translate(${left + (i - 1) * w}px, ${top}px)`;
     });
 
-    // Overview shows the same vertical range; the boxes mark the part on screen (two at the seam).
+    const vh = Math.min(r1 - r0, sh / h);
+    drawOverview(u, Math.min(1, sw / w), Math.max(r0, v - vh / 2), vh);
+    drawCompass((x) => [-1, 0, 1].map((copy) => (x - u + copy) * w), sw);
+  }
+
+  /** Overview strip with the same vertical range; the boxes mark the part on screen (two at the seam).
+   * left/width are fractions of the mosaic width, top/height fractions of its height. */
+  function drawOverview(left: number, vw: number, vt: number, vh: number) {
+    const [r0, r1] = range();
     const span = r1 - r0;
     frame.style.aspectRatio = String(aspect / span);
     frame.style.width = `min(100%, ${Math.round((OVERVIEW_MAX_H * aspect) / span)}px)`; // at most this tall
     overviewImg.style.height = `${100 / span}%`;
     overviewImg.style.top = `${(-r0 / span) * 100}%`;
-    const vw = Math.min(1, sw / w);
-    const vh = Math.min(span, sh / h);
-    const vt = Math.max(r0, v - vh / 2);
-    const first = Math.min(vw, 1 - u);
-    setWindow(windows[0], u, first, (vt - r0) / span, vh / span);
+    const first = Math.min(vw, 1 - left);
+    setWindow(windows[0], left, first, (vt - r0) / span, vh / span);
     setWindow(windows[1], 0, vw - first, (vt - r0) / span, vh / span);
-
-    drawCompass(w, sw);
   }
 
   function setWindow(el: HTMLElement, x: number, w: number, y: number, h: number) {
@@ -227,7 +290,8 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
   /** Azimuth (degrees from north, clockwise) at a horizontal fraction of the mosaic. */
   const azimuthAt = (x: number, center: number) => (((center + (x - 0.5) * 360) % 360) + 360) % 360;
 
-  function drawCompass(w: number, sw: number) {
+  /** `screenX(x)` gives the screen positions (CSS px) of mosaic column fraction x, if visible. */
+  function drawCompass(screenX: (x: number) => number[], sw: number) {
     const center = current?.azimuthCenterDeg;
     compass.hidden = heading.hidden = center == null;
     if (center == null) return;
@@ -236,19 +300,24 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
     for (let k = 0; k < 8; k++) {
       const az = k * 45;
       const x = wrap(0.5 + (az - center) / 360); // fraction of the mosaic where this azimuth is
-      for (let copy = -1; copy <= 1; copy++) {
-        const sx = (x - u + copy) * w;
+      for (const sx of screenX(x)) {
         if (sx < -20 || sx > sw + 20) continue;
         marks.push(`<span class="${k % 2 ? "minor" : "major"}" style="left:${sx.toFixed(1)}px">${esc(names[k] ?? "")}</span>`);
       }
     }
     compass.innerHTML = marks.join("");
-    const az = Math.round(azimuthAt(u + sw / (2 * w), center)) % 360;
+    const az = Math.round(azimuthAt(centerFrac(), center)) % 360;
     heading.textContent = t("pano.heading", { deg: String(az), dir: names[Math.round(az / 45) % 8] ?? "" });
   }
 
   /** Moves the view by screen pixels. */
   function panBy(dx: number, dy: number) {
+    if (isSphere()) {
+      const f = focal(); // one CSS pixel at the center = 1/f radians
+      yaw = wrap(yaw - dx / f / TAU);
+      v -= ((dy / f) * aspect) / TAU;
+      return layout();
+    }
     const { w, h } = size();
     u = wrap(u - dx / w);
     v -= dy / h;
@@ -259,6 +328,14 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
   function zoomAt(factor: number, px = stage.clientWidth / 2, py = stage.clientHeight / 2) {
     const next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom * factor));
     if (next === zoom) return;
+    if (isSphere()) {
+      // Keep the direction under the pointer in place (horizontally; vertical clamps anyway).
+      const dx = px - stage.clientWidth / 2;
+      const a0 = Math.atan(dx / focal());
+      zoom = next;
+      yaw = wrap(yaw + (a0 - Math.atan(dx / focal())) / TAU);
+      return layout();
+    }
     const before = size();
     const ix = u + px / before.w;
     const iy = v + (py - stage.clientHeight / 2) / before.h;
@@ -271,7 +348,19 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
 
   /** Puts the center of the mosaic (NASA's stated azimuth, when given) in the middle of the screen. */
   function centerHorizontally() {
+    yaw = 0.5;
     u = wrap(0.5 - stage.clientWidth / (2 * size().w));
+    layout();
+  }
+
+  /** Switches 360° / flat, looking the same way. */
+  function setSphere(on: boolean) {
+    const middle = centerFrac();
+    preferSphere = on;
+    zoom = MIN_ZOOM;
+    yaw = middle;
+    u = wrap(middle - stage.clientWidth / (2 * size().w));
+    relabel();
     layout();
   }
 
@@ -283,10 +372,11 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
 
   function setCropped(on: boolean) {
     // Keep looking the same way: the mosaic column at the middle of the screen stays there.
-    const middle = u + stage.clientWidth / (2 * size().w);
+    const middle = centerFrac();
     cropped = on;
     zoom = MIN_ZOOM;
     u = wrap(middle - stage.clientWidth / (2 * size().w));
+    yaw = middle;
     relabel();
     layout();
   }
@@ -393,6 +483,7 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
   function jumpTo(fx: number, fy: number) {
     const { w } = size();
     u = wrap(fx - stage.clientWidth / (2 * w));
+    yaw = wrap(fx);
     v = fy;
     layout();
   }
@@ -407,7 +498,7 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
   overview.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      jumpTo(u + 0.5, v); // next half turn
+      jumpTo(centerFrac() + 0.5, v); // next half turn
     }
   });
 
@@ -421,6 +512,7 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
     else if (act === "reset") reset();
     else if (act === "max") setMaximized(!maximized);
     else if (act === "crop") setCropped(!cropped);
+    else if (act === "mode") setSphere(!isSphere());
   });
 
   dialog.addEventListener("keydown", (e) => {
@@ -464,6 +556,9 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
       b.setAttribute("aria-label", t(key));
       b.title = t(key);
     };
+    label("mode", isSphere() ? "pano.modeFlat" : "pano.mode360");
+    modeBtn.hidden = !sphereReady;
+    modeBtn.setAttribute("aria-pressed", String(isSphere()));
     label("crop", cropped ? "pano.showFull" : "pano.cropToCovered");
     cropBtn.hidden = !band;
     cropBtn.setAttribute("aria-pressed", String(!cropped));
@@ -496,6 +591,7 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
       p.lmst ? t("pano.metaLmst", { lmst: p.lmst }) : null,
       band && cropped ? t("pano.metaCropped") : null,
       stretch ? t("pano.metaStretched") : null,
+      isSphere() ? t("pano.metaSphere") : null,
       t("pano.metaObserved"),
       p.credit,
     ].filter((x): x is string => Boolean(x));
@@ -525,7 +621,9 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
         overviewImg.removeAttribute("src");
         band = null;
         stretch = null;
-        cropped = true;
+        cropped = false; // opens with the whole mosaic; the ⇕ button crops to the covered band
+        sphereReady = false;
+        yaw = 0.5;
         setLoadState("loading");
         zoom = MIN_ZOOM;
         u = 0;
@@ -537,6 +635,7 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
           aspect = loader.naturalWidth / loader.naturalHeight;
           ({ band, stretch } = analyzeImage(loader));
           if (band) v = (band[0] + band[1]) / 2;
+          sphereReady = sphere?.setImage(loader) ?? false;
           const filter = stretch ? stretchFilter(stretch) : "";
           [...copies, overviewImg].forEach((el) => {
             el.src = p.imageUrl;
@@ -551,6 +650,7 @@ export function createPanoramaViewer(dialog: HTMLDialogElement): PanoramaViewer 
         relabel();
       }
       if (!dialog.open) dialog.showModal();
+      setMaximized(true); // always opens full screen
       stage.focus();
       requestAnimationFrame(layout);
     },
