@@ -9,6 +9,8 @@ import { createResultsPanel } from "./mission/results";
 import { RouteLayer } from "./mission/routes";
 import { parsePois } from "./mission/pois";
 import type { Poi } from "./mission/types";
+import { ConfigError, describeStartupError, MISSING_TOKEN } from "./ui/errors";
+import { hideLoading, showError, showLoading, showToast, updateLoading } from "./ui/status";
 
 // ---------------------------------------------------------------------------
 // Configuración
@@ -16,12 +18,7 @@ import type { Poi } from "./mission/types";
 const CESIUM_MARS_ASSET_ID = 3644333; // Cesium Mars (3D Tiles), en Cesium ion
 const GALE = { lon: 137.374, lat: -4.792 }; // cerca de la última posición de Curiosity (sol 5073)
 const PARCEL_ID = "gale_demo_v1"; // fixture del contrato; cambiar cuando P3-02 publique la parcela real
-
-const token = import.meta.env.VITE_CESIUM_ION_TOKEN as string | undefined;
-if (!token) {
-  throw new Error("Falta VITE_CESIUM_ION_TOKEN. Copiá .env.example a .env y pegá tu token de Cesium ion.");
-}
-Cesium.Ion.defaultAccessToken = token;
+const SLOW_LOAD_MS = 20_000; // a partir de acá se avisa que la carga está tardando
 
 // Marte como cuerpo por defecto: todas las conversiones lat/lon usan el elipsoide marciano.
 Cesium.Ellipsoid.default = Cesium.Ellipsoid.MARS;
@@ -29,24 +26,29 @@ Cesium.Ellipsoid.default = Cesium.Ellipsoid.MARS;
 // ---------------------------------------------------------------------------
 // Visor
 // ---------------------------------------------------------------------------
-const viewer = new Cesium.Viewer("cesiumContainer", {
-  baseLayer: false,
-  baseLayerPicker: false,
-  geocoder: false,
-  timeline: false,
-  animation: false,
-  homeButton: false,
-  sceneModePicker: false,
-  navigationHelpButton: false,
-  fullscreenButton: false,
-  infoBox: false,
-  selectionIndicator: false,
-  globe: new Cesium.Globe(Cesium.Ellipsoid.MARS),
-  skyBox: false,
-  skyAtmosphere: new Cesium.SkyAtmosphere(Cesium.Ellipsoid.MARS),
-});
-// El terreno lo pone el tileset 3D; el globo vacío se oculta.
-viewer.scene.globe.show = false;
+let viewer!: Cesium.Viewer;
+
+function createViewer(): Cesium.Viewer {
+  const v = new Cesium.Viewer("cesiumContainer", {
+    baseLayer: false,
+    baseLayerPicker: false,
+    geocoder: false,
+    timeline: false,
+    animation: false,
+    homeButton: false,
+    sceneModePicker: false,
+    navigationHelpButton: false,
+    fullscreenButton: false,
+    infoBox: false,
+    selectionIndicator: false,
+    globe: new Cesium.Globe(Cesium.Ellipsoid.MARS),
+    skyBox: false,
+    skyAtmosphere: new Cesium.SkyAtmosphere(Cesium.Ellipsoid.MARS),
+  });
+  // El terreno lo pone el tileset 3D; el globo vacío se oculta.
+  v.scene.globe.show = false;
+  return v;
+}
 
 function resetView() {
   viewer.camera.setView({
@@ -55,9 +57,41 @@ function resetView() {
   });
 }
 
+/** Espera a que carguen las primeras teselas; avisa si tarda o si fallan teselas. */
+function waitForInitialTiles(tileset: Cesium.Cesium3DTileset): Promise<void> {
+  let failed = 0;
+  tileset.tileFailed.addEventListener(() => {
+    failed += 1;
+    if (failed === 5) showToast("Algunas partes del terreno no se pudieron descargar. Revisá la conexión.");
+  });
+  return new Promise((resolve) => {
+    const slow = window.setTimeout(
+      () => updateLoading("La carga está tardando más de lo normal. Revisá la conexión; sigue intentando…"),
+      SLOW_LOAD_MS,
+    );
+    const done = () => {
+      window.clearTimeout(slow);
+      resolve();
+    };
+    // initialTilesLoaded es el evento esperado; allTilesLoaded es un respaldo por si no se dispara.
+    tileset.initialTilesLoaded.addEventListener(done);
+    tileset.allTilesLoaded.addEventListener(done);
+  });
+}
+
 async function main() {
+  showLoading("Cargando el terreno de Gale…");
+
+  const token = import.meta.env.VITE_CESIUM_ION_TOKEN?.trim();
+  if (!token) throw new ConfigError(MISSING_TOKEN);
+  Cesium.Ion.defaultAccessToken = token;
+
+  viewer = createViewer();
   const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(CESIUM_MARS_ASSET_ID);
   viewer.scene.primitives.add(tileset);
+  // Para depurar desde la consola del navegador (disponible aunque la carga no termine)
+  Object.assign(window, { viewer, tileset, Cesium });
+  const initialTiles = waitForInitialTiles(tileset);
 
   // Aspecto: sol bajo desde el oeste (azimut 280°, elevación 8°). Es un valor estético,
   // no una posición solar calculada: la ventana solar real va por REMS/Horizons.
@@ -98,6 +132,9 @@ async function main() {
     if (window.matchMedia("(max-width: 900px)").matches) panel.setCollapsed(true);
   });
 
+  await initialTiles;
+  hideLoading();
+
   const poiEntities = await addPois(pois);
   panel.onDestinationChange((id) => {
     highlightDestination(poiEntities, id);
@@ -123,9 +160,6 @@ async function main() {
     };
   });
   document.getElementById("resetView")!.onclick = resetView;
-
-  // Para depurar desde la consola del navegador
-  Object.assign(window, { viewer, tileset, Cesium });
 }
 
 // ---------------------------------------------------------------------------
@@ -184,5 +218,5 @@ function highlightDestination(entities: Map<string, Cesium.Entity>, selectedId: 
 
 main().catch((err) => {
   console.error(err);
-  alert("No se pudo cargar Cesium Mars: " + err.message);
+  showError(describeStartupError(err, CESIUM_MARS_ASSET_ID));
 });

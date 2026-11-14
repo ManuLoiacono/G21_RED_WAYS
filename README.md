@@ -24,4 +24,4 @@ npm run dev
 ```
 
 ## Estado
-Esqueleto inicial (14/11/2026). La app muestra Gale con Cesium Mars y una ruta **de prueba**. Motor y datos: pendientes según `docs/TAREAS.md`.
+En desarrollo (14/11/2026). La app muestra Gale con Cesium Mars, prepara la misión y compara alternativas. Mientras no exista el motor, usa base, destinos y respuestas **de prueba**, marcados en pantalla. Motor y datos: pendientes según `docs/TAREAS.md`. Si la app falla al arrancar, ver «Si algo falla» en [`app/README.md`](app/README.md).

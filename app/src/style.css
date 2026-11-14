@@ -139,3 +139,27 @@
 @media (max-width: 420px) {
   #resultsPanel { top: 96px; max-height: calc(50% - 112px); }
 }
+
+/* Estado de la app (P1-06): carga, error bloqueante y avisos. */
+#missionPanel:empty { display: none; }
+
+#appStatus[hidden], #appToast[hidden] { display: none; }
+#appStatus { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; font: 14px/1.5 system-ui, sans-serif; color: #ececf0; }
+#appStatus.as-loading { z-index: 5; pointer-events: none; }
+#appStatus.as-error { z-index: 30; background: rgba(8, 8, 10, 0.85); }
+#appStatus .as-card { background: rgba(18, 18, 22, 0.94); border: 1px solid #3a3a44; border-radius: 10px; padding: 16px 20px; max-width: 520px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); }
+#appStatus.as-loading .as-card { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+#appStatus.as-loading p { margin: 0; }
+#appStatus.as-error h2 { margin: 0 0 8px; font-size: 18px; color: #ff8a7a; }
+#appStatus.as-error ol { padding-left: 20px; margin: 8px 0 12px; }
+#appStatus.as-error li { margin: 4px 0; }
+#appStatus details { color: #a3a3ad; margin-bottom: 12px; }
+#appStatus pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; background: #101014; padding: 8px; border-radius: 6px; }
+#appStatus button { background: #3ff0ff; color: #062126; border: none; border-radius: 6px; padding: 8px 14px; font: inherit; font-weight: 600; cursor: pointer; min-height: 36px; }
+#appStatus button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+.as-spinner { width: 18px; height: 18px; border: 2px solid #4a4a55; border-top-color: #3ff0ff; border-radius: 50%; animation: as-spin 0.9s linear infinite; flex: none; }
+@keyframes as-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .as-spinner { animation-duration: 3s; } }
+
+#appToast { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 25; max-width: calc(100% - 32px); background: rgba(18, 18, 22, 0.94); color: #ffd666; border: 1px solid #5a4a1a; border-radius: 8px; padding: 8px 14px; font: 13px system-ui, sans-serif; }

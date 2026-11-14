@@ -3,16 +3,42 @@
 Visor de Gale con CesiumJS + Cesium Mars, efecto de color y luz (sol bajo), sombras, tres ajustes de calidad y una ruta de prueba apoyada sobre el terreno.
 
 ## Requisitos
-- Node.js 18 o superior.
+- Node.js 18 o superior (`node -v`).
+- Navegador de escritorio reciente con WebGL (Chrome, Edge o Firefox).
 - Cuenta de Cesium ion con un token (ver abajo).
+- Conexión a internet: el terreno se descarga de Cesium ion.
 
 ## Arranque
+Desde la carpeta `app/`:
 ```bash
 npm install
 cp .env.example .env      # en Windows: copy .env.example .env
 # editar .env y pegar el token en VITE_CESIUM_ION_TOKEN
 npm run dev               # abre http://localhost:5173
 ```
+- En macOS, `.env` es un archivo oculto: abrilo con `open -e .env` o `code .env`, o mostrá los ocultos en Finder con **Cmd + Shift + .**
+- Vite lee `.env` **solo al arrancar**: si cambiás el token, reiniciá `npm run dev`.
+- Variables de `app/.env`:
+  - `VITE_CESIUM_ION_TOKEN` (obligatoria): token de Cesium ion.
+  - `VITE_SERVICE_URL` (opcional): URL del servicio de rutas. Por defecto, `http://localhost:8000`.
+
+Al abrir la página se ve «Cargando el terreno de Gale…» hasta que llegan las primeras teselas (unos segundos). Después aparecen el panel «Preparar misión», la base y los destinos de prueba.
+
+Otros comandos: `npm run typecheck` (tipos), `npm run build` (compila en `dist/`) y `npm run preview` (sirve `dist/`).
+
+## Si algo falla
+La app muestra el problema en pantalla con los pasos para resolverlo. El detalle técnico queda plegado y en la consola del navegador.
+
+| Mensaje en pantalla | Causa probable | Qué hacer |
+| --- | --- | --- |
+| «Falta el token de Cesium ion» | No existe `app/.env` o `VITE_CESIUM_ION_TOKEN` está vacío | Crear `.env` desde `.env.example`, pegar el token y reiniciar `npm run dev` |
+| «Cesium ion rechazó el token» | Token mal copiado, vencido, sin `assets:read` o sin el asset de Cesium Mars, o URL no permitida | Revisar el token en ion; si restringiste URLs, agregar `http://localhost:5173` |
+| «Cesium Mars no está en tu cuenta de ion» | Falta agregar el asset `3644333` | Asset Depot → Cesium Mars → **Add to my assets** |
+| «No se pudo conectar con Cesium ion» | Sin internet o ion caído | Revisar la conexión y tocar **Reintentar** |
+| «La carga está tardando más de lo normal» | Conexión lenta | Esperar; sigue intentando. Si persiste, usar el ajuste **Liviano** |
+| «El navegador no puede mostrar la escena 3D» | Sin WebGL | Usar Chrome, Edge o Firefox recientes con aceleración por hardware |
+| «El servicio de rutas no responde: se muestra una respuesta simulada» | El servicio de P2 no está levantado | Esperado mientras no exista `service/`. Las tarjetas llevan el aviso «Respuesta simulada» |
+| «El servicio de rutas respondió 4xx/5xx» | Error en el servicio | Ver los registros del servicio (persona 2) |
 
 ## Token de Cesium ion
 1. En https://ion.cesium.com → **Asset Depot**, buscar **Cesium Mars** y agregarlo a tus assets (**Add to my assets**), si no aparece ya en **My Assets**. El ID esperado es `3644333`; si en tu cuenta aparece otro, cambiarlo en `src/main.ts`.
