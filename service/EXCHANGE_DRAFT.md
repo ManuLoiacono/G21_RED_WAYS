@@ -1,6 +1,6 @@
 # Draft prepared-planning exchange for P1/P3 review
 
-Status: **unaccepted draft** `p2-plan-draft-1`, distinct from shared v0 and from any future accepted v1. `service.exchange.decode_request` is the strict executable mapping. `plan_draft(PreparedPlanner(fixture_registry()), payload)` returns a calculated, finite JSON-compatible response. No HTTP, real parcel adapter or UI migration is implemented.
+Status: **unaccepted draft** `p2-plan-draft-1`, distinct from shared v0 and from any future accepted v1. `service.exchange.decode_request` is the strict executable mapping. `plan_draft(PreparedPlanner(fixture_registry()), payload)` returns a calculated, finite JSON-compatible response. The local HTTP adapter now exposes this unchanged draft; see [HTTP_API.md](HTTP_API.md). No real parcel adapter or UI migration is implemented.
 
 ## Runnable request and calculated response examples
 
@@ -60,7 +60,7 @@ The mapping is for fresh complete missions. Departure cannot precede the decisio
 
 Missing complete movement leaves totals/margins null with `unavailable_totals_reason` and unevaluated checks. Missing daylight leaves its margins null with `missing_required` and missing-evidence checks. No CSR matrices, search/predecessor arrays or per-edge participant explanations are serialized by default. Output is normalized through finite strict JSON.
 
-`PlanningInputError.as_dict()` provides structured input errors. Engine input errors preserve code/path when mapped. Backend/reconstruction errors and `PlannerBusyError` propagate separately; the later HTTP adapter must map them to technical/busy responses without returning a successful plan or static fallback.
+`PlanningInputError.as_dict()` provides structured input errors. Engine input errors preserve code/path when mapped. Backend/reconstruction errors and `PlannerBusyError` propagate separately. The HTTP adapter maps malformed JSON to 400, schema/input errors to 422, busy to 409 and technical failures to 500 without returning a successful plan or static fallback. See [HTTP_API.md](HTTP_API.md) for the full transport mapping and resource bounds.
 
 ## Consumer decisions still pending
 

@@ -8,15 +8,21 @@ import logging
 from threading import BoundedSemaphore
 from urllib.parse import parse_qs, urlsplit
 
-from .exchange import DRAFT_SCHEMA_VERSION, export_catalogs
-from .planning import PreparedPlanner
+from .exchange import DRAFT_SCHEMA_VERSION, export_catalogs, plan_draft
+from .planning import PlannerBusyError, PreparedPlanner
 from .prepared import fixture_registry
-from .validation import PlanningInputError
+from .validation import PlanningInputError, loads_strict
 
 
 ADAPTER_VERSION = "p2-http-local-1"
 DEFAULT_ORIGINS = ("http://localhost:5173", "http://127.0.0.1:5173")
-ROUTES = {"/health": "GET", "/parcel": "GET", "/catalogs": "GET"}
+ROUTES = {"/health": "GET", "/parcel": "GET", "/catalogs": "GET", "/plan": "POST"}
+# Technical resource bounds, independent of scientific/operational thresholds.
+MAX_BODY_BYTES = 65_536
+MAX_TASKS = 64
+MAX_JSON_DEPTH = 32
+MAX_GEOMETRY_POINTS = 20_000  # Combined vertices in outbound and return legs.
+MAX_RESPONSE_BYTES = 2_097_152
 LOGGER = logging.getLogger(__name__)
 
 
@@ -25,6 +31,38 @@ class HTTPProblem(Exception):
         self.status = status
         self.error = {"code": code, "path": path, "message": message}
         super().__init__(message)
+
+
+def check_json_depth(raw):
+    """Bound nesting before the recursive JSON parser; ignore brackets in strings."""
+    depth, quoted, escaped = 0, False, False
+    for char in raw:
+        if quoted:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quoted = False
+        elif char == '"':
+            quoted = True
+        elif char in "[{":
+            depth += 1
+            if depth > MAX_JSON_DEPTH:
+                raise HTTPProblem(400, "json_depth_limit", "json", "JSON nesting exceeds the technical limit.")
+        elif char in "]}":
+            depth -= 1
+
+
+def encode_bounded(payload):
+    """Verify the complete serialized response before sending a success header."""
+    body = bytearray()
+    for chunk in json.JSONEncoder(allow_nan=False, separators=(",", ":")).iterencode(payload):
+        encoded = chunk.encode("utf-8")
+        if len(body) + len(encoded) > MAX_RESPONSE_BYTES:
+            raise HTTPProblem(500, "response_size_limit", "response", "Serialized output exceeds the technical limit; no plan was returned.")
+        body.extend(encoded)
+    return bytes(body)
 
 
 def local_origin(value):
@@ -56,6 +94,25 @@ class HTTPApplication:
                 "scope": "local_synthetic_development", "geographic_conversion": "unavailable",
                 "registered_parcels": [{"id": p.id, "version": p.version, "fixture": p.grid.fixture}
                                        for p in self.registry.parcels]}
+
+    def plan(self, payload):
+        if (isinstance(payload, dict) and payload.get("schema_version") == DRAFT_SCHEMA_VERSION
+                and isinstance(payload.get("mission"), dict)):
+            tasks = payload["mission"].get("tasks")
+            if isinstance(tasks, list) and len(tasks) > MAX_TASKS:
+                raise HTTPProblem(422, "task_limit", "mission.tasks", "Task count exceeds the technical limit.")
+        try:
+            result = plan_draft(self.planner, payload)
+        except PlannerBusyError as exc:
+            raise HTTPProblem(409, "planner_busy", "planner", "One calculation is active; retry explicitly after it finishes.") from exc
+        except PlanningInputError as exc:
+            status = 500 if exc.code == "stale_movement_context" else 422
+            raise HTTPProblem(status, exc.code, exc.path, str(exc)) from exc
+        points = sum(len(candidate[leg]["cells"]) for candidate in result["alternatives"]
+                     for leg in ("outbound", "return"))
+        if points > MAX_GEOMETRY_POINTS:
+            raise HTTPProblem(500, "geometry_size_limit", "alternatives", "Calculated geometry exceeds the technical limit; no plan was returned.")
+        return result
 
     def parcel(self, query):
         try:
@@ -129,34 +186,76 @@ class RequestHandler(BaseHTTPRequestHandler):
         pass
 
     def _send_json(self, status, payload, *, extra_headers=()):
-        body = json.dumps(payload, allow_nan=False, separators=(",", ":")).encode("utf-8")
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-store")
-        self.send_header("Connection", "close")
-        self.send_header("Vary", "Origin")
-        origin = self.headers.get("Origin")
-        if origin in self.server.application.allowed_origins:
-            self.send_header("Access-Control-Allow-Origin", origin)
-        for name, value in extra_headers:
-            self.send_header(name, value)
-        self.end_headers()
+        body = encode_bounded(payload)
         self.close_connection = True
-        if self.command != "HEAD":
-            self.wfile.write(body)
+        try:
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Connection", "close")
+            self.send_header("Vary", "Origin")
+            headers = getattr(self, "headers", None)
+            origins = headers.get_all("Origin", []) if headers is not None else []
+            if len(origins) == 1 and origins[0] in self.server.application.allowed_origins:
+                self.send_header("Access-Control-Allow-Origin", origins[0])
+            for name, value in extra_headers:
+                self.send_header(name, value)
+            self.end_headers()
+            if self.command != "HEAD":
+                self.wfile.write(body)
+        except OSError:
+            # Only socket writes are ignored. Backend timeouts remain HTTP 500.
+            # A lost client does not cancel native work or alter a result.
+            return
 
     def send_error(self, code, message=None, explain=None):
         self._send_json(code, {"error": {"code": "http_error", "path": "http",
                                         "message": "HTTP request could not be processed."}})
+
+    def _read_payload(self):
+        if self.headers.get_all("Transfer-Encoding"):
+            raise HTTPProblem(400, "unsupported_transfer_encoding", "headers.Transfer-Encoding", "Chunked requests are unsupported; send Content-Length.")
+        if self.headers.get_all("Content-Encoding"):
+            raise HTTPProblem(415, "unsupported_content_encoding", "headers.Content-Encoding", "Compressed request bodies are unsupported.")
+        types = self.headers.get_all("Content-Type", [])
+        params = self.headers.get_params() or []
+        if (len(types) != 1 or self.headers.get_content_type() != "application/json"
+                or any(name != "charset" or not isinstance(value, str) or value.lower() != "utf-8"
+                       for name, value in params[1:])
+                or len(params) > 2):
+            raise HTTPProblem(415, "unsupported_content_type", "headers.Content-Type", "Send application/json with optional charset=utf-8.")
+        lengths = self.headers.get_all("Content-Length", [])
+        if len(lengths) != 1 or not lengths[0].isascii() or not lengths[0].isdecimal() or len(lengths[0]) > 10:
+            raise HTTPProblem(400, "invalid_content_length", "headers.Content-Length", "One decimal Content-Length is required.")
+        length = int(lengths[0])
+        if length > MAX_BODY_BYTES:
+            raise HTTPProblem(413, "body_size_limit", "body", "Request body exceeds the technical byte limit.")
+        try:
+            body = self.rfile.read(length)
+        except TimeoutError as exc:
+            raise HTTPProblem(400, "incomplete_body", "body", "Timed out while reading the declared body.") from exc
+        if len(body) != length:
+            raise HTTPProblem(400, "incomplete_body", "body", "Body is shorter than its declared Content-Length.")
+        try:
+            raw = body.decode("utf-8")
+            check_json_depth(raw)
+            return loads_strict(raw)
+        except (PlanningInputError, UnicodeError, RecursionError) as exc:
+            error = exc.as_dict() if isinstance(exc, PlanningInputError) else {
+                "code": "invalid_json", "path": "json", "message": "Expected finite UTF-8 JSON within the nesting limit."}
+            raise HTTPProblem(400, **error) from exc
 
     def _dispatch(self):
         try:
             origins = self.headers.get_all("Origin", [])
             if len(origins) > 1 or (origins and origins[0] not in self.server.application.allowed_origins):
                 raise HTTPProblem(403, "origin_not_allowed", "headers.Origin", "Browser origin is not configured.")
-            parts = urlsplit(self.path)
-            if parts.scheme or parts.netloc or parts.fragment:
+            try:
+                parts = urlsplit(self.path)
+            except ValueError as exc:
+                raise HTTPProblem(400, "invalid_target", "path", "Malformed request target.") from exc
+            if parts.scheme or parts.netloc or parts.fragment or not self.path.startswith("/"):
                 raise HTTPProblem(400, "invalid_target", "path", "Use a local absolute-path request target.")
             method = ROUTES.get(parts.path)
             if method is None:
@@ -182,14 +281,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                 payload = app.health()
             elif parts.path == "/catalogs":
                 payload = export_catalogs()
+            elif parts.path == "/plan":
+                payload = app.plan(self._read_payload())
             else:
                 payload = app.parcel(parts.query)
             self._send_json(200, payload)
         except HTTPProblem as exc:
             self._send_json(exc.status, {"error": exc.error})
-        except (BrokenPipeError, ConnectionResetError, TimeoutError):
-            # A lost client does not cancel native work or change a computed result.
-            return
         except Exception:
             LOGGER.exception("HTTP adapter failed")
             self._send_json(500, {"error": {"code": "backend_failure", "path": "service",

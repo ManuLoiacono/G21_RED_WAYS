@@ -29,26 +29,56 @@ P1's corresponding service setting is `VITE_SERVICE_URL=http://127.0.0.1:8001`. 
 
 Origins must be exact `http://localhost:PORT` or `http://127.0.0.1:PORT`, without trailing slash. Unconfigured browser origins receive HTTP 403 without an allow-origin header. Local CLI clients need no `Origin`. Responses, including errors for configured origins, carry `Access-Control-Allow-Origin`, `Vary: Origin` and `Cache-Control: no-store`. No credentials are enabled.
 
-## Delivery A routes
+## Supported routes
 
 | Method and path | Result |
 | --- | --- |
 | `GET /health` | Adapter/draft versions, pending contract status, synthetic scope and registered parcel identities. Does not build a graph. |
 | `GET /parcel?id=synthetic_metric_demo&version=v1` | Exact registered parcel metadata, metric cell-center transform, declared coverage/exclusion/aggregation policy, versions and POIs. No raster or graph/search arrays. |
 | `GET /catalogs` | The exact JSON representation of central `export_catalogs()`, including the roster and four templates. No copied defaults. |
-| `OPTIONS` on these paths | Allowed route method and `Content-Type`; configured browser origins only when supplied. |
+| `POST /plan` | Strict `p2-plan-draft-1` request to `loads_strict` and `plan_draft` on the application-owned planner. Calculated engine response only. |
+| `OPTIONS` on these paths | Allowed route method (`POST` for `/plan`, `GET` for metadata) and `Content-Type`; configured browser origins only when supplied. |
 
 Missing/duplicate/unknown query fields return 422; an unregistered metadata parcel/version returns 404. Unknown paths return 404 and wrong methods return 405. Errors have `{"error":{"code":"...","path":"...","message":"..."}}`. `/health` and `/catalogs` accept no query parameters. Paths are exact and have no trailing slash alias.
 
-At this checkpoint `/plan` is not implemented; it is delivery B. The existing CLI `python -m service.example --case baseline` already calculates through the engine.
+`POST /plan` accepts the complete [draft request](examples/request.example.json), unchanged from the [exchange documentation](EXCHANGE_DRAFT.md). Supply `Content-Type: application/json` (optionally `charset=utf-8`) and one decimal `Content-Length`. UTF-8 JSON is required. Chunked transfer, compression and other content types/parameters are unsupported. The service parses raw JSON with `loads_strict`; duplicate keys, nonfinite constants and overflowing exponents are HTTP 400. No client-side planning durations or assessments are accepted.
+
+Every successful planning response comes from the engine. Repeated compatible requests reuse the same planner's movement while evaluating the mission again. Changing the baseline task from 600 to 601 seconds changes elapsed time from 800 to 801 seconds and reduces temporal/daylight margins by one second. Technical errors never return a successful or fixed plan. Local CLI clients may omit `Origin`.
+
+## Status and resource boundaries
+
+All errors use `{"error":{"code":"...","path":"...","message":"..."}}`; they have no planning alternatives. Planning payload semantics and nullability are the existing explicit draft.
+
+| HTTP status | Meaning and representative codes |
+| --- | --- |
+| 200 | Completed calculated planning result, including `incompatible` and `insufficient_evidence`. An engine `search_inconclusive` also preserves its separate state with null unavailable metrics. Metadata and valid `OPTIONS` also use 200. |
+| 400 | Malformed/nonfinite/duplicate JSON, invalid UTF-8, excess nesting (`json_depth_limit`), invalid/missing/duplicate length (`invalid_content_length`), short/timed-out body (`incomplete_body`), chunked encoding (`unsupported_transfer_encoding`) or unsupported preflight headers. |
+| 403 | `origin_not_allowed`; no allow-origin header for unconfigured origins. |
+| 404 | `unknown_endpoint` or exact metadata parcel/version not registered (`unknown_parcel`). |
+| 405 | Wrong route method or unsupported requested preflight method. |
+| 409 | `planner_busy`: one calculation is active. No job is queued. Retry explicitly when it finishes. |
+| 413 | `body_size_limit`. Rejected before reading an oversized declared body. |
+| 415 | `unsupported_content_type` or `unsupported_content_encoding`. |
+| 422 | Invalid supported-draft fields/version, parcel/scenario/endpoint inputs, query fields or `task_limit`. Current v0 receives `unsupported_schema_version`. Unknown planning parcel/version is 422, unlike metadata lookup's 404. |
+| 500 | Unexpected backend/reconstruction/serialization failure (`backend_failure`), internal movement-association failure (`stale_movement_context`) or complete-output bound (`geometry_size_limit`, `response_size_limit`). No success is published. |
+
+| Technical limit | Value and behavior |
+| --- | --- |
+| Request body | At most 65,536 bytes of UTF-8 JSON. |
+| JSON nesting | At most 32 object/array levels; checked before parsing. |
+| Task occurrences | At most 64, including zero-duration tasks; excess is rejected, never dropped. |
+| Geometry | At most 20,000 route vertices combined across outbound and return candidates; includes same-cell vertices. Grid cells and metric positions are returned in full or the response fails. |
+| Serialized output | At most 2,097,152 bytes including the full response; checked before response headers. No geometry, participants, checks or echo fields are truncated. |
+
+These are local resource bounds, not scientific or operational thresholds. Output checks bound publication, not native computation or peak process memory: the exchange/reconstruction can materialize a complete result before this wrapper checks it. The registered packages remain tiny synthetic inputs. Prepared inputs, caller-held route objects, temporary NumPy/SciPy allocations and exchange serialization are additional to the planner's one retained graph/base search.
 
 The application loads exactly one registry and creates exactly one reusable planner at startup. Metadata does not initialize graph/search arrays. The listener allows at most 16 concurrent connection handlers and a bounded socket backlog; additional connections can be closed before parsing. Each connection closes after one response and has a 10 s socket I/O timeout. This is a local development adapter, not a public production server. A socket timeout or disconnect does not cancel native SciPy work. Ctrl+C stops the listener and waits for active handlers.
 
-## Delivery A verification
+## Verification
 
 ```sh
 python -m unittest service.tests.test_http -v
 python -m unittest discover -s service/tests -p 'test_*.py'
 ```
 
-Real loopback tests cover metadata/catalog identity, no graph construction, exact version selection, local-origin preflight/errors and a separate-process CLI startup. Existing prepared-planner checks remain applicable.
+Real loopback tests cover metadata/catalog identity, no graph construction for metadata, exact versions, configured preflight/errors and separate-process CLI startup. Planning tests observe actual engine calls, movement reuse and changed-input arithmetic, participant failure, exact daylight equality, missing evidence, concurrent busy handling, backend/reconstruction/timeout failure and recovery, malformed/schema/body/task rejection and complete-output bounds. Existing prepared-planner checks remain applicable.
