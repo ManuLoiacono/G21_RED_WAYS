@@ -122,6 +122,11 @@ class PreparedRegistry:
             if len({(item.id, item.version) for item in group}) != len(group):
                 raise PlanningInputError("duplicate_package", "registry", "Package ID/version must be unique.")
 
+    @property
+    def parcels(self):
+        """Registered immutable parcel metadata; no implicit latest-version selection."""
+        return self._parcels
+
     def parcel(self, parcel_id, version):
         result = next((item for item in self._parcels if (item.id, item.version) == (parcel_id, version)), None)
         if result is None:

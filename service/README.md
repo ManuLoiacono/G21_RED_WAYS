@@ -1,6 +1,6 @@
-# Prepared planning service modules (draft, no HTTP)
+# Prepared planning service and local draft HTTP adapter
 
-Increment 2 provides framework-independent inputs for the later local service. Shared v0 `contracts/` and `app/` remain unchanged. Nothing here serves HTTP or calls live APIs.
+Increment 2 provides framework-independent prepared planning. Increment 3 adds a standard-library, loopback-only HTTP adapter; see [HTTP_API.md](HTTP_API.md) for startup, configured origins and supported routes. Shared v0 `contracts/` and `app/` remain unchanged. Planning calls no live APIs.
 
 ## Registered packages and adapters (delivery A)
 
