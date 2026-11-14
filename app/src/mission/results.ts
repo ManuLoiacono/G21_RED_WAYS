@@ -1,5 +1,6 @@
 import { esc, fmtDistance, fmtDuration, fmtMeters, fmtPercent } from "../ui/format";
 import type { Alternative, PlanResponse } from "./response";
+import { infoButton, sourceIdFor } from "../provenance/sources";
 
 /**
  * Panel de resultados y comparación (P1-03).
@@ -77,7 +78,7 @@ export function createResultsPanel(root: HTMLElement): ResultsPanel {
         <button type="button" data-act="collapse" aria-expanded="${!collapsed}" aria-label="${collapsed ? "Mostrar" : "Ocultar"} resultados">${collapsed ? "+" : "−"}</button>
       </header>
       <div class="mp-body">
-        ${simulated || r.fixture ? `<p class="mp-note"><strong>Respuesta simulada (fixture).</strong> No la calculó el motor y no cambia con los parámetros del formulario.</p>` : ""}
+        ${simulated || r.fixture ? `<p class="mp-note"><strong>Respuesta simulada (fixture).</strong> No la calculó el motor y no cambia con los parámetros del formulario. ${infoButton("respuesta_simulada", "respuesta simulada")}</p>` : ""}
         <p class="rs-summary">${statusBadge(r.status)} ${esc(r.summary_reason)}</p>
         ${r.alternatives.length === 0 ? `<p class="mp-hint">El motor no devolvió alternativas.</p>` : ""}
         <ul class="rs-cards">
@@ -103,15 +104,20 @@ export function createResultsPanel(root: HTMLElement): ResultsPanel {
     const others = a.constraints.filter((c) => c.status !== "violated");
     const unfavorable = a.preferences.filter((p) => p.status === "unfavorable");
     const nodata = a.evidence?.nodata_fraction;
+    // Respuesta simulada → su fixture; respuesta real → derivada del DTM HiRISE (motor).
+    const cardSource = simulated || response?.fixture ? "respuesta_simulada" : "dtm_hirise";
 
     return `
       <li>
         <article class="rs-card ${selected ? "selected" : ""}" style="--alt-color:${altColor(a, i)}">
-          <button type="button" class="rs-select" data-alt="${esc(a.id)}" aria-pressed="${selected}">
-            <span class="rs-swatch" aria-hidden="true"></span>
-            <span class="rs-title">${esc(label(CRITERION_LABEL, a.criterion))}</span>
-            ${statusBadge(a.status)}
-          </button>
+          <div class="rs-card-head">
+            <button type="button" class="rs-select" data-alt="${esc(a.id)}" aria-pressed="${selected}">
+              <span class="rs-swatch" aria-hidden="true"></span>
+              <span class="rs-title">${esc(label(CRITERION_LABEL, a.criterion))}</span>
+              ${statusBadge(a.status)}
+            </button>
+            ${infoButton(cardSource, `cálculo de la alternativa ${label(CRITERION_LABEL, a.criterion)}`)}
+          </div>
 
           ${
             violated.length
@@ -141,7 +147,7 @@ export function createResultsPanel(root: HTMLElement): ResultsPanel {
                 .map(
                   (c) => `<li data-status="${esc(c.status)}"><span aria-hidden="true">${c.status === "ok" ? "✓" : "•"}</span>
                     <span><strong>${esc(label(CONSTRAINT_LABEL, c.id))}</strong> (${c.status === "ok" ? "cumple" : esc(c.status)}): ${esc(c.detail)}
-                    ${c.provenance ? `<small class="rs-prov">${esc([c.provenance.mission, c.provenance.instrument, c.provenance.kind].filter(Boolean).join(" · "))}</small>` : ""}</span></li>`,
+                    ${c.provenance ? `<small class="rs-prov">${esc([c.provenance.mission, c.provenance.instrument, c.provenance.kind].filter(Boolean).join(" · "))} ${infoButton(sourceIdFor(c.provenance), label(CONSTRAINT_LABEL, c.id))}</small>` : ""}</span></li>`,
                 )
                 .join("")}
               ${unfavorable.map((p) => `<li data-status="unfavorable"><span aria-hidden="true">↓</span><span><strong>Preferencia desfavorable:</strong> ${esc(p.detail)}</span></li>`).join("")}

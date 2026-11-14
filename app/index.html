@@ -19,9 +19,12 @@
       <button data-preset="equilibrado" class="active">Equilibrado</button>
       <button data-preset="presentacion">Presentación</button>
       <button id="resetView">Restablecer vista</button>
+      <button data-source="terreno_visual" aria-label="Fuente del terreno 3D" title="Ver fuente del terreno">ⓘ</button>
+      <button id="openSources" aria-haspopup="dialog">Fuentes</button>
     </div>
     <aside id="missionPanel" aria-label="Preparar misión"></aside>
     <aside id="resultsPanel" aria-label="Alternativas" hidden></aside>
+    <dialog id="sourcesDialog"></dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -63,6 +63,13 @@ La app muestra el problema en pantalla con los pasos para resolverlo. El detalle
 - **Respaldo simulado:** si el servicio de rutas no responde, se usa `src/fixtures/plan_responses.fixture.ts`. Hay una respuesta fija por destino de prueba (destino 1: dos alternativas; destino 3: una; destino 2: incompatible), con el aviso «Respuesta simulada». Si el servicio responde con un error, se muestra el error, sin simulación.
 - Pantallas de hasta 900 px: el formulario va abajo y se pliega solo al llegar los resultados.
 
+## Procedencia bajo demanda (P1-05)
+- Botón **Fuentes** en la barra superior: abre un panel con todas las fuentes, agrupadas por clase (topográfica, óptica y visual, atmosférica, supuestos y datos de prueba). Se cierra con «×», con Escape o con un clic afuera.
+- Botones **ⓘ** junto al terreno (barra superior), las secciones del formulario, el aviso de datos de prueba, cada tarjeta y las restricciones con fuente. Abren el panel en esa fuente, resaltada. Un clic sobre una ruta del mapa también abre su fuente.
+- Cada fuente muestra: tipo de sustento (observado, derivado, modelado o supuesto), misión, instrumento, producto, obtención (en vivo o respaldo), fecha de consulta, enlace y advertencias.
+- Fuentes en `src/provenance/sources.ts`. Para una capa nueva: agregar una entrada y usar `infoButton("<id>", "<etiqueta>")`, o `data-source="<id>"` en cualquier botón. Si la respuesta del motor trae un bloque `provenance` que coincide con una fuente conocida (misma misión e instrumento), se agregan su origen, fecha, producto y enlace; si no coincide, se crea una entrada nueva.
+- Nada técnico queda fijo sobre la escena (D8): todo está detrás de un ⓘ o del botón «Fuentes».
+
 ## Notas
 - `src/look.ts`: shader de color + sol bajo, atmósfera y ajustes de calidad (liviano / equilibrado / presentación).
 - No usar `scene.verticalExaggeration`: con este tileset deja de cargar el terreno detallado.

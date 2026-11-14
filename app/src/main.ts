@@ -11,6 +11,7 @@ import { parsePois } from "./mission/pois";
 import type { Poi } from "./mission/types";
 import { ConfigError, describeStartupError, MISSING_TOKEN } from "./ui/errors";
 import { hideLoading, showError, showLoading, showToast, updateLoading } from "./ui/status";
+import { createSourcesPanel } from "./provenance/panel";
 
 // ---------------------------------------------------------------------------
 // Configuración
@@ -107,6 +108,7 @@ async function main() {
     Cesium.Cartesian3.fromDegrees(lon, lat, 0, Cesium.Ellipsoid.MARS),
   );
   const fixtureRouteEntity = viewer.entities.add({
+    id: "ruta_prueba",
     name: "Ruta de prueba (fixture)",
     polyline: {
       positions,
@@ -116,6 +118,10 @@ async function main() {
     },
   });
 
+  // Procedencia bajo demanda (P1-05): panel «Fuentes» + botones ⓘ (data-source).
+  const sources = createSourcesPanel(document.getElementById("sourcesDialog") as HTMLDialogElement);
+  document.getElementById("openSources")!.onclick = () => sources.open();
+
   // Base y destinos (FIXTURE hasta P3-05) + panel de preparación de misión (P1-02)
   const pois = parsePois(poiFixture);
   const panel = createMissionPanel(document.getElementById("missionPanel")!, pois, PARCEL_ID);
@@ -123,8 +129,10 @@ async function main() {
   const results = createResultsPanel(document.getElementById("resultsPanel")!);
   const routes = new RouteLayer(viewer);
   results.onSelect((altId) => routes.select(altId));
+  let lastResponseSimulated = false;
   document.addEventListener("plan-response", (e) => {
     const { response, simulated } = (e as CustomEvent<PlanResponseEvent>).detail;
+    lastResponseSimulated = simulated || response.fixture === true;
     fixtureRouteEntity.show = false; // la ruta de prueba inicial ya no aporta
     routes.show(response);
     results.show(response, simulated);
@@ -146,9 +154,11 @@ async function main() {
   viewer.screenSpaceEventHandler.setInputAction((click: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
     const picked = viewer.scene.pick(click.position);
     const entity = Cesium.defined(picked) ? picked.id : undefined;
-    if (entity instanceof Cesium.Entity && entity.id.startsWith("poi:")) {
-      panel.selectDestination(entity.id.slice(4));
-    }
+    if (!(entity instanceof Cesium.Entity)) return;
+    if (entity.id.startsWith("poi:")) panel.selectDestination(entity.id.slice(4));
+    // Clic sobre una ruta: abre su fuente (procedencia bajo demanda, P1-05).
+    else if (entity.id === "ruta_prueba") sources.open("ruta_prueba");
+    else if (entity.id.startsWith("route:")) sources.open(lastResponseSimulated ? "respuesta_simulada" : "dtm_hirise");
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
   // Controles mínimos

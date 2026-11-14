@@ -2,6 +2,7 @@ import { requestPlan, SERVICE_URL } from "./api";
 import { toPlanRequest } from "./request";
 import type { PlanResponse } from "./response";
 import { esc } from "../ui/format";
+import { infoButton } from "../provenance/sources";
 import { DEFAULT_PROFILE, stateFromTemplate, TEMPLATES } from "./templates";
 import { TEMPLATE_IDS, type MissionState, type Poi, type PlanRequest, type TemplateId } from "./types";
 
@@ -73,10 +74,10 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
           aria-label="${collapsed ? "Mostrar" : "Ocultar"} panel">${collapsed ? "+" : "−"}</button>
       </header>
       <form class="mp-body" novalidate>
-        ${usesFixture ? `<p class="mp-note">Base y destinos <strong>de prueba</strong> (fixture), no son destinos científicos reales.</p>` : ""}
+        ${usesFixture ? `<p class="mp-note">Base y destinos <strong>de prueba</strong> (fixture), no son destinos científicos reales. ${infoButton("pois_fixture", "base y destinos de prueba")}</p>` : ""}
 
         <fieldset>
-          <legend>Misión</legend>
+          <legend>Misión ${infoButton("plantillas", "plantillas de misión")}</legend>
           <label>Familia
             <select name="template">
               ${TEMPLATE_IDS.map((id) => `<option value="${id}" ${id === state.template_id ? "selected" : ""}>${esc(TEMPLATES[id].label)}</option>`).join("")}
@@ -101,7 +102,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
         </fieldset>
 
         <fieldset>
-          <legend>Tareas en el destino</legend>
+          <legend>Tareas en el destino ${infoButton("plantillas", "duraciones de las tareas")}</legend>
           <ul class="mp-tasks">
             ${state.tasks
               .map(
@@ -119,7 +120,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
         </fieldset>
 
         <fieldset>
-          <legend>Horario y presupuesto</legend>
+          <legend>Horario y presupuesto ${infoButton("rems", "amanecer y atardecer (REMS)")}</legend>
           <div class="mp-grid">
             <label>Sol (REMS)
               <input type="number" name="sol" min="1" step="1" value="${state.sol}" />
@@ -138,7 +139,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
         </fieldset>
 
         <fieldset>
-          <legend>Perfil del explorador</legend>
+          <legend>Perfil del explorador ${infoButton("perfil_humano", "perfil del explorador")}</legend>
           <label>Modo
             <select name="mode">
               <option value="a_pie" selected>A pie</option>
