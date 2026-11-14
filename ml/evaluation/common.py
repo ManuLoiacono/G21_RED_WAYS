@@ -174,13 +174,13 @@ def mae(y: np.ndarray, p: np.ndarray) -> float:
     return float(np.mean(np.abs(np.asarray(y) - np.asarray(p))))
 
 
-def point_metrics(y, p, p_clim=None, p_pers=None) -> dict:
+def point_metrics(y, p, p_clim=None, p_pers=None, ref_key: str = "climatology") -> dict:
     y, p = np.asarray(y, float), np.asarray(p, float)
     out = {"n": int(y.size), "mae": round(mae(y, p), 4), "bias": round(float(np.mean(p - y)), 4)}
     if p_clim is not None and y.size:
         m_c = mae(y, p_clim)
-        out["mae_climatology"] = round(m_c, 4)
-        out["skill_vs_climatology"] = round(1 - out["mae"] / m_c, 4) if m_c > 0 else None
+        out[f"mae_{ref_key}"] = round(m_c, 4)
+        out[f"skill_vs_{ref_key}"] = round(1 - out["mae"] / m_c, 4) if m_c > 0 else None
     if p_pers is not None and y.size:
         m_p = mae(y, p_pers)
         out["mae_persistence"] = round(m_p, 4)
@@ -216,7 +216,8 @@ def residual_quantile_intervals(oof: pd.DataFrame, value_col: str = "p50") -> pd
     return out
 
 
-def summarize_predictions(preds: pd.DataFrame, candidates: list[str], clim_name: str, pers_name: str) -> dict:
+def summarize_predictions(preds: pd.DataFrame, candidates: list[str], clim_name: str, pers_name: str,
+                          ref_key: str = "climatology") -> dict:
     """preds: long table with columns split, lead_sols, candidate, y, p10, p50, p90 (one row per case).
 
     Returns {"cv": {cand: {lead: metrics}}, "final": {...}, "cv_per_fold": {...}}.
@@ -232,7 +233,7 @@ def summarize_predictions(preds: pd.DataFrame, candidates: list[str], clim_name:
             res[part].setdefault(cand, {})
             for lead, g in sub[mask].groupby("lead_sols"):
                 w = wide.loc[g.set_index(["split", "lead_sols", "target_sol"]).index]
-                m = point_metrics(g["y"], g["p50"], w[clim_name], w[pers_name])
+                m = point_metrics(g["y"], g["p50"], w[clim_name], w[pers_name], ref_key=ref_key)
                 if g["p10"].notna().all() and g["p90"].notna().all():
                     m.update(interval_metrics(g["y"], g["p10"], g["p90"]))
                 res[part][cand][str(int(lead))] = m
