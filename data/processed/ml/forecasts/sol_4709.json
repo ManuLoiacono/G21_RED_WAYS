@@ -5,8 +5,108 @@
   "cutoff_utc": "2025-10-25T00:00:00Z",
   "issued_for_sol": 4709,
   "issued_for_date_utc": "2025-11-04",
-  "inputs": "REMS observations up to issued_for_sol; models and climatology frozen at cutoff_utc",
+  "inputs": "observations up to issued_for_sol (REMS; RAD and SILSO sunspots for dose); models and climatology frozen at cutoff_utc",
   "forecasts": [
+    {
+      "variable": "dose_b_rtgcorr_ugy_day",
+      "target_sol": 4710,
+      "target_date_utc": "2025-11-05",
+      "lead_sols": 1,
+      "p10": 100.35,
+      "p50": 103.55,
+      "p90": 106.7,
+      "observed": 100.84,
+      "baseline_climatology": null,
+      "baseline_moving_average_27_sols": 107.9,
+      "baseline_persistence": 102.39,
+      "model_id": "B1_lgbm_v1",
+      "interval_method": "residual_quantiles",
+      "provenance": {
+        "class": "radiacion",
+        "mission": "MSL",
+        "instrument": "RAD",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://cdaweb.gsfc.nasa.gov/sp_phys/data/msl/rad/cdf/obs-l2",
+        "fetched_at": "2026-11-14T19:37:30Z",
+        "product": "ml/B1"
+      }
+    },
+    {
+      "variable": "dose_b_rtgcorr_ugy_day",
+      "target_sol": 4712,
+      "target_date_utc": "2025-11-07",
+      "lead_sols": 3,
+      "p10": 100.18,
+      "p50": 105.57,
+      "p90": 110.49,
+      "observed": 103.39,
+      "baseline_climatology": null,
+      "baseline_moving_average_27_sols": 107.9,
+      "baseline_persistence": 102.39,
+      "model_id": "B1_lgbm_v1",
+      "interval_method": "residual_quantiles",
+      "provenance": {
+        "class": "radiacion",
+        "mission": "MSL",
+        "instrument": "RAD",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://cdaweb.gsfc.nasa.gov/sp_phys/data/msl/rad/cdf/obs-l2",
+        "fetched_at": "2026-11-14T19:37:30Z",
+        "product": "ml/B1"
+      }
+    },
+    {
+      "variable": "dose_b_rtgcorr_ugy_day",
+      "target_sol": 4714,
+      "target_date_utc": "2025-11-09",
+      "lead_sols": 5,
+      "p10": 100.62,
+      "p50": 107.49,
+      "p90": 113.51,
+      "observed": 105.27,
+      "baseline_climatology": null,
+      "baseline_moving_average_27_sols": 107.9,
+      "baseline_persistence": 102.39,
+      "model_id": "B1_lgbm_v1",
+      "interval_method": "residual_quantiles",
+      "provenance": {
+        "class": "radiacion",
+        "mission": "MSL",
+        "instrument": "RAD",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://cdaweb.gsfc.nasa.gov/sp_phys/data/msl/rad/cdf/obs-l2",
+        "fetched_at": "2026-11-14T19:37:30Z",
+        "product": "ml/B1"
+      }
+    },
+    {
+      "variable": "dose_b_rtgcorr_ugy_day",
+      "target_sol": 4719,
+      "target_date_utc": "2025-11-14",
+      "lead_sols": 10,
+      "p10": 99.44,
+      "p50": 107.9,
+      "p90": 114.7,
+      "observed": 108.75,
+      "baseline_climatology": null,
+      "baseline_moving_average_27_sols": 107.9,
+      "baseline_persistence": 102.39,
+      "model_id": "B1_ma27_v1",
+      "interval_method": "residual_quantiles",
+      "provenance": {
+        "class": "radiacion",
+        "mission": "MSL",
+        "instrument": "RAD",
+        "kind": "modelado",
+        "origin": "cache",
+        "url": "https://cdaweb.gsfc.nasa.gov/sp_phys/data/msl/rad/cdf/obs-l2",
+        "fetched_at": "2026-11-14T19:37:30Z",
+        "product": "ml/B1"
+      }
+    },
     {
       "variable": "max_temp_c",
       "target_sol": 4710,
@@ -363,6 +463,52 @@
           "mae_persistence": 2.1463,
           "skill_vs_persistence": 0.1102,
           "coverage_p10_p90": 0.9268,
+          "n": 41
+        }
+      }
+    },
+    "dose_b_rtgcorr_ugy_day": {
+      "evaluated_on": "final_window_targets",
+      "reference": "ma27",
+      "by_lead": {
+        "1": {
+          "model_id": "B1_lgbm_v1",
+          "mae": 2.5232,
+          "mae_moving_average": 4.1929,
+          "skill": 0.3982,
+          "mae_persistence": 2.9531,
+          "skill_vs_persistence": 0.1456,
+          "coverage_p10_p90": 0.878,
+          "n": 41
+        },
+        "3": {
+          "model_id": "B1_lgbm_v1",
+          "mae": 4.1351,
+          "mae_moving_average": 4.4734,
+          "skill": 0.0756,
+          "mae_persistence": 4.5047,
+          "skill_vs_persistence": 0.0821,
+          "coverage_p10_p90": 0.7561,
+          "n": 41
+        },
+        "5": {
+          "model_id": "B1_lgbm_v1",
+          "mae": 4.283,
+          "mae_moving_average": 4.699,
+          "skill": 0.0885,
+          "mae_persistence": 5.4705,
+          "skill_vs_persistence": 0.2171,
+          "coverage_p10_p90": 0.7805,
+          "n": 41
+        },
+        "10": {
+          "model_id": "B1_ma27_v1",
+          "mae": 4.9316,
+          "mae_moving_average": 4.9316,
+          "skill": -0.0,
+          "mae_persistence": 6.7018,
+          "skill_vs_persistence": 0.2641,
+          "coverage_p10_p90": 0.8049,
           "n": 41
         }
       }
