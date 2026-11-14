@@ -7,10 +7,7 @@ import poiFixture from "./fixtures/poi.fixture.json";
 import "./style.css";
 import { createMissionPanel, type PlanResponseEvent } from "./mission/panel";
 import { createResultsPanel } from "./mission/results";
-import { RouteLayer } from "./mission/routes";
 import { parsePois, poiTitle } from "./mission/pois";
-import { simulatedResponse } from "./fixtures/plan_responses.fixture";
-import type { PlanResponse } from "./mission/response";
 import type { Poi } from "./mission/types";
 import { ConfigError, describeStartupError, missingTokenError } from "./ui/errors";
 import { hideLoading, showError, showLoading, showToast, updateLoading } from "./ui/status";
@@ -30,7 +27,6 @@ import { createMissionContext, setUpSettingsMenu } from "./ui/hud";
 // ---------------------------------------------------------------------------
 const CESIUM_MARS_ASSET_ID = 3644333; // Cesium Mars (3D Tiles) on Cesium ion
 const GALE = { lon: 137.374, lat: -4.792 }; // near Curiosity's last position (sol 5073)
-const PARCEL_ID = "gale_demo_v1"; // contract fixture; change when P3-02 publishes the real parcel
 const SLOW_LOAD_MS = 20_000; // after this, warn that loading is slow
 
 // Mars as the default body: every lat/lon conversion uses the Martian ellipsoid.
@@ -166,24 +162,12 @@ async function main() {
     },
   });
 
-  // On-demand provenance (P1-05): "Sources" panel + ⓘ buttons (data-source).
-  const sources = createSourcesPanel(document.getElementById("sourcesDialog") as HTMLDialogElement);
-  document.getElementById("openSources")!.onclick = () => sources.open();
-
-  // Base and destinations (FIXTURE until P3-05) + mission planning panel (P1-02)
+  // Geographic POIs remain visual fixtures, separate from registered metric locations.
   const pois = parsePois(poiFixture);
-  const panel = createMissionPanel(document.getElementById("missionPanel")!, pois, PARCEL_ID);
-  // Results and comparison (P1-03): cards + routes on the map, kept in sync by selection.
-  const results = createResultsPanel(document.getElementById("resultsPanel")!);
-  const routes = new RouteLayer(viewer);
-  results.onSelect((altId) => routes.select(altId));
-
   // Parcel outline in red, moved like the HiRISE mesh (same shift as its metadata, if built).
   const parcelOutline = addParcelOutline(viewer, hirise?.metadata.horizontal_shift_m);
 
   // Top bar: mission context (center) and the "Layers" panel (left).
-  const context = createMissionContext(document.getElementById("hudContext")!, pois);
-  panel.onChange((state) => context.update(state));
   let missionVisible = true;
   const panoViewer = createPanoramaViewer(document.getElementById("panoDialog") as HTMLDialogElement);
   let panoLayer: PanoramaLayer | null = null;
@@ -257,7 +241,6 @@ async function main() {
         set: (on) => {
           missionVisible = on;
           viewer.entities.show = on;
-          routes.setVisible(on);
         },
       },
     },
@@ -268,35 +251,10 @@ async function main() {
     layersBtn.setAttribute("aria-expanded", String(open));
     layersBtn.classList.toggle("active", open);
   });
-  let lastResponseSimulated = false;
-  let lastResponse: PlanResponse | null = null;
-  document.addEventListener("plan-response", (e) => {
-    const { response, simulated } = (e as CustomEvent<PlanResponseEvent>).detail;
-    lastResponseSimulated = simulated || response.fixture === true;
-    lastResponse = response;
-    fixtureRouteEntity.show = false; // the initial test route no longer adds anything
-    layers.setOpen(false); // make room for the results in the left column
-    routes.show(response);
-    results.show(response, simulated);
-    // On narrow screens (portrait tablet) the form collapses so the map and results are visible.
+  document.addEventListener("plan-response", () => {
+    fixtureRouteEntity.show = false;
+    layers.setOpen(false);
     if (window.matchMedia("(max-width: 900px)").matches) panel.setCollapsed(true);
-  });
-
-  // Any calculation-relevant edit (destination, tasks, times, profile, mode, preferences)
-  // invalidates the result on screen.
-  panel.onStale(() => {
-    lastResponse = null;
-    routes.clear();
-    results.clear();
-  });
-
-  // A simulated response is our own fixture: rebuild it in the new language. Engine responses
-  // are shown as they came (their texts are the engine's).
-  onLanguageChange(() => {
-    const dest = lastResponse?.request_echo?.destination_poi;
-    if (!lastResponseSimulated || !lastResponse || !dest) return;
-    const fresh = simulatedResponse(dest);
-    if (fresh) results.replace({ ...fresh, request_echo: lastResponse.request_echo });
   });
 
   await initialTiles;
@@ -305,7 +263,7 @@ async function main() {
 
   // Cursor readout: position, DTM elevation and slope (highlighted above the profile's maximum).
   const readout = createCursorReadout(viewer, await elevationGrid);
-  panel.onChange((state) => readout.setSlopeLimit(state.profile.max_slope_deg));
+  panel.onChange((state) => readout.setSlopeLimit(panel.getSlopeLimit()));
 
   panoLayer = addPanoramas(viewer); // points appear on their own; does not delay the mission points
   layers.refresh();
@@ -318,7 +276,6 @@ async function main() {
       if (entity.label) entity.label.text = new Cesium.ConstantProperty(poiTitle(p));
     }
   });
-  panel.onDestinationChange((id) => highlightDestination(poiEntities, id));
 
   viewer.screenSpaceEventHandler.setInputAction((click: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
     const entity = pickEntity(click.position);
@@ -328,7 +285,7 @@ async function main() {
     else if (entity.id.startsWith("poi:")) panel.selectDestination(entity.id.slice(4));
     // Click on a route: opens its source (on-demand provenance, P1-05).
     else if (entity.id === "test_route") sources.open("test_route");
-    else if (entity.id.startsWith("route:")) sources.open(lastResponseSimulated ? "simulated_response" : "hirise_dtm");
+    else if (entity.id.startsWith("route:")) sources.open("navigation_draft");
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
   showPointerOverClickables();
 
@@ -437,6 +394,15 @@ function trackHudHeight() {
 
 setUpLanguage();
 trackHudHeight();
+// Planning works independently of ion/terrain availability.
+const sources = createSourcesPanel(document.getElementById("sourcesDialog") as HTMLDialogElement);
+document.getElementById("openSources")!.onclick = () => sources.open();
+const panel = createMissionPanel(document.getElementById("missionPanel")!);
+const results = createResultsPanel(document.getElementById("resultsPanel")!);
+const context = createMissionContext(document.getElementById("hudContext")!);
+panel.onChange((request) => context.update(request));
+panel.onStale(() => results.clear());
+document.addEventListener("plan-response", (event) => results.show((event as CustomEvent<PlanResponseEvent>).detail.response));
 main().catch((err) => {
   console.error(err);
   loadingKey = null;

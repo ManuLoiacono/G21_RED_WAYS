@@ -42,6 +42,13 @@ function text(id: string, notes: number) {
 /** Static entries in the current language (rebuilt on every language switch). */
 const staticSources = (): SourceEntry[] => [
   {
+    id: "navigation_draft",
+    ...text("navigation_draft", 1),
+    group: "supuesto",
+    provenance: { class: "supuesto", kind: "modelado", product: "p2-plan-draft-1 / engine" },
+    fixture: true,
+  },
+  {
     id: "visual_terrain",
     ...text("visual_terrain", 1),
     group: "optica",

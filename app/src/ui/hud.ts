@@ -1,8 +1,7 @@
 import { onLanguageChange, t } from "../i18n";
 import type { Preset } from "../look";
-import { poiTitle } from "../mission/pois";
-import { templateLabel } from "../mission/templates";
-import type { MissionState, Poi } from "../mission/types";
+import { templateLabel } from "../mission/panel";
+import type { PlanRequest } from "../mission/draft";
 import { esc } from "./format";
 
 /**
@@ -42,26 +41,17 @@ export function setUpSettingsMenu(onPreset: (preset: Preset) => void) {
   });
 }
 
-/** Center of the bar: family → destination · sol · departure, kept in sync with the mission panel. */
-export function createMissionContext(el: HTMLElement, pois: Poi[]) {
-  let last: Readonly<MissionState> | null = null;
-
+/** Mission context uses registered IDs and the explicitly assumed UTC clock. */
+export function createMissionContext(el: HTMLElement) {
+  let last: Readonly<PlanRequest> | null = null;
   function render() {
     if (!last) return;
-    const dest = pois.find((p) => p.id === last!.destination_poi);
     el.innerHTML = [
-      `<span class="ctx-chip ctx-family">${esc(templateLabel(last.template_id))}</span>`,
-      `<span class="ctx-chip" title="${esc(t("hud.ctx.destination"))}">→ ${esc(dest ? poiTitle(dest) : t("hud.ctx.noDestination"))}</span>`,
-      `<span class="ctx-chip ctx-num" title="${esc(t("hud.ctx.sol.title"))}">${esc(t("hud.ctx.sol", { sol: last.sol }))}</span>`,
-      `<span class="ctx-chip ctx-num" title="${esc(t("hud.ctx.departure.title"))}">${esc(t("hud.ctx.departure", { time: last.departure_local }))}</span>`,
+      `<span class="ctx-chip ctx-family">${esc(templateLabel(last.mission.template_id))}</span>`,
+      `<span class="ctx-chip">→ ${esc(last.destination.poi_id)}</span>`,
+      `<span class="ctx-chip ctx-num">${esc(last.mission.departure_utc)}</span>`,
     ].join("");
   }
-
   onLanguageChange(render);
-  return {
-    update(state: Readonly<MissionState>) {
-      last = state;
-      render();
-    },
-  };
+  return { update(state: Readonly<PlanRequest>) { last = state; render(); } };
 }
