@@ -27,8 +27,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class HTTPProblem(Exception):
-    def __init__(self, status, code, path, message):
+    def __init__(self, status, code, path, message, *, headers=()):
         self.status = status
+        self.headers = headers
         self.error = {"code": code, "path": path, "message": message}
         super().__init__(message)
 
@@ -226,11 +227,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                 or len(params) > 2):
             raise HTTPProblem(415, "unsupported_content_type", "headers.Content-Type", "Send application/json with optional charset=utf-8.")
         lengths = self.headers.get_all("Content-Length", [])
-        if len(lengths) != 1 or not lengths[0].isascii() or not lengths[0].isdecimal() or len(lengths[0]) > 10:
+        if len(lengths) != 1 or not lengths[0].isascii() or not lengths[0].isdecimal():
             raise HTTPProblem(400, "invalid_content_length", "headers.Content-Length", "One decimal Content-Length is required.")
-        length = int(lengths[0])
-        if length > MAX_BODY_BYTES:
+        normalized = lengths[0].lstrip("0") or "0"
+        maximum = str(MAX_BODY_BYTES)
+        if len(normalized) > len(maximum) or (len(normalized) == len(maximum) and normalized > maximum):
             raise HTTPProblem(413, "body_size_limit", "body", "Request body exceeds the technical byte limit.")
+        length = int(normalized)
         try:
             body = self.rfile.read(length)
         except TimeoutError as exc:
@@ -264,7 +267,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 requested_method = self.headers.get("Access-Control-Request-Method")
                 requested_headers = self.headers.get("Access-Control-Request-Headers", "")
                 if requested_method and requested_method != method:
-                    raise HTTPProblem(405, "method_not_allowed", "headers.Access-Control-Request-Method", "Method is not supported on this route.")
+                    raise HTTPProblem(405, "method_not_allowed", "headers.Access-Control-Request-Method", "Method is not supported on this route.",
+                                      headers=(("Allow", f"{method}, OPTIONS"),))
                 if any(item.strip().lower() != "content-type" for item in requested_headers.split(",") if item.strip()):
                     raise HTTPProblem(400, "headers_not_allowed", "headers.Access-Control-Request-Headers", "Only Content-Type is allowed.")
                 self._send_json(200, {"method": method}, extra_headers=(
@@ -273,7 +277,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                     ("Allow", f"{method}, OPTIONS")))
                 return
             if self.command != method:
-                raise HTTPProblem(405, "method_not_allowed", "method", "Method is not supported on this route.")
+                raise HTTPProblem(405, "method_not_allowed", "method", "Method is not supported on this route.",
+                                  headers=(("Allow", f"{method}, OPTIONS"),))
             if parts.path != "/parcel" and parts.query:
                 raise HTTPProblem(422, "invalid_query", "query", "This route accepts no query parameters.")
             app = self.server.application
@@ -287,7 +292,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 payload = app.parcel(parts.query)
             self._send_json(200, payload)
         except HTTPProblem as exc:
-            self._send_json(exc.status, {"error": exc.error})
+            self._send_json(exc.status, {"error": exc.error}, extra_headers=exc.headers)
         except Exception:
             LOGGER.exception("HTTP adapter failed")
             self._send_json(500, {"error": {"code": "backend_failure", "path": "service",

@@ -8,6 +8,7 @@ import socket
 import subprocess
 import sys
 from threading import Event, Thread
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -31,6 +32,36 @@ def serving(app=None):
             thread.join(timeout=5)
 
 
+@contextmanager
+def launched(*args):
+    """Exercise the documented CLI in a separate process with bounded startup."""
+    with socket.socket() as reservation:
+        reservation.bind(("127.0.0.1", 0))
+        port = reservation.getsockname()[1]
+    process = subprocess.Popen([sys.executable, "-m", "service", "--port", str(port), *args],
+                               cwd=Path(__file__).resolve().parents[2], stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, text=True)
+    ready, lines = Event(), []
+    def read_startup():
+        lines.append(process.stdout.readline())
+        ready.set()
+    reader = Thread(target=read_startup, daemon=True)
+    reader.start()
+    try:
+        if not ready.wait(timeout=10) or f"http://127.0.0.1:{port}" not in "".join(lines):
+            raise RuntimeError("Service CLI did not report a ready listener: " + "".join(lines))
+        yield SimpleNamespace(server_port=port)
+    finally:
+        process.terminate()
+        try:
+            process.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=5)
+        reader.join(timeout=2)
+        process.stdout.close()
+
+
 def request(server, method, path, body=None, headers=None):
     connection = HTTPConnection("127.0.0.1", server.server_port, timeout=5)
     try:
@@ -50,26 +81,10 @@ def post_plan(server, payload, *, origin="http://localhost:5173"):
 
 class MetadataHTTPChecks(unittest.TestCase):
     def test_cli_launch_from_another_process(self):
-        with socket.socket() as reservation:
-            reservation.bind(("127.0.0.1", 0))
-            port = reservation.getsockname()[1]
-        process = subprocess.Popen([sys.executable, "-m", "service", "--port", str(port)],
-                                   cwd=Path(__file__).resolve().parents[2], stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT, text=True)
-        try:
-            startup = process.stdout.readline()
-            self.assertIn(f"http://127.0.0.1:{port}", startup)
-            connection = HTTPConnection("127.0.0.1", port, timeout=5)
-            try:
-                connection.request("GET", "/health")
-                response = connection.getresponse()
-                self.assertEqual(response.status, 200)
-                self.assertEqual(json.loads(response.read())["schema_version"], "p2-plan-draft-1")
-            finally:
-                connection.close()
-        finally:
-            process.terminate()
-            process.communicate(timeout=10)
+        with launched() as server:
+            status, _, data = request(server, "GET", "/health")
+            self.assertEqual(status, 200)
+            self.assertEqual(data["schema_version"], "p2-plan-draft-1")
 
     def test_health_metadata_and_catalogs_use_one_application_without_graph_build(self):
         app = HTTPApplication()
@@ -216,8 +231,11 @@ class PlanningHTTPChecks(unittest.TestCase):
                     ({"Content-Type": "application/json", "Content-Encoding": "gzip"}, 415, "unsupported_content_encoding"),
                     ({"Content-Type": "application/json", "Transfer-Encoding": "chunked"}, 400, "unsupported_transfer_encoding"),
                     ({"Content-Type": "application/json", "Content-Length": "-1"}, 400, "invalid_content_length"),
-                    ({"Content-Type": "application/json", "Content-Length": str(MAX_BODY_BYTES + 1)}, 413, "body_size_limit")):
-                actual, _, response = request(server, "POST", "/plan", b"{}", headers)
+                    ({"Content-Type": "application/json", "Content-Length": str(MAX_BODY_BYTES + 1)}, 413, "body_size_limit"),
+                    ({"Content-Type": "application/json", "Content-Length": "9" * 5000}, 413, "body_size_limit")):
+                # Oversized declarations must fail before the client uploads a body.
+                body = None if status == 413 else b"{}"
+                actual, _, response = request(server, "POST", "/plan", body, headers)
                 self.assertEqual(actual, status, headers)
                 self.assertEqual(response["error"]["code"], code)
             payload = example_requests()["baseline"]

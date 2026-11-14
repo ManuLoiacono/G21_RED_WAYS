@@ -1,6 +1,6 @@
 # P1 / P2 integration brief
 
-Checkpoint update during HTTP delivery A (2026-11-14): integrated main is now `abd987b`, containing P2 `a064069` and P1 compatibility `1f071eb`. The latter adds input invalidation, late-response handling and stronger v0 response validation; those items below describe the earlier review and need not be repeated blindly. The app still emits v0 and retains its static network/language fallback. HTTP implementation now continues on `p2/http-service`; use `service/HTTP_API.md` for current availability. The historical scene reviews remain unchanged.
+Checkpoint update after HTTP increment 3 (2026-11-14): integrated main baseline is `abd987b`, containing P2 `a064069` and P1 compatibility `1f071eb`. The latter adds input invalidation, late-response handling and stronger v0 response validation; those items below describe the earlier review and need not be repeated blindly. The app still emits v0 and retains its static network/language fallback. HTTP is delivered on `p2/http-service`; use [P1_HTTP_API_INCREMENT3.md](P1_HTTP_API_INCREMENT3.md) and `service/HTTP_API.md` for current availability, statuses and client commands. The historical scene reviews remain unchanged.
 
 ## Purpose
 
@@ -16,7 +16,7 @@ P1 already has the Cesium scene, optional HiRISE detail mesh, mission form, alte
 
 P2 now has the fixed team catalog, payload and mission validation, directed grid routing with separate outbound/return searches, complete-mission budgets/daylight checks, prepared synthetic providers, bounded movement reuse and an executable draft JSON exchange.
 
-HTTP is the next P2 increment and is **not available yet**. The current draft provides metric geometry only; a reviewed real Gale geographic adapter is **not available yet**. A calculated synthetic response can drive result components now, but its metric coordinates cannot be passed to Cesium as longitude/latitude.
+HTTP increment 3 is now available on `p2/http-service`. The current draft provides metric geometry only; a reviewed real Gale geographic adapter is **not available yet**. A calculated synthetic response can drive result components now, but its metric coordinates cannot be passed to Cesium as longitude/latitude.
 
 The first integrated user flow will be: choose a prepared parcel and mission, select the team and loads, request planning, then see the calculated paths and the reasons for acceptance/failure. All displayed planning results must come from actual engine calculations using reproducible synthetic or real prepared inputs.
 
@@ -126,7 +126,7 @@ Required details:
 
 The available exchange is the explicit **draft** `p2-plan-draft-1`, not accepted shared v1. The current app's v0 request is incompatible until the team adopts this draft or agrees a tested adapter. P1 feedback is requested before migration.
 
-Authoritative files on `p2/mission-service`:
+Authoritative files now on `p2/http-service` (the earlier `p2/mission-service` was integrated and deleted remotely):
 
 - `service/EXCHANGE_DRAFT.md`: full fields, statuses, errors and limitations.
 - `service/examples/request.example.json`: runnable example request.
@@ -193,7 +193,7 @@ Use a separate reference checkout rather than merging unfinished backend work in
 
 ```sh
 git fetch origin --prune
-git worktree add --detach ../G21_P2_reference origin/p2/mission-service
+git worktree add --detach ../G21_P2_reference origin/p2/http-service
 cd ../G21_P2_reference
 ```
 
@@ -240,7 +240,7 @@ Communication is the next planned navigation extension: known-visible, known-hid
 
 1. P1 can immediately fix calculated-synthetic labeling, language preservation, service-error behavior and stale-result lifecycle. Publish a small verified P1 commit.
 2. Review the available draft with P2/P3, then adapt team/result components and runtime validation. Publish another small verified commit. Do not silently replace shared v0.
-3. P2 supplies the HTTP adapter, launch instructions, supported routes and configured CORS. The increment-3 development target is `POST /plan`, `GET /parcel?id=...&version=...`, `GET /catalogs` and `GET /health`, with the existing explicit draft schema. These routes are not implemented yet; P2 will verify and publish the exact HTTP behavior before integration.
+3. P2's increment-3 HTTP adapter supplies `POST /plan`, `GET /parcel?id=...&version=...`, `GET /catalogs` and `GET /health`, with the existing explicit draft schema, configured CORS and portable launch/client instructions. See [P1_HTTP_API_INCREMENT3.md](P1_HTTP_API_INCREMENT3.md) for the exact delivered behavior; this is not yet app integration.
 4. P3 confirms real geographic/time adapters and the shared parcel. Agree the one display-registration owner.
 5. Run the app-to-service-to-engine exercise: control points; changed team/task; participant failure; missing daylight; unavailable return; ES/EN preservation; stale response rejection; stopped-service error.
 6. Verify the presentation startup serves the optional HiRISE mesh. It is currently generated locally and served by Vite in development, not automatically packaged in production output.
