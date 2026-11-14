@@ -21,7 +21,7 @@ Esto alimenta el panel "Parte de EVA" (luz, clima, clima espacial, comunicación
 
 | Tema | Decisión |
 |---|---|
-| Ventana de prueba final | **25/10/2025 al 05/12/2025** (UTC). Aproximadamente soles 4699–4739: **calcular el rango exacto desde REMS**, no usar este número |
+| Ventana de prueba final | **25/10/2025 al 05/12/2025** (UTC). Rango exacto calculado desde REMS: **soles 4699–4739** (41 soles, todos con registro) ✅ 14/11 |
 | Fecha de corte | Los modelos se entrenan **solo con datos anteriores al 25/10/2025**. La ventana de prueba no se usa para elegir hiperparámetros ni variables |
 | Selección de modelos | Validación cruzada **por año marciano** (sección 7) |
 | Técnica | Modelos chicos y tabulares (climatología + regresión, LightGBM, regresión logística). Nada de LSTM ni transformers salvo como comparación opcional |
