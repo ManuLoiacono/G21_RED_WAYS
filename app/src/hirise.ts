@@ -18,6 +18,8 @@ const CLIP_INSET_M = 3;
 interface Metadata {
   bbox_lonlat: { west: number; south: number; east: number; north: number };
   vertical_offset_m: number;
+  /** DTM → scene shift used to place the mesh (meters). */
+  horizontal_shift_m?: { east: number; north: number };
   generated_at: string;
 }
 

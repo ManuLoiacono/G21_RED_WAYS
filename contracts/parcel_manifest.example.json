@@ -16,13 +16,13 @@
     "vertical_reference": "areoid (geoid-adjusted DTM)",
     "ew_distortion_note": "~0.35% at lat -4.8 deg; declared, not reprojected"
   },
-  "extent_lonlat": { "west": 137.370, "east": 137.400, "south": -4.840, "north": -4.810 },
+  "extent_lonlat": { "west": 137.360, "east": 137.410, "south": -4.850, "north": -4.800 },
   "search_grid": {
     "cell_size_m": 2.0,
-    "rows": 1600,
-    "cols": 1500,
+    "rows": 1482,
+    "cols": 1482,
     "row_order": "north_to_south",
-    "origin_xy_m": [8141700.0, -285200.0],
+    "origin_xy_m": [8141972.5, -284518.5],
     "slope_aggregation": "p90 of 1 m slopes within each cell"
   },
   "files": {

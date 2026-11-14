@@ -66,6 +66,10 @@ export class RouteLayer {
     this.source.entities.removeAll();
     this.styles.clear();
   }
+
+  setVisible(on: boolean) {
+    this.source.show = on;
+  }
 }
 
 function sameLine(a: [number, number][], b: [number, number][]) {

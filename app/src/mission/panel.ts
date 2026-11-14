@@ -24,6 +24,8 @@ export interface MissionPanel {
   /** Picks a destination (for example, from a map click). Returns a reason if it cannot. */
   selectDestination(poiId: string): string | null;
   onDestinationChange(cb: (poiId: string) => void): void;
+  /** Runs after every change to the mission (and once on registration) with the current state. */
+  onChange(cb: (state: Readonly<MissionState>) => void): void;
   getRequest(): PlanRequest;
   setCollapsed(value: boolean): void;
 }
@@ -57,6 +59,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
   let customTaskCount = 0;
   const invalid = new Set<string>();
   const destinationListeners: ((id: string) => void)[] = [];
+  const changeListeners: ((s: Readonly<MissionState>) => void)[] = [];
 
   const notifyDestination = () => destinationListeners.forEach((cb) => cb(state.destination_poi));
 
@@ -366,6 +369,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
     const req = getRequest();
     if (pre) pre.textContent = JSON.stringify(req, null, 2);
     Object.assign(window, { lastPlanRequest: req });
+    changeListeners.forEach((cb) => cb(state));
   }
 
   function setStatus(msg: string, kind: "info" | "error" = "info") {
@@ -412,6 +416,10 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
     onDestinationChange(cb) {
       destinationListeners.push(cb);
       cb(state.destination_poi);
+    },
+    onChange(cb) {
+      changeListeners.push(cb);
+      cb(state);
     },
     getRequest,
     setCollapsed(value) {
