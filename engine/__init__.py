@@ -9,6 +9,12 @@ from .routing import (
     RoundTripRoutes, RouteLeg, RouteReconstructionError, RoutingSearch,
     reconstruct_route, routes_to, search_from_base,
 )
+from .mission import (
+    AssessmentReason, DaylightWindow, Departure, MissionAssessment, MissionCheck,
+    MissionInputError, MissionTask, ParticipantMargin, PhysicalTimeline, SnapshotReference,
+    evaluate_mission,
+)
+from .templates import MISSION_TEMPLATES, TEMPLATE_VERSION, MissionTemplate, export_mission_templates
 
 __all__ = [
     "CATALOG", "Catalog", "CatalogEntry", "CellTerrain", "DirectedGridGraph", "DirectedMetricEdge",
@@ -16,4 +22,7 @@ __all__ = [
     "RoundTripRoutes", "RouteLeg", "RouteReconstructionError", "RoutingSearch",
     "build_graph", "evaluate_edge", "evaluate_path", "reconstruct_route", "resolve_comparison",
     "resolve_team", "routes_to", "search_from_base", "select_team",
+    "AssessmentReason", "DaylightWindow", "Departure", "MISSION_TEMPLATES", "MissionAssessment",
+    "MissionCheck", "MissionInputError", "MissionTask", "MissionTemplate", "ParticipantMargin",
+    "PhysicalTimeline", "SnapshotReference", "TEMPLATE_VERSION", "evaluate_mission", "export_mission_templates",
 ]
