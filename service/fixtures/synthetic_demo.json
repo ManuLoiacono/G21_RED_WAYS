@@ -1,0 +1,100 @@
+{
+  "parcel": {
+    "id": "synthetic_metric_demo", "version": "v1", "evaluation_location_id": "synthetic_local_frame",
+    "mask_version": "synthetic-whole-cell-v1", "slope_version": "synthetic-flat-v1",
+    "coordinate_adapter": "synthetic_metric_v1",
+    "reference_description": "Synthetic Cartesian metres, (0,0) at cell center, columns increase x, rows decrease y; boolean whole-cell masks. No Mars CRS or geographic conversion.",
+    "grid": {
+      "elevation_m": [[0, 0, 0], [0, 0, 0], [-32768, 0, 0]],
+      "coverage": [[true, true, true], [true, true, true], [false, true, true]],
+      "excluded": [[false, false, false], [false, false, false], [false, true, false]],
+      "terrain_slope_deg": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
+      "spacing_m": [30, 30], "origin_center_xy_m": [0, 0], "row_direction": "decreasing_y",
+      "data_version": "synthetic-metric-grid-v1", "fixture": true,
+      "aggregation_policy": "Assumed exact synthetic flat centers, boolean whole-cell coverage/exclusions and zero slope summaries. No subcell or real terrain evidence."
+    },
+    "pois": [
+      {"id": "base", "xy_m": [0, 0]}, {"id": "sample", "xy_m": [30, 0]},
+      {"id": "far_target", "xy_m": [60, -30]}, {"id": "missing", "xy_m": [0, -60]},
+      {"id": "excluded", "xy_m": [30, -60]}
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "synthetic_replay", "version": "v1", "parcel_id": "synthetic_metric_demo", "parcel_version": "v1",
+      "evaluation_location_id": "synthetic_local_frame", "fixture": true,
+      "clock": {
+        "adapter_id": "synthetic_utc_seconds_v1", "epoch_id": "synthetic-epoch-2025-10-25",
+        "utc_epoch": "2025-10-25T12:00:00Z", "offset_at_epoch_s": 100,
+        "valid_from_utc": "2025-10-25T11:00:00Z", "valid_to_utc": "2025-10-26T12:00:00Z",
+        "assumption": "Fixture only: one elapsed UTC second advances one physical second, with offset 100 at the declared UTC epoch. No Mars local clock, sol length or solar model is inferred."
+      },
+      "availability_policy": "exclude_unknown", "required_evidence": ["daylight"],
+      "records": [
+        {
+          "record_id": "synthetic-daylight-r1", "series_id": "solar-window", "revision": 1,
+          "kind": "daylight", "variable": "daylight_window", "value": [100, 5000], "units": "physical_second",
+          "evidence_kind": "assumed", "source_id": "synthetic-solar-input", "source_location_id": "synthetic_local_frame",
+          "spatial_scope": "Synthetic evaluation location only; not Gale.", "epoch_id": "synthetic-epoch-2025-10-25",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": "2025-10-25T11:00:00Z"
+        },
+        {
+          "record_id": "synthetic-previous-daily", "series_id": "previous-daily-pressure", "revision": 1,
+          "kind": "observation", "variable": "pressure_pa", "value": 777, "units": "Pa", "evidence_kind": "assumed",
+          "source_id": "synthetic-weather", "source_location_id": "synthetic-rover-reference",
+          "spatial_scope": "Context at a synthetic reference location, not a local field at the parcel.",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": "2025-10-25T11:00:00Z",
+          "observation_start_utc": "2025-10-24T10:00:00Z", "observation_end_utc": "2025-10-25T10:00:00Z"
+        },
+        {
+          "record_id": "synthetic-future-daily", "series_id": "current-daily-minimum", "revision": 1,
+          "kind": "observation", "variable": "daily_min_temp_c", "value": -60, "units": "degC", "evidence_kind": "assumed",
+          "source_id": "synthetic-weather", "source_location_id": "synthetic-rover-reference", "spatial_scope": "Daily context only; no hourly conditions.",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": "2025-10-26T11:00:00Z",
+          "observation_start_utc": "2025-10-25T10:00:00Z", "observation_end_utc": "2025-10-26T10:00:00Z"
+        },
+        {
+          "record_id": "synthetic-pressure-forecast-r1", "series_id": "pressure-forecast-2025-10-26", "revision": 1,
+          "kind": "forecast", "variable": "pressure_pa", "value": 775, "units": "Pa", "evidence_kind": "forecast",
+          "source_id": "synthetic-forecast-model-v1", "source_location_id": "synthetic-rover-reference", "spatial_scope": "Synthetic daily forecast context; no movement effect.",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": "2025-10-25T11:05:00Z", "issued_at_utc": "2025-10-25T11:00:00Z",
+          "valid_from_utc": "2025-10-26T00:00:00Z", "valid_to_utc": "2025-10-27T00:00:00Z"
+        },
+        {
+          "record_id": "synthetic-pressure-forecast-r2", "series_id": "pressure-forecast-2025-10-26", "revision": 2,
+          "kind": "forecast", "variable": "pressure_pa", "value": 776, "units": "Pa", "evidence_kind": "forecast",
+          "source_id": "synthetic-forecast-model-v1", "source_location_id": "synthetic-rover-reference", "spatial_scope": "Later revision excluded before issue/availability.",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": "2025-10-25T13:05:00Z", "issued_at_utc": "2025-10-25T13:00:00Z",
+          "valid_from_utc": "2025-10-26T00:00:00Z", "valid_to_utc": "2025-10-27T00:00:00Z"
+        },
+        {
+          "record_id": "synthetic-unknown-publication", "series_id": "previous-daily-maximum", "revision": 1,
+          "kind": "observation", "variable": "daily_max_temp_c", "value": -10, "units": "degC", "evidence_kind": "assumed",
+          "source_id": "synthetic-weather", "source_location_id": "synthetic-rover-reference", "spatial_scope": "Daily context with unknown publication time.",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": null,
+          "observation_start_utc": "2025-10-24T10:00:00Z", "observation_end_utc": "2025-10-25T10:00:00Z",
+          "reconstructed_available_at_utc": "2025-10-25T11:00:00Z",
+          "availability_assumption": "Assumed publication one hour after the complete synthetic daily interval; retrospective reconstruction only."
+        },
+        {
+          "record_id": "synthetic-verification-outcome", "series_id": "forecast-verification", "revision": 1,
+          "kind": "verification", "variable": "pressure_pa", "value": 776, "units": "Pa", "evidence_kind": "assumed",
+          "source_id": "synthetic-verification", "source_location_id": "synthetic-rover-reference", "spatial_scope": "Verification dataset; never a decision feature.",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": "2025-10-27T01:00:00Z",
+          "observation_start_utc": "2025-10-26T00:00:00Z", "observation_end_utc": "2025-10-27T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "synthetic_missing_daylight", "version": "v1", "parcel_id": "synthetic_metric_demo", "parcel_version": "v1",
+      "evaluation_location_id": "synthetic_local_frame", "fixture": true,
+      "clock": {
+        "adapter_id": "synthetic_utc_seconds_v1", "epoch_id": "synthetic-epoch-2025-10-25",
+        "utc_epoch": "2025-10-25T12:00:00Z", "offset_at_epoch_s": 100,
+        "valid_from_utc": "2025-10-25T11:00:00Z", "valid_to_utc": "2025-10-26T12:00:00Z",
+        "assumption": "Fixture-only UTC/physical-second mapping; no Mars local clock or solar conversion."
+      },
+      "availability_policy": "exclude_unknown", "required_evidence": ["daylight"], "records": []
+    }
+  ]
+}
