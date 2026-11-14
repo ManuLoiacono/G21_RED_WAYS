@@ -1,49 +1,40 @@
-import { simulatedResponse } from "../fixtures/plan_responses.fixture";
 import { t } from "../i18n";
-import { isPlanResponse, type PlanResponse } from "./response";
-import type { PlanRequest } from "./types";
+import type { Catalogs, Health, Parcel, PlanRequest, PlanResponse } from "./draft";
+import { isCatalogs, isDraftResponse, isHealth, isParcel, object } from "./validation";
 
-/** Route service URL (persona 2). Can be changed with VITE_SERVICE_URL in app/.env. */
-export const SERVICE_URL = import.meta.env.VITE_SERVICE_URL ?? "http://localhost:8000";
+export const SERVICE_URL = (import.meta.env.VITE_SERVICE_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+export interface ServiceMetadata { health: Health; parcel: Parcel; catalogs: Catalogs }
+export type Result<T> = { ok: true; data: T } | { ok: false; error: string };
 
-export type PlanResult =
-  | { ok: true; data: PlanResponse; simulated: boolean }
-  | { ok: false; error: string };
-
-/**
- * Sends the request to the engine. If the service does not answer (not running or down),
- * returns a SIMULATED response (fixture) flagged as such. If the service answers with an
- * error, the error is reported: it is never hidden behind a simulation.
- */
-export async function requestPlan(req: PlanRequest): Promise<PlanResult> {
-  let res: Response;
+async function read<T>(path: string, validate: (x: unknown) => x is T, init?: RequestInit): Promise<Result<T>> {
   try {
-    res = await fetch(`${SERVICE_URL}/plan`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req),
-    });
+    const response = await fetch(`${SERVICE_URL}${path}`, { cache: "no-store", ...init, signal: AbortSignal.timeout(30_000) });
+    let body: unknown;
+    try { body = await response.json(); }
+    catch { return { ok: false, error: t("api.notJson") }; }
+    if (!response.ok) {
+      const detail = object(body) && object(body.error) ? body.error : null;
+      return { ok: false, error: `${t("api.httpError", { status: response.status })} ${detail ? [detail.code, detail.path, detail.message].filter((v) => typeof v === "string").join(" · ") : ""}` };
+    }
+    return validate(body) ? { ok: true, data: body } : { ok: false, error: t("api.badShape") };
   } catch {
-    return simulatedPlan(req);
+    return { ok: false, error: t("nav.unavailable", { url: SERVICE_URL }) };
   }
-  if (!res.ok) return { ok: false, error: t("api.httpError", { status: res.status }) };
-  let data: unknown;
-  try {
-    data = await res.json();
-  } catch {
-    return { ok: false, error: t("api.notJson") };
-  }
-  if (!isPlanResponse(data)) return { ok: false, error: t("api.badShape") };
-  return { ok: true, data, simulated: false };
 }
 
-/** Simulated response for the request, in the current UI language (also used after a language switch). */
-export function simulatedPlan(req: PlanRequest): PlanResult {
-  const fixture = simulatedResponse(req.destination_poi);
-  if (!fixture) return { ok: false, error: t("api.noSimulation", { url: SERVICE_URL }) };
-  const data: PlanResponse = {
-    ...fixture,
-    request_echo: { parcel_id: req.parcel_id, origin_poi: req.origin_poi, destination_poi: req.destination_poi },
-  };
-  return { ok: true, data, simulated: true };
+export async function loadMetadata(): Promise<Result<ServiceMetadata>> {
+  const [health, catalogs] = await Promise.all([read("/health", isHealth), read("/catalogs", isCatalogs)]);
+  if (!health.ok) return health;
+  if (!catalogs.ok) return catalogs;
+  // This consumer adopts only the explicitly reviewed synthetic development package.
+  const registered = health.data.registered_parcels.find((p) => p.id === "synthetic_metric_demo" && p.version === "v1");
+  if (!registered) return { ok: false, error: t("nav.noParcel") };
+  const parcel = await read(`/parcel?id=${encodeURIComponent(registered.id)}&version=${encodeURIComponent(registered.version)}`, isParcel);
+  if (!parcel.ok) return parcel;
+  if (parcel.data.id !== registered.id || parcel.data.version !== registered.version) return { ok: false, error: t("api.badShape") };
+  return { ok: true, data: { health: health.data, catalogs: catalogs.data, parcel: parcel.data } };
+}
+
+export function requestPlan(req: PlanRequest): Promise<Result<PlanResponse>> {
+  return read("/plan", isDraftResponse, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req) });
 }

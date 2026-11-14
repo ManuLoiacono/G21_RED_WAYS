@@ -25,7 +25,7 @@ The default browser origins are exactly `http://localhost:5173` and `http://127.
 python -m service --port 8001 --allow-origin http://localhost:5174 --allow-origin http://127.0.0.1:5174
 ```
 
-P1's corresponding service setting is `VITE_SERVICE_URL=http://127.0.0.1:8001`. The app still needs a separately reviewed draft consumer. Changing its service URL alone does not migrate v0.
+P1's corresponding service setting is `VITE_SERVICE_URL=http://127.0.0.1:8001`. The feature branch `p1/http-mission-integration` explicitly consumes the draft; see its [integration handoff](../docs/handoffs/P1_P2_FRONTEND_INTEGRATION.md) and [frontend run instructions](../app/README.md). Changing the URL in an older v0 frontend alone does not migrate its schema.
 
 Origins must be exact `http://localhost:PORT` or `http://127.0.0.1:PORT`, without trailing slash. Unconfigured browser origins receive HTTP 403 without an allow-origin header. Local CLI clients need no `Origin`. Responses, including errors for configured origins, carry `Access-Control-Allow-Origin`, `Vary: Origin` and `Cache-Control: no-store`. No credentials are enabled.
 
@@ -111,7 +111,7 @@ curl -i -X OPTIONS -H 'Origin: http://localhost:5173' -H 'Access-Control-Request
 
 ## Consumer handoff and limits
 
-The concise [P1 HTTP handoff](../docs/handoffs/P1_HTTP_API_INCREMENT3.md) identifies exact response paths, statuses and example values. The draft still needs P1/P3 acceptance; the integrated app emits v0 and cannot consume this response merely by changing its service URL. P1 owns its app migration, static-fallback removal and display adapter. All new HTTP planning responses calculate through the existing engine.
+The concise [P1 HTTP handoff](../docs/handoffs/P1_HTTP_API_INCREMENT3.md) identifies exact response paths, statuses and example values. The [frontend integration branch](../docs/handoffs/P1_P2_FRONTEND_INTEGRATION.md) adopts this draft explicitly, removes active static fallbacks and renders local metric geometry. This does not declare shared v1 acceptance or supply a real geographic adapter. All HTTP planning responses calculate through the existing engine.
 
 Only service-owned synthetic metric parcels and the declared assumed UTC/physical-second mapping are enabled. No real/geographic/display adapter, accepted v1/v0 mapping, live NASA calls, forecast training, communication search, weather-speed/radiation model, simulated mission progression, cancellation or production hosting is provided. This increment stops for review here.
 

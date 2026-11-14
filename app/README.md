@@ -1,73 +1,72 @@
-# Marswalk — app (persona 1)
+# Marswalk frontend
 
-Visor de Gale con CesiumJS + Cesium Mars, efecto de color y luz (sol bajo), sombras, tres ajustes de calidad y una ruta de prueba apoyada sobre el terreno.
+The mission UI explicitly consumes the local P2 development draft `p2-plan-draft-1`. Shared v0 is unchanged. The service calculates the result from synthetic metric inputs; it does not supply a real Gale route. Connection and schema errors are visible and never replaced with fixed response cards.
 
-## Requisitos
-- Node.js 18 o superior (`node -v`).
-- Navegador de escritorio reciente con WebGL (Chrome, Edge o Firefox).
-- Cuenta de Cesium ion con un token (ver abajo).
-- Conexión a internet: el terreno se descarga de Cesium ion.
+## Run the integrated development flow
 
-## Arranque
-Desde la carpeta `app/`:
-```bash
-npm install
-cp .env.example .env      # en Windows: copy .env.example .env
-# editar .env y pegar el token en VITE_CESIUM_ION_TOKEN
-npm run dev               # abre http://localhost:5173
+From the repository root, with Python 3.10–3.12 and the pinned engine dependencies:
+
+```sh
+python -m pip install -r engine/requirements.txt
+python -m service
 ```
-- En macOS, `.env` es un archivo oculto: abrilo con `open -e .env` o `code .env`, o mostrá los ocultos en Finder con **Cmd + Shift + .**
-- Vite lee `.env` **solo al arrancar**: si cambiás el token, reiniciá `npm run dev`.
-- Variables de `app/.env`:
-  - `VITE_CESIUM_ION_TOKEN` (obligatoria): token de Cesium ion.
-  - `VITE_SERVICE_URL` (opcional): URL del servicio de rutas. Por defecto, `http://localhost:8000`.
 
-Al abrir la página se ve «Cargando el terreno de Gale…» hasta que llegan las primeras teselas (unos segundos). Después aparecen el panel «Preparar misión», la base y los destinos de prueba.
+In another terminal:
 
-Otros comandos: `npm run typecheck` (tipos), `npm run build` (compila en `dist/`) y `npm run preview` (sirve `dist/`).
+```sh
+cd app
+npm ci
+npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
+```
 
-## Si algo falla
-La app muestra el problema en pantalla con los pasos para resolverlo. El detalle técnico queda plegado y en la consola del navegador.
+Open http://127.0.0.1:5173. The initial reconnaissance mission selects the registered base/sample locations, Avery Stone and the support rover. Click **Compute routes**: the calculated result is 800 s activity and 2600 s including reserve. Task durations are edited in seconds. Metadata comes from `/health`, `/parcel` and `/catalogs`; calculations use `POST /plan`. The last sent request and accepted response are available as `window.lastPlanRequest` and `window.lastPlanResponse`. Input edits invalidate results and pending responses; switching ES/EN preserves calculations.
 
-| Mensaje en pantalla | Causa probable | Qué hacer |
+The planning panel works even if Cesium cannot start. To load the Gale scene, copy `.env.example` to `.env` and set `VITE_CESIUM_ION_TOKEN` with access to Cesium Mars asset 3644333. Restart Vite after environment changes. Optional `VITE_SERVICE_URL` defaults to `http://127.0.0.1:8000`. Alternate ports require matching service `--allow-origin` flags; see [HTTP instructions](../service/HTTP_API.md). Windows can use `& 'C:\Users\Usuario\anaconda3\python.exe' -m service` for the verified Python runtime.
+
+```sh
+npm run typecheck
+npm run build
+npm run test:mission
+# Include actual HTTP consumer checks while the service runs:
+# PowerShell: $env:SERVICE_TEST_URL = 'http://127.0.0.1:8000'
+# Also set P2_TEST_PYTHON to the engine Python interpreter for HTTP edge cases.
+# POSIX: SERVICE_TEST_URL=http://127.0.0.1:8000 npm run test:mission
+```
+
+Only registered service POIs are submitted. Geographic fixture points and optical panorama observations are separate from planning. Synthetic metric geometry is never interpreted as longitude/latitude. Effort, communication, weather effects and other unsupported capabilities are explained in the form.
+
+## Mission configuration and calculated results
+
+Select 1–4 fixed humans and 0–2 fixed robots from the service catalog. Selected participants have assigned payloads and optional per-mission overrides for flat speed, ascent/descent grade limits, carrying limit and sortie availability. Empty override fields inherit catalog defaults. Identity and the movement model stay fixed. The reset button restores the initial baseline, including the roster.
+
+All four mission templates come from the central export. Sequential tasks can be added, removed, renamed by unique occurrence ID and edited in seconds (up to 64 tasks). Reserve and mission budget use seconds. UTC departure and decision cutoff are explicit assumed scenario inputs. The scenario selector is intentionally limited to the two registered synthetic scenarios documented by P2; the service has no scenario-discovery endpoint. REMS sol selection and local solar time are unavailable in this draft.
+
+Cards display only returned alternatives. Assessment and search status stay separate. Elapsed activity excludes unused reserve; reserved total includes it. Mission budget, every participant margin, limiting temporal margin and both daylight checks have separate labels. Missing values remain unavailable; no null becomes zero. Failed and missing-evidence checks show reasons, values, limits and evidence IDs. Expand evidence/reproducibility details for the actual returned metadata, classifications, assumptions, effective overrides and versions.
+
+Reproduce the requested cases through the form:
+
+| Case | Edit from the baseline | Expected |
 | --- | --- | --- |
-| «Falta el token de Cesium ion» | No existe `app/.env` o `VITE_CESIUM_ION_TOKEN` está vacío | Crear `.env` desde `.env.example`, pegar el token y reiniciar `npm run dev` |
-| «Cesium ion rechazó el token» | Token mal copiado, vencido, sin `assets:read` o sin el asset de Cesium Mars, o URL no permitida | Revisar el token en ion; si restringiste URLs, agregar `http://localhost:5173` |
-| «Cesium Mars no está en tu cuenta de ion» | Falta agregar el asset `3644333` | Asset Depot → Cesium Mars → **Add to my assets** |
-| «No se pudo conectar con Cesium ion» | Sin internet o ion caído | Revisar la conexión y tocar **Reintentar** |
-| «La carga está tardando más de lo normal» | Conexión lenta | Esperar; sigue intentando. Si persiste, elegir **Liviano** en el menú ⚙ |
-| «El navegador no puede mostrar la escena 3D» | Sin WebGL | Usar Chrome, Edge o Firefox recientes con aceleración por hardware |
-| «El servicio de rutas no responde: se muestra una respuesta simulada» | El servicio de P2 no está levantado | Esperado mientras no exista `service/`. Las tarjetas llevan el aviso «Respuesta simulada» |
-| «El servicio de rutas respondió 4xx/5xx» | Error en el servicio | Ver los registros del servicio (persona 2) |
+| Task +1 s | Visual reconnaissance: 601 | 801 / 2601 s |
+| Rover limit | Support rover override: maximum sortie 2599 | Incompatible; rover margin -1 s |
+| Exact daylight | Departure UTC 2025-10-25 12:38:20 | Daylight reserved return margin 0 s |
+| Missing daylight | Select missing-daylight scenario | Insufficient evidence; daylight margins unavailable |
 
-## Token de Cesium ion
-1. En https://ion.cesium.com → **Asset Depot**, buscar **Cesium Mars** y agregarlo a tus assets (**Add to my assets**), si no aparece ya en **My Assets**. El ID esperado es `3644333`; si en tu cuenta aparece otro, cambiarlo en `src/main.ts`.
-2. **Access Tokens → Create token**:
-   - Scopes: solo `assets:read`.
-   - Resources: solo el asset de Cesium Mars.
-   - Allowed URLs: `http://localhost:5173` (y más adelante el dominio publicado).
-3. Pegar el token en `.env`. **No** subir `.env` al repositorio. El token igual queda visible en el navegador; por eso se restringe.
+Restore defaults between cases. Changing inputs removes calculated cards immediately. ES/EN changes preserve the received result and form values.
 
-## Preparación de misión (P1-02)
-- Panel «Preparar misión» (`src/mission/`): familia (4 plantillas), destino (selector o clic en el mapa), tareas con duración, sol REMS, hora de salida, reserva, tiempo máximo, perfil y preferencias, y «Restaurar valores».
-- «Calcular rutas» envía `POST {VITE_SERVICE_URL}/plan` con el `plan_request` del contrato v0 (por defecto `http://localhost:8000`). El último pedido queda en `window.lastPlanRequest` y en «Ver pedido enviado al motor».
-- El servicio de P2 tiene que aceptar CORS desde `http://localhost:5173`: el navegador manda un `OPTIONS` antes del `POST`.
-- Valores iniciales en `src/mission/templates.ts`: supuestos editables. Reemplazarlos por los de P2-01 cuando existan.
-- Base y destinos: `src/fixtures/poi.fixture.json` (**fixture**) hasta tener P3-05.
-- Los puntos se dibujan con la altura que muestrea Cesium (`sampleHeightMostDetailed`). Con el globo oculto, `CLAMP_TO_GROUND` no funciona en puntos ni etiquetas; en polilíneas sí.
-- `npm run typecheck` revisa los tipos.
+## Geometry preview and regression verification
 
-## Resultados y comparación (P1-03)
-- Panel «Alternativas» (`src/mission/results.ts`): una tarjeta por alternativa con estado (sin porcentajes), restricciones incumplidas, condiciones, tiempo total, margen de regreso, distancia, desnivel y desglose ida/tareas/vuelta/reserva.
-- Mapa (`src/mission/routes.ts`): ida continua, vuelta a trazos si difiere, incompatibles en rojo a trazos. Elegir una tarjeta resalta su ruta.
-- **Respaldo simulado:** si el servicio de rutas no responde, se usa `src/fixtures/plan_responses.fixture.ts`. Hay una respuesta fija por destino de prueba (destino 1: dos alternativas; destino 3: una; destino 2: incompatible), con el aviso «Respuesta simulada». Si el servicio responde con un error, se muestra el error, sin simulación.
-- Pantallas de hasta 900 px: el formulario va abajo y se pliega solo al llegar los resultados.
+Calculated routes appear in a local metric preview in each returned card: equal x/y scale, solid cyan outbound and dashed orange return. Overlapping legs stay visible; a same-cell route is a point; unavailable legs have no path. The preview shows resolved centres and exact returned coordinates. It has no geographic transform or Cesium route placement. The +71.2 m panorama height correction remains visual only.
+
+The existing Gale scene, panorama observations/viewer, layers and camera implementation remain separate. A valid ion token is required to verify the full streamed scene. Scene buttons are disabled until their handlers are ready. The token-free component harness at http://127.0.0.1:5173/tests/browser.html exercises the actual panorama/layer/source modules without streamed terrain; it does not verify real Gale registration or camera clearance.
+
+Verified integration cases, limits, delayed-response tooling and remaining real-routing dependencies are recorded in the [integration handoff](../docs/handoffs/P1_P2_FRONTEND_INTEGRATION.md). The draft backend and shared v0 remain unchanged. The scene-inclusive production build retains Vite's large Cesium chunk warning.
 
 ## Procedencia bajo demanda (P1-05)
 - Botón **Fuentes** en la barra superior: abre un panel con todas las fuentes, agrupadas por clase (topográfica, óptica y visual, atmosférica, supuestos y datos de prueba). Se cierra con «×», con Escape o con un clic afuera.
 - Botones **ⓘ** junto al terreno (barra superior), las secciones del formulario, el aviso de datos de prueba, cada tarjeta y las restricciones con fuente. Abren el panel en esa fuente, resaltada. Un clic sobre una ruta del mapa también abre su fuente.
-- Cada fuente muestra: tipo de sustento (observado, derivado, modelado o supuesto), misión, instrumento, producto, obtención (en vivo o respaldo), fecha de consulta, enlace y advertencias.
-- Fuentes en `src/provenance/sources.ts`. Para una capa nueva: agregar una entrada y usar `infoButton("<id>", "<etiqueta>")`, o `data-source="<id>"` en cualquier botón. Si la respuesta del motor trae un bloque `provenance` que coincide con una fuente conocida (misma misión e instrumento), se agregan su origen, fecha, producto y enlace; si no coincide, se crea una entrada nueva.
+- Each source shows its evidence kind, mission/instrument/product, retrieval information, link and limitations. The active planner source explicitly identifies engine calculation on synthetic inputs; raw environment evidence and effective participants remain inspectable in the result details.
+- Sources are registered in `src/provenance/sources.ts`. New layer buttons can use `infoButton("<id>", "<label>")` or `data-source="<id>"`. The active draft does not claim that the visual HiRISE grid or historical REMS reference is a connected analytical input.
 - Nada técnico queda fijo sobre la escena (D8): todo está detrás de un ⓘ o del botón «Fuentes».
 
 ## Cámara (P1-01)
@@ -121,7 +120,7 @@ Al pasar el mouse sobre el terreno, abajo al centro se ven la posición, la **el
 - Cada módulo que muestra texto se registra con `onLanguageChange` y se vuelve a dibujar; lo que escribió el usuario (por ejemplo, el nombre de una tarea) no se traduce.
 - Los textos están en `src/i18n/es.ts` y `src/i18n/en.ts`. Para agregar uno: sumar la clave en los dos archivos y usarla con `t("clave")`. Si falta en `en.ts`, `npm run typecheck` falla.
 - El código y los comentarios van siempre en inglés (ver `CLAUDE.md`, sección 8). Los valores de los contratos (`observacion_geologica`, `destino`, `observado`…) no se traducen.
-- Lo que manda el motor (motivos, detalles) se muestra tal cual llega. Las respuestas simuladas y los títulos de los puntos de prueba (`title_en`) traen los dos idiomas.
+- Engine rule/status labels use the ES/EN dictionary when recognized; original engine messages and reason codes remain in technical details. Changing language preserves the received calculated object and geometry.
 
 ## Notas
 - `src/look.ts`: shader de color + sol bajo, atmósfera y ajustes de calidad (`light` / `balanced` / `presentation`).

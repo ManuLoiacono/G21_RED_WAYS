@@ -42,6 +42,13 @@ function text(id: string, notes: number) {
 /** Static entries in the current language (rebuilt on every language switch). */
 const staticSources = (): SourceEntry[] => [
   {
+    id: "navigation_draft",
+    ...text("navigation_draft", 1),
+    group: "supuesto",
+    provenance: { class: "supuesto", kind: "modelado", product: "p2-plan-draft-1 / engine" },
+    fixture: true,
+  },
+  {
     id: "visual_terrain",
     ...text("visual_terrain", 1),
     group: "optica",
@@ -96,18 +103,6 @@ const staticSources = (): SourceEntry[] => [
     },
   },
   {
-    id: "human_profile",
-    ...text("human_profile", 1),
-    group: "supuesto",
-    provenance: { class: "supuesto", mission: t("source.human_profile.mission"), kind: "supuesto" },
-  },
-  {
-    id: "mission_templates",
-    ...text("mission_templates", 1),
-    group: "supuesto",
-    provenance: { class: "supuesto", kind: "supuesto" },
-  },
-  {
     id: "fixture_pois",
     ...text("fixture_pois", 1),
     group: "supuesto",
@@ -123,16 +118,10 @@ const staticSources = (): SourceEntry[] => [
       mission: "MSL",
       instrument: "Mastcam, Navcam",
       product: "PIA26696; Navcam cylindrical-projection mosaics",
+      origin: "live",
       url: "https://science.nasa.gov/mission/msl-curiosity/",
       kind: "observado",
     },
-  },
-  {
-    id: "simulated_response",
-    ...text("simulated_response", 1),
-    group: "supuesto",
-    provenance: { class: "supuesto", kind: "supuesto", product: "app/src/fixtures/plan_responses.fixture.ts" },
-    fixture: true,
   },
   {
     id: "test_route",

@@ -1,36 +1,41 @@
-import type { MissionState, PlanRequest } from "./types";
+import baseline from "../../../service/examples/request.example.json";
+import type { ServiceMetadata } from "./api";
+import { DRAFT_SCHEMA, type PlanRequest, type PlanResponse } from "./draft";
 
-export const PLAN_REQUEST_SCHEMA_VERSION = 0;
-
-/** Builds the planning request (contract v0) from the form state. */
-export function toPlanRequest(s: MissionState, parcelId: string): PlanRequest {
+/** The request example supplies scenario identity; editable defaults come from catalogs. */
+export function baselineRequest(metadata: ServiceMetadata): PlanRequest {
+  const { parcel, catalogs } = metadata;
+  const template = catalogs.mission_templates.templates.find((t) => t.id === baseline.mission.template_id);
+  if (!template || !parcel.pois.some((p) => p.id === "base") || !parcel.pois.some((p) => p.id === "sample")) throw new Error("Required baseline metadata is unavailable.");
   return {
-    schema_version: PLAN_REQUEST_SCHEMA_VERSION,
-    parcel_id: parcelId,
-    origin_poi: s.origin_poi,
-    destination_poi: s.destination_poi,
-    mission: {
-      template_id: s.template_id,
-      tasks: s.tasks.map((t) => ({ id: t.id, duration_s: t.duration_s })),
-      departure_local: s.departure_local,
-      scenario_id: `rems_sol_${s.sol}`,
-      reserve_s: s.reserve_s,
-      time_budget_s: s.time_budget_s,
-    },
-    profiles: [structuredClone(s.profile)],
-    mode: s.mode,
-    preferences: { ...s.preferences },
+    schema_version: DRAFT_SCHEMA, request_id: crypto.randomUUID(), revision: 0,
+    parcel: { id: parcel.id, version: parcel.version }, scenario: structuredClone(baseline.scenario),
+    origin: { type: "poi", poi_id: "base" }, destination: { type: "poi", poi_id: "sample" },
+    team: { ...structuredClone(baseline.team), catalog_version: catalogs.catalog.version },
+    mission: { template_id: template.id, template_version: catalogs.mission_templates.version, tasks: structuredClone(template.tasks), time_budget_s: template.time_budget_s, reserve_s: template.reserve_s, departure_utc: baseline.mission.departure_utc },
+    criterion: "fastest",
   };
 }
 
-/**
- * Key of the calculation inputs of a request. Two requests with the same key ask the engine the
- * same question. Translated free text (`parameter_sources`) is left out, so a language switch
- * does not make a result stale.
- */
-export function calculationKey(req: PlanRequest): string {
-  return JSON.stringify({
-    ...req,
-    profiles: req.profiles.map(({ parameter_sources: _sources, ...rest }) => rest),
-  });
+/** Revision changes invalidate even edits that are subsequently reverted. */
+export class RequestGate {
+  revision = 0;
+  private sequence = 0;
+  edit() { this.revision += 1; }
+  submit(state: PlanRequest): PlanRequest {
+    this.sequence += 1;
+    return { ...structuredClone(state), request_id: `${state.request_id.split(":")[0]}:${this.sequence}`, revision: this.revision };
+  }
+  accepts(request: PlanRequest, response: PlanResponse, current: PlanRequest): boolean {
+    return request.revision === this.revision && request.request_id.endsWith(`:${this.sequence}`) &&
+      response.request_echo.request_id === request.request_id && response.request_echo.revision === request.revision &&
+      calculationKey(request) === calculationKey(current) && calculationKey(response.request_echo) === calculationKey(request);
+  }
+}
+
+export function calculationKey({ request_id: _id, revision: _revision, ...inputs }: PlanRequest): string {
+  // The HTTP encoder sorts object keys; comparisons must not depend on insertion order.
+  const canonical = (value: unknown): unknown => Array.isArray(value) ? value.map(canonical) :
+    value !== null && typeof value === "object" ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => [k, canonical(v)])) : value;
+  return JSON.stringify(canonical(inputs));
 }
