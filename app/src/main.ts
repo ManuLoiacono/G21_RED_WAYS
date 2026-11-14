@@ -12,6 +12,7 @@ import type { Poi } from "./mission/types";
 import { ConfigError, describeStartupError, MISSING_TOKEN } from "./ui/errors";
 import { hideLoading, showError, showLoading, showToast, updateLoading } from "./ui/status";
 import { createSourcesPanel } from "./provenance/panel";
+import { installWheelZoom, keepCameraAboveGround } from "./camera";
 
 // ---------------------------------------------------------------------------
 // Configuración
@@ -88,8 +89,12 @@ async function main() {
   Cesium.Ion.defaultAccessToken = token;
 
   viewer = createViewer();
+  // No usar { enableCollision: true }: con este tileset traba la carga de teselas (medido).
+  // La cámara se mantiene sobre el terreno con installWheelZoom + keepCameraAboveGround.
   const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(CESIUM_MARS_ASSET_ID);
   viewer.scene.primitives.add(tileset);
+  installWheelZoom(viewer);
+  keepCameraAboveGround(viewer);
   // Para depurar desde la consola del navegador (disponible aunque la carga no termine)
   Object.assign(window, { viewer, tileset, Cesium });
   const initialTiles = waitForInitialTiles(tileset);

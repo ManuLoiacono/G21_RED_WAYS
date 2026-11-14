@@ -75,7 +75,8 @@ Datos: scripts/ + data/ (persona 3)          └─ caché: data/cache/ (última
 
 ### Visual
 - Cesium Mars: asset ion `3644333` (3D Tiles). En Gale carga hasta un error geométrico de ~2,5 m.
-- **Desfase vertical:** alturas de Cesium ≈ `elev_geoid` + ~71 m (medido: +70,2 a +71,5 m). No mezclar alturas sin corregir. Para dibujar, usar `clampToGround`.
+- **Desfase vertical:** alturas de Cesium ≈ `elev_geoid` + ~71 m (medido: +70,2 a +71,5 m; el 14/11, 71,2 ± 0,3 m en 20 posiciones de Curiosity). No mezclar alturas sin corregir. Para dibujar, usar `clampToGround` (sirve para polilíneas; con el globo oculto no sirve para puntos ni etiquetas).
+- **Latitudes en Cesium:** `Ellipsoid.MARS` es achatado, pero `fromDegrees(lon, lat, h, Ellipsoid.MARS)` con la latitud tal como viene en los datos cae en el lugar correcto del tileset (verificado con las posiciones de Curiosity). **No convertir** de planetocéntrica a geodésica: correría todo ~3,3 km.
 - Ajustes de calidad medidos en una GTX 1050 Ti a 1600×900, render puro:
   - Liviano: ~3,5 ms por cuadro.
   - Equilibrado (SSE 6, sombras 2048): ~10 ms.

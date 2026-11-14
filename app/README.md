@@ -70,8 +70,21 @@ La app muestra el problema en pantalla con los pasos para resolverlo. El detalle
 - Fuentes en `src/provenance/sources.ts`. Para una capa nueva: agregar una entrada y usar `infoButton("<id>", "<etiqueta>")`, o `data-source="<id>"` en cualquier botón. Si la respuesta del motor trae un bloque `provenance` que coincide con una fuente conocida (misma misión e instrumento), se agregan su origen, fecha, producto y enlace; si no coincide, se crea una entrada nueva.
 - Nada técnico queda fijo sobre la escena (D8): todo está detrás de un ⓘ o del botón «Fuentes».
 
+## Cámara (P1-01)
+- **Rueda del mouse:** zoom propio (`src/camera.ts`) hacia el punto bajo el cursor. Nunca baja a menos de 30 m del suelo.
+  - El zoom de Cesium falla en Gale: el terreno está ~3,4–4,4 km por debajo del elipsoide de Marte y Cesium mide la distancia como «altura sobre el elipsoide», que da negativa. El zoom se invertía y la cámara terminaba bajo tierra o subía hacia 0 m.
+- **Arrastre:** rotar e inclinar siguen siendo de Cesium. El zoom con botón derecho quedó desactivado (usaba la misma lógica); en tablet se puede pellizcar.
+- `keepCameraAboveGround`: si cualquier gesto deja la cámara bajo tierra o a menos de 30 m del suelo, la sube.
+- **No usar `{ enableCollision: true }` en el tileset:** con Cesium Mars traba la carga de teselas (medido).
+- «Restablecer vista» vuelve a la vista inicial (137,374° E, −4,792°, rumbo 160°, inclinación −9°).
+
+## Coordenadas y alturas (medido el 14/11 con 20 posiciones de Curiosity, soles 1930–4857)
+- `Cartesian3.fromDegrees(lon, lat, h, Ellipsoid.MARS)` con la latitud tal como viene en los datos (MMGIS/HiRISE) cae en el lugar correcto del tileset. **No convertir** de planetocéntrica a geodésica: daría un corrimiento de ~3,3 km y un desfase vertical inconsistente (491 ± 41 m).
+- Desfase vertical Cesium − `elev_geoid`: **71,2 m ± 0,3 m** (de 70,4 a 71,8). Es el dato que busca P3-03.
+
 ## Notas
 - `src/look.ts`: shader de color + sol bajo, atmósfera y ajustes de calidad (liviano / equilibrado / presentación).
+- Ajustes de calidad verificados en una Mac con WebGL 2: los tres se aplican sin errores (SSE 16/6/4, sombras no/2048/4096, MSAA 1/4/4) y la escena se mantiene a 60 cuadros por segundo, el tope del monitor. Medir de nuevo en la máquina de presentación.
 - No usar `scene.verticalExaggeration`: con este tileset deja de cargar el terreno detallado.
 - `src/fixture_route.json` es una **ruta sintética de prueba**, no un cálculo del motor.
 - Para depurar: `viewer`, `tileset` y `Cesium` quedan accesibles desde la consola del navegador.
