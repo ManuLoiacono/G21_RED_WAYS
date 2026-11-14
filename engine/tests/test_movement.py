@@ -48,7 +48,15 @@ def run():
     assert "ascent_limit" in codes(evaluate_edge(asymmetric, edge(14)))
     assert evaluate_edge(asymmetric, edge(14).reversed()).allowed
 
-    assert "missing_terrain" in codes(evaluate_edge(team(("explorer_01",)), edge(target=CellTerrain(None, 0))))
+    assert evaluate_edge(team(("explorer_01",)), edge(target=CellTerrain(None, 0))).allowed
+    assert "invalid_material" in codes(evaluate_edge(team(("explorer_01",)), edge(target=CellTerrain("", 0))))
+    assert "missing_coverage" in codes(evaluate_edge(team(("explorer_01",)), edge(target=CellTerrain(None, -32768, coverage_valid=False))))
+    contradictory = DirectedMetricEdge(CellTerrain(None, 0), CellTerrain(None, 1000), 100, 0)
+    for movement in (contradictory, contradictory.reversed()):
+        assert "inconsistent_rise" in codes(evaluate_edge(team(("explorer_01",)), movement))
+    near = DirectedMetricEdge(CellTerrain(None, 0), CellTerrain(None, 14), 100, 14 + 5e-7)
+    assert evaluate_edge(team(("explorer_01",)), near).duration_s == evaluate_edge(team(("explorer_01",)), edge(14)).duration_s
+    assert "terrain_slope_limit" in codes(evaluate_edge(team(("explorer_01",)), edge(target=CellTerrain(None, 0, terrain_slope_deg=20))))
     assert "missing_elevation" in codes(evaluate_edge(team(("explorer_01",)), edge(target=CellTerrain("firm", None))))
     assert "invalid_elevation" in codes(evaluate_edge(team(("explorer_01",)), edge(target=CellTerrain("firm", math.nan))))
     assert "invalid_exclusion" in codes(evaluate_edge(team(("explorer_01",)), edge(target=CellTerrain("firm", 0, 0))))

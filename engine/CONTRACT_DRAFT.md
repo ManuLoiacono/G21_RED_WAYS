@@ -10,7 +10,9 @@ The catalog currently contains synthetic development presets only. P1 should con
 
 ## Directed edge input and result
 
-`DirectedMetricEdge` takes source and target `CellTerrain` records (`terrain_code`, `elevation_m`, `excluded`), positive horizontal `run_m`, and signed `rise_m`. P3 must define the cell-center geometry, terrain code vocabulary, mask precedence, and conservative summary rule. P2-02 will separately prevent diagonal corner cutting. Missing essential elevation or terrain blocks an edge; exclusion blocks it even when the terrain summary otherwise looks benign. Direction reversal negates rise.
+`DirectedMetricEdge` takes source/target `CellTerrain` records (`terrain_code`, `elevation_m`, `excluded`, `coverage_valid`, optional `terrain_slope_deg`), positive horizontal `run_m`, and signed `rise_m`. Endpoint elevations determine grade; inconsistent supplied rise returns `inconsistent_rise` (absolute numerical tolerance `1e-6` m, not measurement accuracy). Reversal negates supplied rise. Missing essential elevation/coverage and exclusion block traversal. Material classification is optional: `terrain_code=None` means unevaluated material without a claim of firm ground or speed benefit. This positional extension intentionally removes the old `missing_terrain` rejection; empty supplied labels are invalid. P3 must review the coverage/material separation before real-data integration.
+
+Proposed adapter target: `MetricGrid` with elevation, boolean coverage and exclusion masks, separate conservative terrain-slope summary, metric row/column spacing, `(0,0)` cell-center x/y, row direction, data version, fixture flag and explicit aggregation/mask policy. See `README.md`. These are engine fields, not an accepted shared schema. Do not guess a half-cell offset from v0 `origin_xy_m`, convert coordinates, invent masks/material classes or apply the Cesium display offset. Material rasters are not ingested. Terrain summaries gate each participant against the smaller ascent/descent limit independently of directed grade; real input requires a summary and policy review.
 
 `evaluate_edge` returns `allowed`, `duration_s` or null, `participant_results`, `limiting_participant_ids`, and structured reasons (`code`, `path`, `message`, optional `participant_id`). Each participant result includes `evidence_ids`. Search may use `duration_s` only for allowed edges; it is strictly positive. The group result is the intersection of permissions and the maximum participant duration on that edge. A path duration is the sum of those maxima.
 
@@ -19,6 +21,6 @@ The current movement strategies are explicitly assumed formulas. Carrying capaci
 ## Open integration semantics
 
 - P1/P3 must accept or revise names, enum values, catalog delivery and result structure before a shared v1 schema replaces v0.
-- P3 must specify whether `terrain_code` is categorical or has a conservative exclusion classification; this slice treats a present code as evidence only and applies no terrain speed effect.
+- P3 must review optional material classification separately from mandatory coverage/exclusions and conservative native-slope summaries; material stays unevaluated without an agreed layer and rule.
 - P3 must supply or define a normalized physical-second daylight interval. Local clock strings cannot be added directly to travel seconds. Participant `max_sortie_s` covers outbound, sequential tasks, and return, with reserve checked as margin in a later mission evaluator.
 - Avatar references are stable keys without image assets yet. No identity attribute automatically changes a capability or task duration.
