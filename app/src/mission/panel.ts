@@ -1,5 +1,7 @@
-import { postPlan } from "./api";
+import { requestPlan, SERVICE_URL } from "./api";
 import { toPlanRequest } from "./request";
+import type { PlanResponse } from "./response";
+import { esc } from "../ui/format";
 import { DEFAULT_PROFILE, stateFromTemplate, TEMPLATES } from "./templates";
 import { TEMPLATE_IDS, type MissionState, type Poi, type PlanRequest, type TemplateId } from "./types";
 
@@ -9,18 +11,22 @@ import { TEMPLATE_IDS, type MissionState, type Poi, type PlanRequest, type Templ
  * En pantalla se usan minutos y horas; el estado y el pedido van en segundos (SI).
  */
 
+/** Detalle del evento `plan-response` que emite el panel al recibir una respuesta. */
+export interface PlanResponseEvent {
+  response: PlanResponse;
+  simulated: boolean;
+}
+
 export interface MissionPanel {
   /** Elige un destino (por ejemplo, desde un clic en el mapa). Devuelve un motivo si no se puede. */
   selectDestination(poiId: string): string | null;
   onDestinationChange(cb: (poiId: string) => void): void;
   getRequest(): PlanRequest;
+  setCollapsed(value: boolean): void;
 }
 
 const MIN = 60;
 const HOUR = 3600;
-
-const esc = (s: string) =>
-  s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 const fmt = (n: number, digits = 2) => String(Number(n.toFixed(digits)));
 
@@ -292,8 +298,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
     if (!btn) return;
     switch (btn.dataset.act) {
       case "collapse":
-        collapsed = !collapsed;
-        render();
+        api.setCollapsed(!collapsed);
         break;
       case "add-task":
         customTaskCount += 1;
@@ -328,12 +333,17 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
     const submit = root.querySelector<HTMLButtonElement>('button[type="submit"]');
     if (submit) submit.disabled = true;
     setStatus("Calculando…");
-    const res = await postPlan(req);
+    const res = await requestPlan(req);
     if (submit) submit.disabled = false;
     if (res.ok) {
-      setStatus("Respuesta recibida del motor.");
+      setStatus(
+        res.simulated
+          ? `El servicio de rutas (${SERVICE_URL}) no responde: se muestra una respuesta simulada.`
+          : "Respuesta recibida del motor.",
+        res.simulated ? "error" : "info",
+      );
       Object.assign(window, { lastPlanResponse: res.data });
-      root.dispatchEvent(new CustomEvent("plan-response", { detail: res.data, bubbles: true }));
+      root.dispatchEvent(new CustomEvent<PlanResponseEvent>("plan-response", { detail: { response: res.data, simulated: res.simulated }, bubbles: true }));
     } else {
       setStatus(res.error, "error");
     }
@@ -370,7 +380,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
   root.addEventListener("submit", onSubmit);
   render();
 
-  return {
+  const api: MissionPanel = {
     selectDestination(poiId) {
       const poi = destinations.find((d) => d.id === poiId);
       if (!poi) return "Ese punto no es un destino.";
@@ -392,5 +402,18 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
       cb(state.destination_poi);
     },
     getRequest,
+    setCollapsed(value) {
+      if (collapsed === value) return;
+      // Plegar no re-renderiza el formulario: así no se pierde el estado de los campos ni el mensaje.
+      collapsed = value;
+      root.classList.toggle("collapsed", collapsed);
+      const btn = root.querySelector<HTMLButtonElement>('[data-act="collapse"]');
+      if (btn) {
+        btn.textContent = collapsed ? "+" : "−";
+        btn.setAttribute("aria-expanded", String(!collapsed));
+        btn.setAttribute("aria-label", `${collapsed ? "Mostrar" : "Ocultar"} panel`);
+      }
+    },
   };
+  return api;
 }

@@ -31,6 +31,12 @@ npm run dev               # abre http://localhost:5173
 - Los puntos se dibujan con la altura que muestrea Cesium (`sampleHeightMostDetailed`). Con el globo oculto, `CLAMP_TO_GROUND` no funciona en puntos ni etiquetas; en polilíneas sí.
 - `npm run typecheck` revisa los tipos.
 
+## Resultados y comparación (P1-03)
+- Panel «Alternativas» (`src/mission/results.ts`): una tarjeta por alternativa con estado (sin porcentajes), restricciones incumplidas, condiciones, tiempo total, margen de regreso, distancia, desnivel y desglose ida/tareas/vuelta/reserva.
+- Mapa (`src/mission/routes.ts`): ida continua, vuelta a trazos si difiere, incompatibles en rojo a trazos. Elegir una tarjeta resalta su ruta.
+- **Respaldo simulado:** si el servicio de rutas no responde, se usa `src/fixtures/plan_responses.fixture.ts`. Hay una respuesta fija por destino de prueba (destino 1: dos alternativas; destino 3: una; destino 2: incompatible), con el aviso «Respuesta simulada». Si el servicio responde con un error, se muestra el error, sin simulación.
+- Pantallas de hasta 900 px: el formulario va abajo y se pliega solo al llegar los resultados.
+
 ## Notas
 - `src/look.ts`: shader de color + sol bajo, atmósfera y ajustes de calidad (liviano / equilibrado / presentación).
 - No usar `scene.verticalExaggeration`: con este tileset deja de cargar el terreno detallado.

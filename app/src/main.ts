@@ -4,7 +4,9 @@ import { applyAtmosphere, applyPreset, marsShader, sunDirectionWC, type Preset }
 import fixtureRoute from "./fixture_route.json";
 import poiFixture from "./fixtures/poi.fixture.json";
 import "./style.css";
-import { createMissionPanel } from "./mission/panel";
+import { createMissionPanel, type PlanResponseEvent } from "./mission/panel";
+import { createResultsPanel } from "./mission/results";
+import { RouteLayer } from "./mission/routes";
 import { parsePois } from "./mission/pois";
 import type { Poi } from "./mission/types";
 
@@ -70,7 +72,7 @@ async function main() {
   const positions = (fixtureRoute.coordinates as [number, number][]).map(([lon, lat]) =>
     Cesium.Cartesian3.fromDegrees(lon, lat, 0, Cesium.Ellipsoid.MARS),
   );
-  viewer.entities.add({
+  const fixtureRouteEntity = viewer.entities.add({
     name: "Ruta de prueba (fixture)",
     polyline: {
       positions,
@@ -83,8 +85,26 @@ async function main() {
   // Base y destinos (FIXTURE hasta P3-05) + panel de preparación de misión (P1-02)
   const pois = parsePois(poiFixture);
   const panel = createMissionPanel(document.getElementById("missionPanel")!, pois, PARCEL_ID);
+  // Resultados y comparación (P1-03): tarjetas + rutas en el mapa, sincronizadas por selección.
+  const results = createResultsPanel(document.getElementById("resultsPanel")!);
+  const routes = new RouteLayer(viewer);
+  results.onSelect((altId) => routes.select(altId));
+  document.addEventListener("plan-response", (e) => {
+    const { response, simulated } = (e as CustomEvent<PlanResponseEvent>).detail;
+    fixtureRouteEntity.show = false; // la ruta de prueba inicial ya no aporta
+    routes.show(response);
+    results.show(response, simulated);
+    // En pantallas angostas (tablet vertical) el formulario se pliega para dejar ver mapa y resultados.
+    if (window.matchMedia("(max-width: 900px)").matches) panel.setCollapsed(true);
+  });
+
   const poiEntities = await addPois(pois);
-  panel.onDestinationChange((id) => highlightDestination(poiEntities, id));
+  panel.onDestinationChange((id) => {
+    highlightDestination(poiEntities, id);
+    // Cambiar de destino invalida el resultado anterior.
+    routes.clear();
+    results.clear();
+  });
 
   viewer.screenSpaceEventHandler.setInputAction((click: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
     const picked = viewer.scene.pick(click.position);
