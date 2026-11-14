@@ -19,3 +19,19 @@ Public boundary errors are `PlanningInputError(code, path, message)`. Run with P
 ```sh
 python -m unittest service.tests.test_prepared -v
 ```
+
+## As-of selection and bounded reuse (delivery B)
+
+`select_scenario` gates each record on declared availability, forecast/alert issue time and complete observation interval. Forecast validity may extend beyond the decision instant. Verification records never enter decision inputs. Within a source/kind/series, the latest eligible issue time wins, then effective availability and revision. No accuracy/outcome is used. Unknown publication times are excluded under `exclude_unknown`; `reconstruct_declared` can use a separately supplied reconstructed time plus its explicit assumption, labeled retrospective reconstruction. Fetch time is never treated as historical availability. Missing required solar input becomes `daylight=None`; optional missing daily values remain missing context. Pressure/temperature and event records apply no movement rule.
+
+The snapshot digest identifies the registered scenario content, normalized UTC decision cutoff, eligible record IDs and policy. It echoes the exact selected record metadata and assumptions. Fresh mission departure must be no earlier than the decision cutoff. Both instants require coverage in the declared fixture mapping; no opaque physical offset is equated to UTC without that mapping.
+
+`PreparedPlanner(registry).plan(...)` resolves the team through the engine, canonicalizes participant order, searches prepared movement, then calls `evaluate_mission` every time. Movement context includes the parcel content/data/mask/slope versions, metric geometry, backend/SciPy/model/catalog versions, effective participant IDs/parameters/payloads and an empty applied-effects set. Changing tasks, budget, reserve, departure, cutoff or destination reuses movement when this context/base is unchanged; changing base replaces only the search; changed effective team/parcel configuration rebuilds both. Requested override provenance remains separate from effective parameters for later wire echo. Graph/team/search/base association is checked before reuse. No client-supplied durations or completed assessments are accepted.
+
+Each planner retains at most one graph and one complete base search, clearing incompatible references before replacement. Inconclusive searches are not reused as completed results. Returned evaluations contain routes, not graph/search arrays. Prepared registry inputs, route explanation objects held by callers, and temporary NumPy/SciPy build/search memory are additional; this is not a process-memory cap. A nonblocking instance lock rejects concurrent work with `PlannerBusyError`; multiple planner instances would multiply retention, so the later service must own one. No timeout/cancellation is promised.
+
+All planning results are calculated by the engine from prepared inputs. Synthetic input provenance is independent of calculation origin; no fixed planning-response fallback is present. Run:
+
+```sh
+python -m unittest discover -s service/tests -p 'test_*.py' -v
+```

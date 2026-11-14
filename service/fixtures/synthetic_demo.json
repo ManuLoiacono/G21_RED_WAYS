@@ -37,6 +37,51 @@
           "evidence_kind": "assumed", "source_id": "synthetic-solar-input", "source_location_id": "synthetic_local_frame",
           "spatial_scope": "Synthetic evaluation location only; not Gale.", "epoch_id": "synthetic-epoch-2025-10-25",
           "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": "2025-10-25T11:00:00Z"
+        },
+        {
+          "record_id": "synthetic-previous-daily", "series_id": "previous-daily-pressure", "revision": 1,
+          "kind": "observation", "variable": "pressure_pa", "value": 777, "units": "Pa", "evidence_kind": "assumed",
+          "source_id": "synthetic-weather", "source_location_id": "synthetic-rover-reference",
+          "spatial_scope": "Context at a synthetic reference location, not a local field at the parcel.",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": "2025-10-25T11:00:00Z",
+          "observation_start_utc": "2025-10-24T10:00:00Z", "observation_end_utc": "2025-10-25T10:00:00Z"
+        },
+        {
+          "record_id": "synthetic-future-daily", "series_id": "current-daily-minimum", "revision": 1,
+          "kind": "observation", "variable": "daily_min_temp_c", "value": -60, "units": "degC", "evidence_kind": "assumed",
+          "source_id": "synthetic-weather", "source_location_id": "synthetic-rover-reference", "spatial_scope": "Daily context only; no hourly conditions.",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": "2025-10-26T11:00:00Z",
+          "observation_start_utc": "2025-10-25T10:00:00Z", "observation_end_utc": "2025-10-26T10:00:00Z"
+        },
+        {
+          "record_id": "synthetic-pressure-forecast-r1", "series_id": "pressure-forecast-2025-10-26", "revision": 1,
+          "kind": "forecast", "variable": "pressure_pa", "value": 775, "units": "Pa", "evidence_kind": "forecast",
+          "source_id": "synthetic-forecast-model-v1", "source_location_id": "synthetic-rover-reference", "spatial_scope": "Synthetic daily forecast context; no movement effect.",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": "2025-10-25T11:05:00Z", "issued_at_utc": "2025-10-25T11:00:00Z",
+          "valid_from_utc": "2025-10-26T00:00:00Z", "valid_to_utc": "2025-10-27T00:00:00Z"
+        },
+        {
+          "record_id": "synthetic-pressure-forecast-r2", "series_id": "pressure-forecast-2025-10-26", "revision": 2,
+          "kind": "forecast", "variable": "pressure_pa", "value": 776, "units": "Pa", "evidence_kind": "forecast",
+          "source_id": "synthetic-forecast-model-v1", "source_location_id": "synthetic-rover-reference", "spatial_scope": "Later revision excluded before issue/availability.",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": "2025-10-25T13:05:00Z", "issued_at_utc": "2025-10-25T13:00:00Z",
+          "valid_from_utc": "2025-10-26T00:00:00Z", "valid_to_utc": "2025-10-27T00:00:00Z"
+        },
+        {
+          "record_id": "synthetic-unknown-publication", "series_id": "previous-daily-maximum", "revision": 1,
+          "kind": "observation", "variable": "daily_max_temp_c", "value": -10, "units": "degC", "evidence_kind": "assumed",
+          "source_id": "synthetic-weather", "source_location_id": "synthetic-rover-reference", "spatial_scope": "Daily context with unknown publication time.",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": null,
+          "observation_start_utc": "2025-10-24T10:00:00Z", "observation_end_utc": "2025-10-25T10:00:00Z",
+          "reconstructed_available_at_utc": "2025-10-25T11:00:00Z",
+          "availability_assumption": "Assumed publication one hour after the complete synthetic daily interval; retrospective reconstruction only."
+        },
+        {
+          "record_id": "synthetic-verification-outcome", "series_id": "forecast-verification", "revision": 1,
+          "kind": "verification", "variable": "pressure_pa", "value": 776, "units": "Pa", "evidence_kind": "assumed",
+          "source_id": "synthetic-verification", "source_location_id": "synthetic-rover-reference", "spatial_scope": "Verification dataset; never a decision feature.",
+          "fetched_at_utc": "2026-11-14T12:00:00Z", "available_at_utc": "2025-10-27T01:00:00Z",
+          "observation_start_utc": "2025-10-26T00:00:00Z", "observation_end_utc": "2025-10-27T00:00:00Z"
         }
       ]
     },

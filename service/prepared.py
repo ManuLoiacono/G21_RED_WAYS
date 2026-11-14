@@ -62,12 +62,12 @@ class FixtureClockMapping:
     valid_to_utc: str
     assumption: str
 
-    def departure(self, departure_utc):
+    def departure(self, departure_utc, path="mission.departure_utc"):
         if self.adapter_id != CLOCK_ADAPTER:
             raise PlanningInputError("unsupported_clock_adapter", "scenario.clock.adapter_id", "A reviewed real clock adapter is unavailable.")
-        instant = utc(departure_utc, "mission.departure_utc")
+        instant = utc(departure_utc, path)
         if not utc(self.valid_from_utc, "clock.valid_from_utc") <= instant <= utc(self.valid_to_utc, "clock.valid_to_utc"):
-            raise PlanningInputError("outside_clock_coverage", "mission.departure_utc", "Departure is outside the declared fixture mapping interval.")
+            raise PlanningInputError("outside_clock_coverage", path, "Instant is outside the declared fixture mapping interval.")
         offset = self.offset_at_epoch_s + (instant - utc(self.utc_epoch, "clock.utc_epoch")).total_seconds()
         return Departure(self.timeline, number(offset, "departure.offset_s"))
 
@@ -234,7 +234,9 @@ def registry_from_fixture(raw):
         text(item[key], f"parcel.{key}")
     grid_input = dict(item["grid"])
     elevation = grid_input.get("elevation_m")
-    if not isinstance(elevation, list) or not elevation or not isinstance(elevation[0], list) or len(elevation) * len(elevation[0]) > MAX_PREPARED_CELLS:
+    if (not isinstance(elevation, list) or not elevation or not isinstance(elevation[0], list)
+            or not elevation[0] or any(not isinstance(row, list) or len(row) != len(elevation[0]) for row in elevation)
+            or sum(len(row) for row in elevation) > MAX_PREPARED_CELLS):
         raise PlanningInputError("parcel_size_limit", "parcel.grid", "Prepared input exceeds the bounded grid envelope or is malformed.")
     for key in ("elevation_m", "coverage", "excluded", "terrain_slope_deg"):
         if grid_input.get(key) is not None:
