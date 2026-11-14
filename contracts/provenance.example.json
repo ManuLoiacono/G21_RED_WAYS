@@ -1,0 +1,12 @@
+{
+  "schema_version": 0,
+  "class": "topografica",
+  "mission": "MRO",
+  "instrument": "HiRISE",
+  "product": "DTEEC_019698_1750_019988_1750_U01",
+  "url": "https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_019698_1750_ESP_019988_1750/DTEEC_019698_1750_019988_1750_U01.tif",
+  "kind": "observado",
+  "origin": "live",
+  "fetched_at": "2026-11-14T13:00:00Z",
+  "notes": "class: topografica|optica|atmosferica|termica|radiacion|espectral. kind: observado|derivado|modelado|supuesto. origin: live|cache."
+}

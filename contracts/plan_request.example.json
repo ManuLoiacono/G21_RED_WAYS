@@ -1,0 +1,31 @@
+{
+  "schema_version": 0,
+  "parcel_id": "gale_demo_v1",
+  "origin_poi": "poi_base",
+  "destination_poi": "poi_001",
+  "mission": {
+    "template_id": "observacion_geologica",
+    "tasks": [
+      { "id": "foto_contexto", "duration_s": 900 },
+      { "id": "muestreo", "duration_s": 1800 }
+    ],
+    "departure_local": "15:00",
+    "scenario_id": "rems_sol_4995",
+    "reserve_s": 3600,
+    "time_budget_s": 25200
+  },
+  "profiles": [
+    {
+      "id": "astronauta_a_pie",
+      "max_slope_deg": 16.7,
+      "flat_speed_m_s": 0.42,
+      "speed_model": "tobler_like_v0",
+      "parameter_sources": {
+        "max_slope_deg": "Ensayo Mark III al 30 % de pendiente (Tierra, 2 sujetos): referencia, no límite marciano",
+        "flat_speed_m_s": "Apollo 15 ~1,5 km/h (Luna): referencia"
+      }
+    }
+  ],
+  "mode": "a_pie",
+  "preferences": { "time": 1.0, "effort": 0.5, "comm": 0.0 }
+}

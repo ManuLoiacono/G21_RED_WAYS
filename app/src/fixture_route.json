@@ -1,0 +1,14 @@
+{
+  "_comment": "FIXTURE de desarrollo: ruta sintética cerca de la zona de Curiosity en Gale. NO es resultado del motor ni un recorrido real. Coordenadas [lon E, lat] planetocéntricas.",
+  "type": "LineString",
+  "coordinates": [
+    [137.3790, -4.8020],
+    [137.3812, -4.8061],
+    [137.3808, -4.8105],
+    [137.3836, -4.8142],
+    [137.3851, -4.8189],
+    [137.3843, -4.8226],
+    [137.3870, -4.8248],
+    [137.3889, -4.8260]
+  ]
+}

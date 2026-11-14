@@ -1,0 +1,24 @@
+{
+  "schema_version": 0,
+  "fixture": true,
+  "scenario_id": "rems_sol_4995",
+  "kind": "observado",
+  "sol": 4995,
+  "terrestrial_date": "2026-08-25",
+  "observed_at_lonlat": [137.3889, -4.8260],
+  "values": {
+    "sunrise_local": "06:46",
+    "sunset_local": "18:51",
+    "min_temp_c": -71,
+    "max_temp_c": -5,
+    "pressure_pa": 777,
+    "uv_index_category": "Moderate",
+    "wind_speed": null,
+    "atmo_opacity": null
+  },
+  "nulls_policy": "'--' de REMS => null; nunca 0. atmo_opacity 'Sunny' no se usa como medición.",
+  "effects": [
+    { "rule": "daylight", "description": "salida + ida + tareas + vuelta + reserva <= atardecer" }
+  ],
+  "provenance": { "class": "atmosferica", "mission": "MSL", "instrument": "REMS", "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json", "kind": "observado", "origin": "live" }
+}

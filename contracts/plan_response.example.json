@@ -1,0 +1,30 @@
+{
+  "schema_version": 0,
+  "fixture": true,
+  "request_echo": { "parcel_id": "gale_demo_v1", "origin_poi": "poi_base", "destination_poi": "poi_001" },
+  "status": "conditional",
+  "summary_reason": "La ruta es transitable, pero el regreso termina 46 min después del atardecer del sol 4995.",
+  "alternatives": [
+    {
+      "id": "alt_tiempo",
+      "criterion": "menor_tiempo",
+      "status": "conditional",
+      "outbound": { "lonlat": [[137.3889, -4.8260], [137.3850, -4.8189], [137.3810, -4.8100]], "distance_m": 2140, "ascent_m": 85, "descent_m": 12, "duration_s": 5600 },
+      "return": { "lonlat": [[137.3810, -4.8100], [137.3850, -4.8189], [137.3889, -4.8260]], "distance_m": 2140, "ascent_m": 12, "descent_m": 85, "duration_s": 4700 },
+      "tasks_s": 2700,
+      "reserve_s": 3600,
+      "budget": { "total_s": 16600, "time_budget_s": 25200, "margin_s": 8600 },
+      "constraints": [
+        { "id": "max_slope", "status": "ok", "detail": "pendiente máxima en dirección de marcha 14,2°" },
+        { "id": "daylight", "status": "violated", "detail": "salida 15:00 + 4 h 37 min = 19:37 > atardecer 18:51 (hora solar local)", "provenance": { "class": "atmosferica", "mission": "MSL", "instrument": "REMS", "kind": "observado" } }
+      ],
+      "preferences": [
+        { "id": "effort", "status": "unfavorable", "detail": "mayor ascenso que alt_esfuerzo" }
+      ],
+      "evidence": { "nodata_fraction": 0.0, "analytic_cell_m": 2.0, "notes": "DTM 1 m: no detecta rocas < ~1 m" },
+      "warnings": []
+    }
+  ],
+  "not_evaluated": ["comunicacion (P1)", "termica (P1)"],
+  "input_versions": { "parcel": "gale_demo_v1", "engine": "0.1.0" }
+}
