@@ -1,0 +1,27 @@
+{
+  "_comment": "Real 360° Curiosity panoramas whose rover position falls inside the parcel (extent in src/terrain/parcel.ts). Position = MSL_waypoints.json entry of the first sol of the panorama (the rover did not move during it). elev_geoid_m from the same waypoint. Verified 2026-11-14.",
+  "panoramas": [
+    {
+      "id": "pano_nevado_sajama",
+      "title": "Nevado Sajama",
+      "title_en": "Nevado Sajama",
+      "lonlat": [
+        137.3810041,
+        -4.80800755
+      ],
+      "sol_start": 4714,
+      "sol_end": 4741,
+      "waypoint_sol": 4711,
+      "date_start": "2025-11-09",
+      "date_end": "2025-12-07",
+      "mission": "MSL",
+      "instrument": "Mastcam (right, 100 mm)",
+      "images": 1031,
+      "credit": "NASA/JPL-Caltech/MSSS",
+      "page_url": "https://photojournal.jpl.nasa.gov/catalog/PIA26696",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia26/pia26696/PIA26696.jpg",
+      "image_bytes": 14019268,
+      "elev_geoid_m": -3607.722
+    }
+  ]
+}

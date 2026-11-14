@@ -18,6 +18,8 @@ import { createSourcesPanel } from "./provenance/panel";
 import { installWheelZoom, keepCameraAboveGround } from "./camera";
 import { loadHiriseLayer } from "./hirise";
 import { createLayersPanel } from "./ui/layers";
+import { addPanoramas, PANORAMAS, panoramaForEntity, type PanoramaLayer } from "./panoramas/panoramas";
+import { createPanoramaViewer } from "./panoramas/viewer";
 import { createCursorReadout } from "./ui/readout";
 import { ElevationGrid } from "./terrain/elevationGrid";
 import { addParcelOutline } from "./terrain/parcel";
@@ -183,6 +185,8 @@ async function main() {
   const context = createMissionContext(document.getElementById("hudContext")!, pois);
   panel.onChange((state) => context.update(state));
   let missionVisible = true;
+  const panoViewer = createPanoramaViewer(document.getElementById("panoDialog") as HTMLDialogElement);
+  let panoLayer: PanoramaLayer | null = null;
   const layers = createLayersPanel(document.getElementById("layersPanel")!, [
     {
       id: "hirise",
@@ -230,6 +234,16 @@ async function main() {
         get: () => parcelOutline.isVisible(),
         set: (on) => parcelOutline.setVisible(on),
       },
+    },
+    {
+      id: "panoramas",
+      dataClass: "optica",
+      name: "layers.panoramas",
+      origin: "MSL · Mastcam · Navcam",
+      sourceId: "rover_panoramas",
+      action: { label: "layers.panoramas.view", run: () => panoViewer.open(PANORAMAS[0]) },
+      status: () => (panoLayer ? "streaming" : "pending"),
+      visibility: { get: () => panoLayer?.isVisible() ?? true, set: (on) => panoLayer?.setVisible(on) },
     },
     {
       id: "mission",
@@ -293,6 +307,8 @@ async function main() {
   const readout = createCursorReadout(viewer, await elevationGrid);
   panel.onChange((state) => readout.setSlopeLimit(state.profile.max_slope_deg));
 
+  panoLayer = addPanoramas(viewer); // points appear on their own; does not delay the mission points
+  layers.refresh();
   const poiEntities = await addPois(pois);
   onLanguageChange(() => {
     for (const p of pois) {
@@ -305,14 +321,16 @@ async function main() {
   panel.onDestinationChange((id) => highlightDestination(poiEntities, id));
 
   viewer.screenSpaceEventHandler.setInputAction((click: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
-    const picked = viewer.scene.pick(click.position);
-    const entity = Cesium.defined(picked) ? picked.id : undefined;
-    if (!(entity instanceof Cesium.Entity)) return;
-    if (entity.id.startsWith("poi:")) panel.selectDestination(entity.id.slice(4));
+    const entity = pickEntity(click.position);
+    if (!entity) return;
+    const pano = panoramaForEntity(entity.id);
+    if (pano) panoViewer.open(pano);
+    else if (entity.id.startsWith("poi:")) panel.selectDestination(entity.id.slice(4));
     // Click on a route: opens its source (on-demand provenance, P1-05).
     else if (entity.id === "test_route") sources.open("test_route");
     else if (entity.id.startsWith("route:")) sources.open(lastResponseSimulated ? "simulated_response" : "hirise_dtm");
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+  showPointerOverClickables();
 
   setUpSettingsMenu((preset) => applyPreset(viewer, tilesets, preset, sun));
   document.getElementById("resetView")!.onclick = resetView;
@@ -360,6 +378,30 @@ async function addPois(pois: Poi[]): Promise<Map<string, Cesium.Entity>> {
     entities.set(p.id, entity);
   });
   return entities;
+}
+
+/** Entity under a screen position, with a few pixels of tolerance so small points are easy to hit. */
+function pickEntity(position: Cesium.Cartesian2): Cesium.Entity | undefined {
+  const picked = viewer.scene.pick(position, 9, 9);
+  const entity = Cesium.defined(picked) ? picked.id : undefined;
+  return entity instanceof Cesium.Entity ? entity : undefined;
+}
+
+/** Hand cursor over what a click acts on (points of interest, panoramas, routes). Picks once per frame at most. */
+function showPointerOverClickables() {
+  const canvas = viewer.scene.canvas;
+  const handler = new Cesium.ScreenSpaceEventHandler(canvas);
+  let pending: Cesium.Cartesian2 | null = null;
+  handler.setInputAction((move: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
+    if (!pending) {
+      requestAnimationFrame(() => {
+        const id = pending ? pickEntity(pending)?.id ?? "" : "";
+        canvas.style.cursor = /^(pano:|poi:|route:)|^test_route$/.test(id) ? "pointer" : "";
+        pending = null;
+      });
+    }
+    pending = Cesium.Cartesian2.clone(move.endPosition);
+  }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 }
 
 function highlightDestination(entities: Map<string, Cesium.Entity>, selectedId: string) {

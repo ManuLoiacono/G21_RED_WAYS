@@ -1,0 +1,1574 @@
+{
+  "source": "science.nasa.gov 'Right Navigation Camera, Cylindrical Projection' pages + MSL_waypoints.json",
+  "fetched_at": "2026-11-14T19:08:17+00:00",
+  "parcel_extent_dtm": {
+    "west": 137.36,
+    "south": -4.85,
+    "east": 137.41,
+    "north": -4.8
+  },
+  "kind": "observado",
+  "skipped_pages": [],
+  "panoramas": [
+    {
+      "sol": 4571,
+      "sol_start": 4571,
+      "sol_end": 4571,
+      "date": "2025-06-16",
+      "site": 116,
+      "drive": 2214,
+      "azimuth_center_deg": 225.0,
+      "frames": 31,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/06/N_R000_4571_EDR116CYLASB2214_AUTOLM2.PNG",
+      "image_mb": 8.19,
+      "page_url": "https://science.nasa.gov/resource/sol-4571-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.382987,
+        -4.80040688
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3643.934
+    },
+    {
+      "sol": 4573,
+      "sol_start": 4573,
+      "sol_end": 4573,
+      "date": "2025-06-18",
+      "site": 116,
+      "drive": 2562,
+      "azimuth_center_deg": 204.0,
+      "frames": 32,
+      "lmst": "4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/06/N_R000_4573_EDR116CYLASB2562_AUTOLM1.PNG",
+      "image_mb": 8.85,
+      "page_url": "https://science.nasa.gov/resource/sol-4573-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.382517,
+        -4.80116383
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3644.188
+    },
+    {
+      "sol": 4575,
+      "sol_start": 4575,
+      "sol_end": 4575,
+      "date": "2025-06-20",
+      "site": 117,
+      "drive": 0,
+      "azimuth_center_deg": 230.0,
+      "frames": 31,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/06/N_R000_4575_EDR117CYLASB0000_AUTOLM2.PNG",
+      "image_mb": 8.78,
+      "page_url": "https://science.nasa.gov/resource/sol-4575-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3821132,
+        -4.80190838
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3644.423
+    },
+    {
+      "sol": 4578,
+      "sol_start": 4578,
+      "sol_end": 4578,
+      "date": "2025-06-23",
+      "site": 117,
+      "drive": 168,
+      "azimuth_center_deg": 262.0,
+      "frames": 31,
+      "lmst": "4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/06/N_R000_4578_EDR117CYLASB0168_AUTOLM1.PNG",
+      "image_mb": 8.56,
+      "page_url": "https://science.nasa.gov/resource/sol-4578-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3817054,
+        -4.8019306
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3645.46
+    },
+    {
+      "sol": 4580,
+      "sol_start": 4580,
+      "sol_end": 4580,
+      "date": "2025-06-25",
+      "site": 117,
+      "drive": 420,
+      "azimuth_center_deg": 233.0,
+      "frames": 31,
+      "lmst": "4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/06/N_R000_4580_EDR117CYLASB0420_AUTOLM1.PNG",
+      "image_mb": 8.54,
+      "page_url": "https://science.nasa.gov/resource/sol-4580-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3812512,
+        -4.80232637
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3643.912
+    },
+    {
+      "sol": 4582,
+      "sol_start": 4582,
+      "sol_end": 4582,
+      "date": "2025-06-27",
+      "site": 117,
+      "drive": 492,
+      "azimuth_center_deg": 226.0,
+      "frames": 31,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/06/N_R000_4582_EDR117CYLASB0492_AUTOLM1.PNG",
+      "image_mb": 8.79,
+      "page_url": "https://science.nasa.gov/resource/sol-4582-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3812526,
+        -4.80234626
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3643.818
+    },
+    {
+      "sol": 4585,
+      "sol_start": 4585,
+      "sol_end": 4585,
+      "date": "2025-06-30",
+      "site": 117,
+      "drive": 702,
+      "azimuth_center_deg": 209.0,
+      "frames": 31,
+      "lmst": "from 3 PM to 5 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/06/N_R000_4585_EDR117CYLASB0702_AUTOLM1.PNG",
+      "image_mb": 8.4,
+      "page_url": "https://science.nasa.gov/resource/sol-4585-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.381053,
+        -4.80256772
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3644.11
+    },
+    {
+      "sol": 4587,
+      "sol_start": 4587,
+      "sol_end": 4587,
+      "date": "2025-07-02",
+      "site": 117,
+      "drive": 840,
+      "azimuth_center_deg": 233.0,
+      "frames": 31,
+      "lmst": "3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4587_EDR117CYLASB0840_AUTOLM1.PNG",
+      "image_mb": 8.25,
+      "page_url": "https://science.nasa.gov/resource/sol-4587-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3807901,
+        -4.80273617
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3643.5
+    },
+    {
+      "sol": 4588,
+      "sol_start": 4588,
+      "sol_end": 4588,
+      "date": "2025-07-03",
+      "site": 117,
+      "drive": 1008,
+      "azimuth_center_deg": 215.0,
+      "frames": 31,
+      "lmst": "4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4588_EDR117CYLASB1008_AUTOLM1.PNG",
+      "image_mb": 8.64,
+      "page_url": "https://science.nasa.gov/resource/sol-4588-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3805951,
+        -4.80242965
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3645.303
+    },
+    {
+      "sol": 4591,
+      "sol_start": 4591,
+      "sol_end": 4591,
+      "date": "2025-07-06",
+      "site": 117,
+      "drive": 1122,
+      "azimuth_center_deg": 243.0,
+      "frames": 31,
+      "lmst": "3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4591_EDR117CYLASB1122_AUTOLM1.PNG",
+      "image_mb": 7.85,
+      "page_url": "https://science.nasa.gov/resource/sol-4591-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3804498,
+        -4.80250974
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3644.62
+    },
+    {
+      "sol": 4594,
+      "sol_start": 4594,
+      "sol_end": 4594,
+      "date": "2025-07-09",
+      "site": 117,
+      "drive": 1434,
+      "azimuth_center_deg": 178.0,
+      "frames": 28,
+      "lmst": "from 2 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4594_EDR117CYLASB1434_AUTOLM1.PNG",
+      "image_mb": 6.79,
+      "page_url": "https://science.nasa.gov/resource/sol-4594-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3804319,
+        -4.802963
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3642.423
+    },
+    {
+      "sol": 4596,
+      "sol_start": 4596,
+      "sol_end": 4596,
+      "date": "2025-07-12",
+      "site": 117,
+      "drive": 1890,
+      "azimuth_center_deg": 154.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4596_EDR117CYLASB1890_AUTOLM1.PNG",
+      "image_mb": 9.26,
+      "page_url": "https://science.nasa.gov/resource/sol-4596-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3800743,
+        -4.80360579
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3640.497
+    },
+    {
+      "sol": 4598,
+      "sol_start": 4598,
+      "sol_end": 4598,
+      "date": "2025-07-14",
+      "site": 117,
+      "drive": 2166,
+      "azimuth_center_deg": 192.0,
+      "frames": 31,
+      "lmst": "3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4598_EDR117CYLASB2166_AUTOLM2.PNG",
+      "image_mb": 8.06,
+      "page_url": "https://science.nasa.gov/resource/sol-4598-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3797556,
+        -4.80401601
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3635.866
+    },
+    {
+      "sol": 4600,
+      "sol_start": 4600,
+      "sol_end": 4600,
+      "date": "2025-07-16",
+      "site": 117,
+      "drive": 2370,
+      "azimuth_center_deg": 170.0,
+      "frames": 31,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4600_EDR117CYLASB2370_AUTOLM1.PNG",
+      "image_mb": 7.81,
+      "page_url": "https://science.nasa.gov/resource/sol-4600-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3796858,
+        -4.804189
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3632.878
+    },
+    {
+      "sol": 4602,
+      "sol_start": 4602,
+      "sol_end": 4602,
+      "date": "2025-07-18",
+      "site": 117,
+      "drive": 2490,
+      "azimuth_center_deg": 234.0,
+      "frames": 31,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4602_EDR117CYLASB2490_AUTOLM1.PNG",
+      "image_mb": 8.34,
+      "page_url": "https://science.nasa.gov/resource/sol-4602-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3796237,
+        -4.80436679
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3630.754
+    },
+    {
+      "sol": 4605,
+      "sol_start": 4605,
+      "sol_end": 4605,
+      "date": "2025-07-21",
+      "site": 117,
+      "drive": 2538,
+      "azimuth_center_deg": 222.0,
+      "frames": 24,
+      "lmst": "from 2 PM to 3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4605_EDR117CYLASB2538_AUTOLM1.PNG",
+      "image_mb": 7.59,
+      "page_url": "https://science.nasa.gov/resource/sol-4605-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3795572,
+        -4.80443344
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3631.479
+    },
+    {
+      "sol": 4611,
+      "sol_start": 4609,
+      "sol_end": 4611,
+      "date": "2025-07-27",
+      "site": 117,
+      "drive": 2730,
+      "azimuth_center_deg": 239.0,
+      "frames": 39,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4611XEDR117CYLASB2730_AUTOLM1.PNG",
+      "image_mb": 9.31,
+      "page_url": "https://science.nasa.gov/resource/sol-4611-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3793204,
+        -4.80474015
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3624.329
+    },
+    {
+      "sol": 4612,
+      "sol_start": 4612,
+      "sol_end": 4612,
+      "date": "2025-07-28",
+      "site": 117,
+      "drive": 2850,
+      "azimuth_center_deg": 164.0,
+      "frames": 24,
+      "lmst": "3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4612_EDR117CYLASB2850_AUTOLM1.PNG",
+      "image_mb": 6.44,
+      "page_url": "https://science.nasa.gov/resource/sol-4612-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3792959,
+        -4.80494509
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3623.51
+    },
+    {
+      "sol": 4614,
+      "sol_start": 4614,
+      "sol_end": 4614,
+      "date": "2025-07-30",
+      "site": 118,
+      "drive": 0,
+      "azimuth_center_deg": 100.0,
+      "frames": 31,
+      "lmst": "4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4614_EDR118CYLASB0000_AUTOLM2.PNG",
+      "image_mb": 7.88,
+      "page_url": "https://science.nasa.gov/resource/sol-4614-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3794477,
+        -4.80520603
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3622.376
+    },
+    {
+      "sol": 4616,
+      "sol_start": 4616,
+      "sol_end": 4616,
+      "date": "2025-08-01",
+      "site": 118,
+      "drive": 162,
+      "azimuth_center_deg": 145.0,
+      "frames": 31,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/07/N_R000_4616_EDR118CYLASB0162_AUTOLM1.PNG",
+      "image_mb": 7.9,
+      "page_url": "https://science.nasa.gov/resource/sol-4616-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3795247,
+        -4.80545276
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3620.597
+    },
+    {
+      "sol": 4620,
+      "sol_start": 4618,
+      "sol_end": 4620,
+      "date": "2025-08-05",
+      "site": 118,
+      "drive": 198,
+      "azimuth_center_deg": 236.0,
+      "frames": 33,
+      "lmst": "from 8 AM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/08/N_R000_4620XEDR118CYLASB0198_AUTOLM1.PNG",
+      "image_mb": 9.03,
+      "page_url": "https://science.nasa.gov/resource/sol-4620-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3795358,
+        -4.80549507
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3620.486
+    },
+    {
+      "sol": 4621,
+      "sol_start": 4621,
+      "sol_end": 4621,
+      "date": "2025-08-06",
+      "site": 118,
+      "drive": 372,
+      "azimuth_center_deg": 63.0,
+      "frames": 28,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/08/N_R000_4621_EDR118CYLASB0372_AUTOLM1.PNG",
+      "image_mb": 6.65,
+      "page_url": "https://science.nasa.gov/resource/sol-4621-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3795125,
+        -4.80541391
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3620.089
+    },
+    {
+      "sol": 4623,
+      "sol_start": 4623,
+      "sol_end": 4623,
+      "date": "2025-08-08",
+      "site": 118,
+      "drive": 534,
+      "azimuth_center_deg": 109.0,
+      "frames": 31,
+      "lmst": "2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/08/N_R000_4623_EDR118CYLASB0534_AUTOLM1.PNG",
+      "image_mb": 9.12,
+      "page_url": "https://science.nasa.gov/resource/sol-4623-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3799173,
+        -4.80548391
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3621.591
+    },
+    {
+      "sol": 4626,
+      "sol_start": 4625,
+      "sol_end": 4626,
+      "date": "2025-08-11",
+      "site": 118,
+      "drive": 762,
+      "azimuth_center_deg": 210.0,
+      "frames": 32,
+      "lmst": "from 9 AM to 3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/08/N_R000_4626XEDR118CYLASB0762_AUTOLM1.PNG",
+      "image_mb": 8.57,
+      "page_url": "https://science.nasa.gov/resource/sol-4626-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3797583,
+        -4.80585913
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3617.654
+    },
+    {
+      "sol": 4628,
+      "sol_start": 4628,
+      "sol_end": 4628,
+      "date": "2025-08-13",
+      "site": 118,
+      "drive": 924,
+      "azimuth_center_deg": 268.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/08/N_R000_4628_EDR118CYLASB0924_AUTOLM1.PNG",
+      "image_mb": 11.09,
+      "page_url": "https://science.nasa.gov/resource/sol-4628-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3794602,
+        -4.80599016
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3613.896
+    },
+    {
+      "sol": 4629,
+      "sol_start": 4629,
+      "sol_end": 4629,
+      "date": "2025-08-15",
+      "site": 118,
+      "drive": 1194,
+      "azimuth_center_deg": 258.0,
+      "frames": 27,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/08/N_R000_4629_EDR118CYLASB1194_AUTOLM2.PNG",
+      "image_mb": 7.56,
+      "page_url": "https://science.nasa.gov/resource/sol-4629-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.379723,
+        -4.80616679
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3613.975
+    },
+    {
+      "sol": 4633,
+      "sol_start": 4633,
+      "sol_end": 4633,
+      "date": "2025-08-19",
+      "site": 118,
+      "drive": 1350,
+      "azimuth_center_deg": 193.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/08/N_R000_4633_EDR118CYLASB1350_AUTOLM1.PNG",
+      "image_mb": 10.25,
+      "page_url": "https://science.nasa.gov/resource/sol-4633-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3796739,
+        -4.80645796
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3611.188
+    },
+    {
+      "sol": 4634,
+      "sol_start": 4634,
+      "sol_end": 4634,
+      "date": "2025-08-20",
+      "site": 118,
+      "drive": 1608,
+      "azimuth_center_deg": 261.0,
+      "frames": 31,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/08/N_R000_4634_EDR118CYLASB1608_AUTOLM1.PNG",
+      "image_mb": 8.11,
+      "page_url": "https://science.nasa.gov/resource/sol-4634-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3791167,
+        -4.80635617
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3609.909
+    },
+    {
+      "sol": 4636,
+      "sol_start": 4636,
+      "sol_end": 4636,
+      "date": "2025-08-22",
+      "site": 118,
+      "drive": 1752,
+      "azimuth_center_deg": 144.0,
+      "frames": 31,
+      "lmst": "3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/08/N_R000_4636_EDR118CYLASB1752_AUTOLM1.PNG",
+      "image_mb": 7.59,
+      "page_url": "https://science.nasa.gov/resource/sol-4636-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3793381,
+        -4.80653823
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3607.128
+    },
+    {
+      "sol": 4639,
+      "sol_start": 4639,
+      "sol_end": 4639,
+      "date": "2025-08-25",
+      "site": 118,
+      "drive": 1776,
+      "azimuth_center_deg": 231.0,
+      "frames": 31,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/08/N_R000_4639_EDR118CYLASB1776_AUTOLM1.PNG",
+      "image_mb": 9.19,
+      "page_url": "https://science.nasa.gov/resource/sol-4639-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3793171,
+        -4.80655332
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3606.72
+    },
+    {
+      "sol": 4641,
+      "sol_start": 4641,
+      "sol_end": 4641,
+      "date": "2025-08-27",
+      "site": 118,
+      "drive": 1944,
+      "azimuth_center_deg": 216.0,
+      "frames": 31,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/08/N_R000_4641_EDR118CYLASB1944_AUTOLM1.PNG",
+      "image_mb": 7.98,
+      "page_url": "https://science.nasa.gov/resource/sol-4641-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3793537,
+        -4.80669051
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3608.108
+    },
+    {
+      "sol": 4643,
+      "sol_start": 4643,
+      "sol_end": 4643,
+      "date": "2025-08-29",
+      "site": 118,
+      "drive": 2028,
+      "azimuth_center_deg": 65.0,
+      "frames": 31,
+      "lmst": "3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/08/N_R000_4643_EDR118CYLASB2028_AUTOLM1.PNG",
+      "image_mb": 7.93,
+      "page_url": "https://science.nasa.gov/resource/sol-4643-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3794121,
+        -4.80679651
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3604.677
+    },
+    {
+      "sol": 4647,
+      "sol_start": 4647,
+      "sol_end": 4647,
+      "date": "2025-09-02",
+      "site": 118,
+      "drive": 2268,
+      "azimuth_center_deg": 98.0,
+      "frames": 31,
+      "lmst": "from 2 PM to 3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/09/N_R000_4647_EDR118CYLASB2268_AUTOLM1.PNG",
+      "image_mb": 7.78,
+      "page_url": "https://science.nasa.gov/resource/sol-4647-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3798121,
+        -4.80689063
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3610.488
+    },
+    {
+      "sol": 4650,
+      "sol_start": 4650,
+      "sol_end": 4650,
+      "date": "2025-09-05",
+      "site": 118,
+      "drive": 2304,
+      "azimuth_center_deg": 77.0,
+      "frames": 31,
+      "lmst": "2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/09/N_R000_4650_EDR118CYLASB2304_AUTOLM1.PNG",
+      "image_mb": 9.67,
+      "page_url": "https://science.nasa.gov/resource/sol-4650-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3798418,
+        -4.8068928
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3610.513
+    },
+    {
+      "sol": 4653,
+      "sol_start": 4653,
+      "sol_end": 4653,
+      "date": "2025-09-08",
+      "site": 118,
+      "drive": 2466,
+      "azimuth_center_deg": 185.0,
+      "frames": 31,
+      "lmst": "3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/09/N_R000_4653_EDR118CYLASB2466_AUTOLM1.PNG",
+      "image_mb": 8.26,
+      "page_url": "https://science.nasa.gov/resource/sol-4653-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3798962,
+        -4.80708025
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3607.997
+    },
+    {
+      "sol": 4655,
+      "sol_start": 4655,
+      "sol_end": 4655,
+      "date": "2025-09-10",
+      "site": 118,
+      "drive": 2538,
+      "azimuth_center_deg": 325.0,
+      "frames": 10,
+      "lmst": "from 3 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/09/N_R000_4655_EDR118CYLASB2538_AUTOLM1.PNG",
+      "image_mb": 3.59,
+      "page_url": "https://science.nasa.gov/resource/sol-4655-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3798956,
+        -4.80716832
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3607.704
+    },
+    {
+      "sol": 4660,
+      "sol_start": 4660,
+      "sol_end": 4660,
+      "date": "2025-09-15",
+      "site": 118,
+      "drive": 2742,
+      "azimuth_center_deg": 138.0,
+      "frames": 31,
+      "lmst": "12 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/09/N_R000_4660_EDR118CYLASB2742_AUTOLM1.PNG",
+      "image_mb": 10.62,
+      "page_url": "https://science.nasa.gov/resource/sol-4660-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3800604,
+        -4.80745212
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3605.483
+    },
+    {
+      "sol": 4662,
+      "sol_start": 4662,
+      "sol_end": 4662,
+      "date": "2025-09-17",
+      "site": 118,
+      "drive": 2832,
+      "azimuth_center_deg": 149.0,
+      "frames": 31,
+      "lmst": "from 11 AM to 12 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/09/N_R000_4662_EDR118CYLASB2832_AUTOLM1.PNG",
+      "image_mb": 10.6,
+      "page_url": "https://science.nasa.gov/resource/sol-4662-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3801893,
+        -4.80762759
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3606.064
+    },
+    {
+      "sol": 4664,
+      "sol_start": 4664,
+      "sol_end": 4664,
+      "date": "2025-09-19",
+      "site": 118,
+      "drive": 3156,
+      "azimuth_center_deg": 78.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/09/N_R000_4664_EDR118CYLASB3156_AUTOLM1.PNG",
+      "image_mb": 10.22,
+      "page_url": "https://science.nasa.gov/resource/sol-4664-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3802489,
+        -4.8079252
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3605.206
+    },
+    {
+      "sol": 4667,
+      "sol_start": 4667,
+      "sol_end": 4667,
+      "date": "2025-09-22",
+      "site": 119,
+      "drive": 0,
+      "azimuth_center_deg": 101.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/09/N_R000_4667_EDR119CYLASB0000_AUTOLM1.PNG",
+      "image_mb": 9.3,
+      "page_url": "https://science.nasa.gov/resource/sol-4667-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3805074,
+        -4.80802327
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3604.77
+    },
+    {
+      "sol": 4669,
+      "sol_start": 4669,
+      "sol_end": 4669,
+      "date": "2025-09-24",
+      "site": 119,
+      "drive": 198,
+      "azimuth_center_deg": 58.0,
+      "frames": 19,
+      "lmst": "12 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/09/N_R000_4669_EDR119CYLASB0198_AUTOLM3.PNG",
+      "image_mb": 9.09,
+      "page_url": "https://science.nasa.gov/resource/sol-4669-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.380883,
+        -4.80805222
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3606.525
+    },
+    {
+      "sol": 4671,
+      "sol_start": 4671,
+      "sol_end": 4671,
+      "date": "2025-09-27",
+      "site": 119,
+      "drive": 486,
+      "azimuth_center_deg": 119.0,
+      "frames": 31,
+      "lmst": "1 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/09/N_R000_4671_EDR119CYLASB0486_AUTOLM1.jpg",
+      "image_mb": 3.67,
+      "page_url": "https://science.nasa.gov/resource/sol-4671-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3812695,
+        -4.80827103
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3608.263
+    },
+    {
+      "sol": 4673,
+      "sol_start": 4673,
+      "sol_end": 4673,
+      "date": "2025-09-29",
+      "site": 119,
+      "drive": 846,
+      "azimuth_center_deg": 56.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 12 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/09/N_R000_4673_EDR119CYLASB0846_AUTOLM1.jpg",
+      "image_mb": 4.07,
+      "page_url": "https://science.nasa.gov/resource/sol-4673-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3815696,
+        -4.80871606
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3606.57
+    },
+    {
+      "sol": 4677,
+      "sol_start": 4677,
+      "sol_end": 4677,
+      "date": "2025-10-03",
+      "site": 119,
+      "drive": 924,
+      "azimuth_center_deg": 29.0,
+      "frames": 31,
+      "lmst": "12 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/10/N_R000_4677_EDR119CYLASB0924_AUTOLM2.jpg",
+      "image_mb": 4.2,
+      "page_url": "https://science.nasa.gov/resource/sol-4677-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3816902,
+        -4.80871233
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3606.641
+    },
+    {
+      "sol": 4680,
+      "sol_start": 4680,
+      "sol_end": 4680,
+      "date": "2025-10-06",
+      "site": 119,
+      "drive": 1344,
+      "azimuth_center_deg": 321.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/10/N_R000_4680_EDR119CYLASB1344_AUTOLM3.jpg",
+      "image_mb": 3.42,
+      "page_url": "https://science.nasa.gov/resource/sol-4680-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3812465,
+        -4.80827147
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3608.02
+    },
+    {
+      "sol": 4684,
+      "sol_start": 4684,
+      "sol_end": 4684,
+      "date": "2025-10-10",
+      "site": 119,
+      "drive": 1554,
+      "azimuth_center_deg": 346.0,
+      "frames": 31,
+      "lmst": "1 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/10/N_R000_4684_EDR119CYLASB1554_AUTOLM2.jpg",
+      "image_mb": 3.94,
+      "page_url": "https://science.nasa.gov/resource/sol-4684-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3810178,
+        -4.80801097
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3607.941
+    },
+    {
+      "sol": 4693,
+      "sol_start": 4687,
+      "sol_end": 4693,
+      "date": "2025-10-19",
+      "site": 119,
+      "drive": 1722,
+      "azimuth_center_deg": 185.0,
+      "frames": 34,
+      "lmst": "from 2 PM to 12 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/10/N_R000_4693XEDR119CYLASB1722_AUTOLM1.jpg",
+      "image_mb": 3.97,
+      "page_url": "https://science.nasa.gov/resource/sol-4693-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3810353,
+        -4.80783916
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3610.432
+    },
+    {
+      "sol": 4709,
+      "sol_start": 4709,
+      "sol_end": 4709,
+      "date": "2025-11-05",
+      "site": 120,
+      "drive": 0,
+      "azimuth_center_deg": 236.0,
+      "frames": 31,
+      "lmst": "from 2 PM to 3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/11/N_R000_4709_EDR120CYLASB0000_AUTOLM3.jpg",
+      "image_mb": 2.88,
+      "page_url": "https://science.nasa.gov/resource/sol-4709-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3810495,
+        -4.80799931
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3608.689
+    },
+    {
+      "sol": 4728,
+      "sol_start": 4711,
+      "sol_end": 4728,
+      "date": "2025-11-24",
+      "site": 120,
+      "drive": 82,
+      "azimuth_center_deg": 216.0,
+      "frames": 65,
+      "lmst": "from 11 AM to 3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/11/N_R000_4728XEDR120CYLASB0082_AUTOLM1.jpg",
+      "image_mb": 2.82,
+      "page_url": "https://science.nasa.gov/resource/sol-4728-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3810041,
+        -4.80800755
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3607.722
+    },
+    {
+      "sol": 4744,
+      "sol_start": 4741,
+      "sol_end": 4744,
+      "date": "2025-12-11",
+      "site": 120,
+      "drive": 232,
+      "azimuth_center_deg": 172.0,
+      "frames": 35,
+      "lmst": "from 11 AM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/12/N_R000_4744XEDR120CYLASB0232_AUTOLM1.jpg",
+      "image_mb": 3.54,
+      "page_url": "https://science.nasa.gov/resource/sol-4744-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3810137,
+        -4.80776275
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3611.533
+    },
+    {
+      "sol": 4748,
+      "sol_start": 4748,
+      "sol_end": 4748,
+      "date": "2025-12-15",
+      "site": 120,
+      "drive": 346,
+      "azimuth_center_deg": 146.0,
+      "frames": 31,
+      "lmst": "1 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/12/N_R000_4748_EDR120CYLASB0346_AUTOLM2.jpg",
+      "image_mb": 4.1,
+      "page_url": "https://science.nasa.gov/resource/sol-4748-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3811194,
+        -4.80790799
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3610.29
+    },
+    {
+      "sol": 4757,
+      "sol_start": 4752,
+      "sol_end": 4757,
+      "date": "2025-12-24",
+      "site": 120,
+      "drive": 538,
+      "azimuth_center_deg": 151.0,
+      "frames": 35,
+      "lmst": "from 11 AM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2025/mosaics/12/N_R000_4757XEDR120CYLASB0538_AUTOLM1.jpg",
+      "image_mb": 2.73,
+      "page_url": "https://science.nasa.gov/resource/sol-4757-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3809929,
+        -4.80803169
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3607.648
+    },
+    {
+      "sol": 4795,
+      "sol_start": 4789,
+      "sol_end": 4795,
+      "date": "2026-02-01",
+      "site": 120,
+      "drive": 574,
+      "azimuth_center_deg": 192.0,
+      "frames": 34,
+      "lmst": "1 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/february/N_R000_4795XEDR120CYLASB0574_AUTOLM1.jpg",
+      "image_mb": 4.19,
+      "page_url": "https://science.nasa.gov/resource/sol-4795-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3809924,
+        -4.80800539
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3608.018
+    },
+    {
+      "sol": 4805,
+      "sol_start": 4805,
+      "sol_end": 4805,
+      "date": "2026-02-11",
+      "site": 120,
+      "drive": 808,
+      "azimuth_center_deg": 60.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/february/N_R000_4805_EDR120CYLASB0808_AUTOLM1.jpg",
+      "image_mb": 3.25,
+      "page_url": "https://science.nasa.gov/resource/sol-4805-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.38142,
+        -4.8078367
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3610.912
+    },
+    {
+      "sol": 4810,
+      "sol_start": 4810,
+      "sol_end": 4810,
+      "date": "2026-02-16",
+      "site": 120,
+      "drive": 1042,
+      "azimuth_center_deg": 329.0,
+      "frames": 31,
+      "lmst": "from 11 AM to 12 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/february/N_R000_4810_EDR120CYLASB1042_AUTOLM1.jpg",
+      "image_mb": 7.26,
+      "page_url": "https://science.nasa.gov/resource/sol-4810-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3815047,
+        -4.8075379
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3613.194
+    },
+    {
+      "sol": 4813,
+      "sol_start": 4813,
+      "sol_end": 4813,
+      "date": "2026-02-20",
+      "site": 120,
+      "drive": 1264,
+      "azimuth_center_deg": 16.0,
+      "frames": 31,
+      "lmst": "from 2 PM to 3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/february/N_R000_4813_EDR120CYLASB1264_AUTOLM2.jpg",
+      "image_mb": 5.07,
+      "page_url": "https://science.nasa.gov/resource/sol-4813-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.381668,
+        -4.80734998
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3615.743
+    },
+    {
+      "sol": 4816,
+      "sol_start": 4816,
+      "sol_end": 4816,
+      "date": "2026-02-22",
+      "site": 120,
+      "drive": 1546,
+      "azimuth_center_deg": 208.0,
+      "frames": 31,
+      "lmst": "12 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/february/N_R000_4816_EDR120CYLASB1546_AUTOLM1.jpg",
+      "image_mb": 6.99,
+      "page_url": "https://science.nasa.gov/resource/sol-4816-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.38194,
+        -4.80752572
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3615.227
+    },
+    {
+      "sol": 4818,
+      "sol_start": 4818,
+      "sol_end": 4818,
+      "date": "2026-02-25",
+      "site": 120,
+      "drive": 2030,
+      "azimuth_center_deg": 40.0,
+      "frames": 31,
+      "lmst": "3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/february/N_R000_4818_EDR120CYLASB2030_AUTOLM1.jpg",
+      "image_mb": 4.72,
+      "page_url": "https://science.nasa.gov/resource/sol-4818-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3825624,
+        -4.80790359
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3615.835
+    },
+    {
+      "sol": 4820,
+      "sol_start": 4820,
+      "sol_end": 4820,
+      "date": "2026-02-27",
+      "site": 120,
+      "drive": 2102,
+      "azimuth_center_deg": 40.0,
+      "frames": 31,
+      "lmst": "from 2 PM to 3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/february/N_R000_4820_EDR120CYLASB2102_AUTOLM1.jpg",
+      "image_mb": 5.72,
+      "page_url": "https://science.nasa.gov/resource/sol-4820-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.382671,
+        -4.80778482
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3617.009
+    },
+    {
+      "sol": 4823,
+      "sol_start": 4823,
+      "sol_end": 4823,
+      "date": "2026-03-02",
+      "site": 120,
+      "drive": 2192,
+      "azimuth_center_deg": 172.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 12 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/march/N_R000_4823_EDR120CYLASB2192_AUTOLM1.jpg",
+      "image_mb": 7.08,
+      "page_url": "https://science.nasa.gov/resource/sol-4823-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3826281,
+        -4.80788259
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3616.256
+    },
+    {
+      "sol": 4827,
+      "sol_start": 4827,
+      "sol_end": 4827,
+      "date": "2026-03-06",
+      "site": 120,
+      "drive": 2366,
+      "azimuth_center_deg": 148.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/march/N_R000_4827_EDR120CYLASB2366_AUTOLM1.jpg",
+      "image_mb": 6.11,
+      "page_url": "https://science.nasa.gov/resource/sol-4827-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3828539,
+        -4.80813306
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3615.48
+    },
+    {
+      "sol": 4830,
+      "sol_start": 4830,
+      "sol_end": 4830,
+      "date": "2026-03-09",
+      "site": 120,
+      "drive": 2726,
+      "azimuth_center_deg": 184.0,
+      "frames": 31,
+      "lmst": "1 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/march/N_R000_4830_EDR120CYLASB2726_AUTOLM2.jpg",
+      "image_mb": 6.61,
+      "page_url": "https://science.nasa.gov/resource/sol-4830-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3826516,
+        -4.80882201
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3609.236
+    },
+    {
+      "sol": 4834,
+      "sol_start": 4834,
+      "sol_end": 4834,
+      "date": "2026-03-13",
+      "site": 121,
+      "drive": 0,
+      "azimuth_center_deg": 255.0,
+      "frames": 31,
+      "lmst": "2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/march/N_R000_4834_EDR121CYLASB0000_AUTOLM1.jpg",
+      "image_mb": 6.06,
+      "page_url": "https://science.nasa.gov/resource/sol-4834-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3826974,
+        -4.80954314
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3604.708
+    },
+    {
+      "sol": 4837,
+      "sol_start": 4837,
+      "sol_end": 4837,
+      "date": "2026-03-16",
+      "site": 121,
+      "drive": 156,
+      "azimuth_center_deg": 248.0,
+      "frames": 31,
+      "lmst": "1 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/march/N_R000_4837_EDR121CYLASB0156_AUTOLM1.jpg",
+      "image_mb": 6.97,
+      "page_url": "https://science.nasa.gov/resource/sol-4837-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3823585,
+        -4.80971635
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3603.622
+    },
+    {
+      "sol": 4839,
+      "sol_start": 4839,
+      "sol_end": 4839,
+      "date": "2026-03-18",
+      "site": 121,
+      "drive": 396,
+      "azimuth_center_deg": 238.0,
+      "frames": 31,
+      "lmst": "2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/march/N_R000_4839_EDR121CYLASB0396_AUTOLM1.jpg",
+      "image_mb": 5.9,
+      "page_url": "https://science.nasa.gov/resource/sol-4839-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3818621,
+        -4.80991273
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3598.479
+    },
+    {
+      "sol": 4841,
+      "sol_start": 4841,
+      "sol_end": 4841,
+      "date": "2026-03-20",
+      "site": 121,
+      "drive": 762,
+      "azimuth_center_deg": 244.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/march/N_R000_4841_EDR121CYLASB0762_AUTOLM1.jpg",
+      "image_mb": 6.52,
+      "page_url": "https://science.nasa.gov/resource/sol-4841-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3817563,
+        -4.81042121
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3595.812
+    },
+    {
+      "sol": 4844,
+      "sol_start": 4844,
+      "sol_end": 4844,
+      "date": "2026-03-23",
+      "site": 121,
+      "drive": 876,
+      "azimuth_center_deg": 199.0,
+      "frames": 31,
+      "lmst": "3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/march/N_R000_4844_EDR121CYLASB0876_AUTOLM2.jpg",
+      "image_mb": 4.98,
+      "page_url": "https://science.nasa.gov/resource/sol-4844-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3816768,
+        -4.81053581
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3595.451
+    },
+    {
+      "sol": 4845,
+      "sol_start": 4845,
+      "sol_end": 4845,
+      "date": "2026-03-24",
+      "site": 121,
+      "drive": 990,
+      "azimuth_center_deg": 24.0,
+      "frames": 19,
+      "lmst": "from 2 PM to 3 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/march/N_R000_4845_EDR121CYLASB0990_AUTOLM1.jpg",
+      "image_mb": 5.94,
+      "page_url": "https://science.nasa.gov/resource/sol-4845-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3816452,
+        -4.81060029
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3593.697
+    },
+    {
+      "sol": 4848,
+      "sol_start": 4848,
+      "sol_end": 4848,
+      "date": "2026-03-27",
+      "site": 121,
+      "drive": 1446,
+      "azimuth_center_deg": 151.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/march/N_R000_4848_EDR121CYLASB1446_AUTOLM2.jpg",
+      "image_mb": 6.28,
+      "page_url": "https://science.nasa.gov/resource/sol-4848-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3818117,
+        -4.81155245
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3590.118
+    },
+    {
+      "sol": 4851,
+      "sol_start": 4851,
+      "sol_end": 4851,
+      "date": "2026-03-31",
+      "site": 121,
+      "drive": 1656,
+      "azimuth_center_deg": 179.0,
+      "frames": 31,
+      "lmst": "1 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/march/N_R000_4851_EDR121CYLASB1656_AUTOLM1.jpg",
+      "image_mb": 6.74,
+      "page_url": "https://science.nasa.gov/resource/sol-4851-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3820371,
+        -4.81201523
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3587.992
+    },
+    {
+      "sol": 4855,
+      "sol_start": 4855,
+      "sol_end": 4855,
+      "date": "2026-04-04",
+      "site": 121,
+      "drive": 2004,
+      "azimuth_center_deg": 181.0,
+      "frames": 30,
+      "lmst": "1 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/april/N_R000_4855_EDR121CYLASB2004_AUTOLM1.jpg",
+      "image_mb": 6.89,
+      "page_url": "https://science.nasa.gov/resource/sol-4855-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3821479,
+        -4.81284894
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3583.149
+    },
+    {
+      "sol": 4857,
+      "sol_start": 4857,
+      "sol_end": 4857,
+      "date": "2026-04-06",
+      "site": 121,
+      "drive": 2202,
+      "azimuth_center_deg": 202.0,
+      "frames": 31,
+      "lmst": "1 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/april/N_R000_4857_EDR121CYLASB2202_AUTOLM2.jpg",
+      "image_mb": 7.17,
+      "page_url": "https://science.nasa.gov/resource/sol-4857-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3818456,
+        -4.81316906
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3578.401
+    },
+    {
+      "sol": 4861,
+      "sol_start": 4861,
+      "sol_end": 4861,
+      "date": "2026-04-10",
+      "site": 121,
+      "drive": 2490,
+      "azimuth_center_deg": 225.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/april/N_R000_4861_EDR121CYLASB2490_AUTOLM2.jpg",
+      "image_mb": 6.61,
+      "page_url": "https://science.nasa.gov/resource/sol-4861-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3813703,
+        -4.81322691
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3579.327
+    },
+    {
+      "sol": 4865,
+      "sol_start": 4865,
+      "sol_end": 4865,
+      "date": "2026-04-14",
+      "site": 121,
+      "drive": 2826,
+      "azimuth_center_deg": 194.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/april/N_R000_4865_EDR121CYLASB2826_AUTOLM1.jpg",
+      "image_mb": 6.45,
+      "page_url": "https://science.nasa.gov/resource/sol-4865-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3810006,
+        -4.81378952
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3574.228
+    },
+    {
+      "sol": 4883,
+      "sol_start": 4868,
+      "sol_end": 4883,
+      "date": "2026-05-02",
+      "site": 122,
+      "drive": 0,
+      "azimuth_center_deg": 175.0,
+      "frames": 54,
+      "lmst": "from 3 PM to 12 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/may/N_R000_4883XEDR122CYLASB0000_AUTOLM1.jpg",
+      "image_mb": 3.02,
+      "page_url": "https://science.nasa.gov/resource/sol-4883-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3817063,
+        -4.8142672
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3570.45
+    },
+    {
+      "sol": 4889,
+      "sol_start": 4889,
+      "sol_end": 4889,
+      "date": "2026-05-08",
+      "site": 122,
+      "drive": 138,
+      "azimuth_center_deg": 155.0,
+      "frames": 30,
+      "lmst": "from 11 AM to 12 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/may/N_R000_4889_EDR122CYLASB0138_AUTOLM3.jpg",
+      "image_mb": 3.67,
+      "page_url": "https://science.nasa.gov/resource/sol-4889-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3818334,
+        -4.81444561
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3568.867
+    },
+    {
+      "sol": 4891,
+      "sol_start": 4891,
+      "sol_end": 4891,
+      "date": "2026-05-11",
+      "site": 122,
+      "drive": 360,
+      "azimuth_center_deg": 187.0,
+      "frames": 31,
+      "lmst": "from 1 PM to 2 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/may/N_R000_4891_EDR122CYLASB0360_AUTOLM1.jpg",
+      "image_mb": 3.99,
+      "page_url": "https://science.nasa.gov/resource/sol-4891-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3816021,
+        -4.81427973
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3570.568
+    },
+    {
+      "sol": 4897,
+      "sol_start": 4893,
+      "sol_end": 4897,
+      "date": "2026-05-17",
+      "site": 122,
+      "drive": 462,
+      "azimuth_center_deg": 162.0,
+      "frames": 34,
+      "lmst": "from 1 PM to 4 PM",
+      "image_url": "https://assets.science.nasa.gov/content/dam/science/missions/msl/2026/mosaics/may/N_R000_4897XEDR122CYLASB0462_AUTOLM1.jpg",
+      "image_mb": 3.04,
+      "page_url": "https://science.nasa.gov/resource/sol-4897-right-navigation-camera-cylindrical-projection/",
+      "lonlat": [
+        137.3815811,
+        -4.81439703
+      ],
+      "location_method": "waypoint_site_drive",
+      "elev_geoid_m": -3569.59
+    }
+  ]
+}

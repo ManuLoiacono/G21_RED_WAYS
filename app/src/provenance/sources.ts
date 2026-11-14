@@ -115,6 +115,19 @@ const staticSources = (): SourceEntry[] => [
     fixture: true,
   },
   {
+    id: "rover_panoramas",
+    ...text("rover_panoramas", 3),
+    group: "optica",
+    provenance: {
+      class: "optica",
+      mission: "MSL",
+      instrument: "Mastcam, Navcam",
+      product: "PIA26696; Navcam cylindrical-projection mosaics",
+      url: "https://science.nasa.gov/mission/msl-curiosity/",
+      kind: "observado",
+    },
+  },
+  {
     id: "simulated_response",
     ...text("simulated_response", 1),
     group: "supuesto",

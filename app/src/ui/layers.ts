@@ -28,6 +28,8 @@ export interface LayerDef {
   status: () => LayerStatus;
   /** Present if the layer can be shown or hidden. */
   visibility?: { get: () => boolean; set: (on: boolean) => void };
+  /** Optional button in the row (for example, to open something from the layer). */
+  action?: { label: MessageKey; run: () => void };
   /** Shown instead of a switch when the layer cannot be hidden. */
   lockedKey?: MessageKey;
 }
@@ -58,11 +60,15 @@ export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): Layers
       ? `<button type="button" class="info-btn" data-source="${layer.sourceId}"
            aria-label="${esc(t("layers.source", { layer: t(layer.name) }))}" title="${esc(t("layers.source", { layer: t(layer.name) }))}">ⓘ</button>`
       : "";
+    const action = layer.action
+      ? `<button type="button" class="ly-action" data-action="${layer.id}">${esc(t(layer.action.label))}</button>`
+      : "";
     return `
       <li class="ly-row" data-status="${status}" data-active="${status !== "missing" && status !== "pending" && (!layer.visibility || on)}">
         <div class="ly-main">
           <span class="ly-name">${esc(t(layer.name))}</span>
           ${info}
+          ${action}
           ${control}
         </div>
         <div class="ly-meta">
@@ -86,6 +92,11 @@ export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): Layers
     const target = e.target as HTMLElement;
     if (target.closest('[data-act="close"]')) {
       api.setOpen(false);
+      return;
+    }
+    const act = target.closest<HTMLButtonElement>(".ly-action");
+    if (act) {
+      layers.find((l) => l.id === act.dataset.action)?.action?.run();
       return;
     }
     const sw = target.closest<HTMLButtonElement>(".ly-switch");
