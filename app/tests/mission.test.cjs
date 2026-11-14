@@ -65,6 +65,27 @@ test("reverted edits, newer submits and mismatched echoes reject late responses"
   assert.equal(gate.accepts(newer, { request_echo: newer }, state), false);
 });
 
+test("metadata selects the exact advertised default and keeps synthetic discovery", { skip: !service }, async () => {
+  browserLabels();
+  const { loadMetadata, loadParcel } = require("../src/mission/api.ts");
+  const originalFetch = global.fetch;
+  try {
+    global.fetch = (url, options) => {
+      const parsed = new URL(url);
+      return originalFetch(service + parsed.pathname + parsed.search, options);
+    };
+    const result = await loadMetadata();
+    assert.ok(result.ok, result.error);
+    assert.deepEqual({ id: result.data.parcel.id, version: result.data.parcel.version }, result.data.health.default_parcel);
+    const synthetic = await loadParcel("synthetic_metric_demo", "v1");
+    assert.ok(synthetic.ok);
+    assert.equal(synthetic.data.geographic_adapter, null);
+    const request = baselineRequest({ ...result.data, parcel: synthetic.data });
+    assert.equal((await post(request)).alternatives[0].metrics.elapsed_s, 800);
+    assert.equal((await loadParcel("synthetic_metric_demo", "unregistered-version")).ok, false);
+  } finally { global.fetch = originalFetch; }
+});
+
 test("calculated task, participant and daylight boundaries preserve draft semantics", { skip: !service }, async () => {
   const baseline = require("../../service/examples/request.example.json");
   const cases = [
@@ -215,4 +236,23 @@ test("actual HTTP no-return and interrupted-search payloads validate and render"
   assert.equal(cases.no_return.search_status, "complete");
   assert.equal(cases.inconclusive.assessment, null);
   assert.equal(cases.inconclusive.search_status, "search_inconclusive");
+});
+
+test("three Gale controls preserve source latitude and apply the registered scene shift once", () => {
+  const { metricToGeographic, geographicToMetric, metricToScene, sceneToMetric } = require("../src/mission/geography.ts");
+  const manifest = require("../../data/processed/gale/analytical/manifest.json");
+  const a = manifest.geographic_adapter;
+  for (const [row, col] of [[731, 1288], [790, 1317], [760, 1346]]) {
+    const xy = [manifest.grid.origin_center_xy_m[0] + col*manifest.grid.spacing_m[1],
+      manifest.grid.origin_center_xy_m[1] - row*manifest.grid.spacing_m[0]];
+    const geographic = metricToGeographic(xy, a);
+    const scene = metricToScene(xy, a);
+    const back = sceneToMetric(scene, a);
+    assert.ok(Math.hypot(back[0]-xy[0], back[1]-xy[1]) < 1e-7);
+    const native = geographicToMetric(geographic, a);
+    assert.ok(Math.hypot(native[0]-xy[0], native[1]-xy[1]) < 1e-7);
+    assert.ok(Math.abs((scene[0]-geographic[0])*Math.PI/180*a.radius_m - a.horizontal_shift_m.east) < 1e-7);
+    assert.ok(Math.abs((scene[1]-geographic[1])*Math.PI/180*a.radius_m - a.horizontal_shift_m.north) < 1e-7);
+    assert.ok(Math.abs(geographic[1]+4.826) < .01, "No additional planetocentric/geodetic conversion");
+  }
 });

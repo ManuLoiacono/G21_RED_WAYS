@@ -46,7 +46,6 @@ const staticSources = (): SourceEntry[] => [
     ...text("navigation_draft", 1),
     group: "supuesto",
     provenance: { class: "supuesto", kind: "modelado", product: "p2-plan-draft-1 / engine" },
-    fixture: true,
   },
   {
     id: "visual_terrain",

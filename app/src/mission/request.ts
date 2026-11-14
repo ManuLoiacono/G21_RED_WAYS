@@ -5,14 +5,15 @@ import { DRAFT_SCHEMA, type PlanRequest, type PlanResponse } from "./draft";
 /** The request example supplies scenario identity; editable defaults come from catalogs. */
 export function baselineRequest(metadata: ServiceMetadata): PlanRequest {
   const { parcel, catalogs } = metadata;
+  const defaults = parcel.planning_defaults;
   const template = catalogs.mission_templates.templates.find((t) => t.id === baseline.mission.template_id);
-  if (!template || !parcel.pois.some((p) => p.id === "base") || !parcel.pois.some((p) => p.id === "sample")) throw new Error("Required baseline metadata is unavailable.");
+  if (!template || !parcel.pois.some((p) => p.id === defaults.origin_poi_id) || !parcel.pois.some((p) => p.id === defaults.destination_poi_id)) throw new Error("Required baseline metadata is unavailable.");
   return {
     schema_version: DRAFT_SCHEMA, request_id: crypto.randomUUID(), revision: 0,
-    parcel: { id: parcel.id, version: parcel.version }, scenario: structuredClone(baseline.scenario),
-    origin: { type: "poi", poi_id: "base" }, destination: { type: "poi", poi_id: "sample" },
+    parcel: { id: parcel.id, version: parcel.version }, scenario: structuredClone(defaults.scenario),
+    origin: { type: "poi", poi_id: defaults.origin_poi_id }, destination: { type: "poi", poi_id: defaults.destination_poi_id },
     team: { ...structuredClone(baseline.team), catalog_version: catalogs.catalog.version },
-    mission: { template_id: template.id, template_version: catalogs.mission_templates.version, tasks: structuredClone(template.tasks), time_budget_s: template.time_budget_s, reserve_s: template.reserve_s, departure_utc: baseline.mission.departure_utc },
+    mission: { template_id: template.id, template_version: catalogs.mission_templates.version, tasks: structuredClone(template.tasks), time_budget_s: template.time_budget_s, reserve_s: template.reserve_s, departure_utc: defaults.departure_utc },
     criterion: "fastest",
   };
 }

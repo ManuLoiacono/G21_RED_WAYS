@@ -30,12 +30,15 @@ class ResolvedLocation:
     effective_xy_m: tuple[float, float]
     adapter_id: str = METRIC_ADAPTER
     geographic_conversion: str = "unavailable"
+    requested_xy_m: tuple[float, float] | None = None
+    effective_elevation_m: float | None = None
 
 
 @dataclass(frozen=True)
 class PreparedPOI:
     id: str
     xy_m: tuple[float, float]
+    classification: str = "hypothetical"
 
 
 @dataclass(frozen=True)
@@ -50,6 +53,11 @@ class PreparedParcel:
     reference_description: str
     pois: tuple[PreparedPOI, ...]
     content_id: str
+    metadata_json: str | None = None
+
+    @property
+    def geographic_adapter(self):
+        return loads_strict(self.metadata_json)["geographic_adapter"] if self.metadata_json else None
 
 
 @dataclass(frozen=True)
@@ -127,6 +135,10 @@ class PreparedRegistry:
         """Registered immutable parcel metadata; no implicit latest-version selection."""
         return self._parcels
 
+    @property
+    def scenarios(self):
+        return self._scenarios
+
     def parcel(self, parcel_id, version):
         result = next((item for item in self._parcels if (item.id, item.version) == (parcel_id, version)), None)
         if result is None:
@@ -145,7 +157,8 @@ class PreparedRegistry:
 
 
 def resolve_location(parcel, request, path="location"):
-    if parcel.coordinate_adapter != METRIC_ADAPTER or not parcel.grid.fixture:
+    if not ((parcel.coordinate_adapter == METRIC_ADAPTER and parcel.grid.fixture) or
+            (parcel.coordinate_adapter == "gale-eqc-scene-v1" and parcel.geographic_adapter is not None and not parcel.grid.fixture)):
         raise PlanningInputError("unsupported_coordinate_adapter", path, "A reviewed real coordinate adapter is unavailable.")
     if not isinstance(request, dict):
         raise PlanningInputError("invalid_structure", path, "Expected a tagged location object.")
@@ -177,7 +190,9 @@ def resolve_location(parcel, request, path="location"):
         raise PlanningInputError("missing_endpoint_coverage", path, "Containing cell has no analytical coverage; no snapping is performed.")
     if grid.excluded[cell]:
         raise PlanningInputError("excluded_endpoint", path, "Containing cell is excluded; no snapping is performed.")
-    return ResolvedLocation(requested, cell, grid.xy_m(cell))
+    return ResolvedLocation(requested, cell, grid.xy_m(cell), parcel.coordinate_adapter,
+                            "available" if parcel.geographic_adapter else "unavailable", xy,
+                            float(grid.elevation_m[cell]))
 
 
 def _pair(value, path):

@@ -1,8 +1,8 @@
 import { onLanguageChange, t, tOr } from "../i18n";
 import { esc } from "../ui/format";
 import { infoButton } from "../provenance/sources";
-import { loadMetadata, requestPlan, type ServiceMetadata } from "./api";
-import type { CatalogEntry, Member, Parameters, PlanRequest, PlanResponse } from "./draft";
+import { loadMetadata, loadParcel, requestPlan, type ServiceMetadata } from "./api";
+import type { CatalogEntry, Member, Parameters, Parcel, PlanRequest, PlanResponse } from "./draft";
 import { baselineRequest, RequestGate } from "./request";
 
 export interface PlanResponseEvent { response: PlanResponse }
@@ -11,6 +11,7 @@ export interface MissionPanel {
   onChange(cb: (request: Readonly<PlanRequest>) => void): void;
   onStale(cb: () => void): void;
   getRequest(): PlanRequest | null;
+  getParcel(): Parcel | null;
   getSlopeLimit(): number;
   setCollapsed(value: boolean): void;
 }
@@ -19,6 +20,7 @@ const PARAMETER_KEYS: (keyof Parameters)[] = ["flat_speed_m_s", "max_ascent_deg"
 
 export function createMissionPanel(root: HTMLElement): MissionPanel {
   let metadata: ServiceMetadata | null = null;
+  let parcelLoadSequence = 0;
   let state: PlanRequest | null = null;
   let collapsed = false;
   let busy = false;
@@ -54,8 +56,10 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   }
   function form(s: PlanRequest, m: ServiceMetadata) {
     return `
-      <p class="mp-note">${esc(t("nav.synthetic"))} ${infoButton("navigation_draft", t("nav.provenance"))}</p>
+      <p class="mp-note">${esc(t(m.parcel.geographic_adapter ? "nav.realTerrain" : "nav.synthetic"))} ${infoButton("navigation_draft", t("nav.provenance"))}</p>
       <fieldset><legend>${esc(t("mp.mission"))}</legend>
+        <label>${esc(t("nav.parcel"))}<select name="parcel">${m.health.registered_parcels.map((p, i) =>
+          `<option value="${i}" ${p.id === s.parcel.id && p.version === s.parcel.version ? "selected" : ""}>${esc(p.id)} · ${esc(p.version)} · ${esc(t(p.fixture ? "nav.syntheticMode" : "nav.galeMode"))}</option>`).join("")}</select></label>
         <label>${esc(t("mp.family"))}<select name="template">${m.catalogs.mission_templates.templates.map((v) =>
           `<option value="${esc(v.id)}" ${v.id === s.mission.template_id ? "selected" : ""}>${esc(templateLabel(v.id))}</option>`).join("")}</select></label>
         <label>${esc(t("mp.departFrom"))}<select name="origin">${poiOptions(s.origin.poi_id)}</select></label>
@@ -77,7 +81,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       </fieldset>
       <fieldset><legend>${esc(t("mp.schedule"))}</legend>
         <label>${esc(t("nav.scenario"))}<select name="scenario">
-          ${["synthetic_replay", "synthetic_missing_daylight"].map((id) => `<option value="${id}" ${s.scenario.id === id ? "selected" : ""}>${esc(tOr(`nav.scenario.${id}`, id))}</option>`).join("")}
+          ${m.parcel.scenarios.map(({ id }) => `<option value="${id}" ${s.scenario.id === id ? "selected" : ""}>${esc(tOr(`nav.scenario.${id}`, id))}</option>`).join("")}
         </select></label>
         <label>${esc(t("nav.asOfUtc"))}<input name="as-of" type="datetime-local" step="1" value="${s.scenario.as_of_utc.replace("Z", "")}" /></label>
         <label>${esc(t("nav.departureUtc"))}<input name="departure" type="datetime-local" step="1" value="${s.mission.departure_utc.replace("Z", "")}" /></label>
@@ -111,7 +115,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     </section>`;
   }
   function poiOptions(selected: string) {
-    return metadata!.parcel.pois.map((p) => `<option value="${esc(p.id)}" ${p.id === selected ? "selected" : ""}>${esc(tOr(`nav.poi.${p.id}`, p.id))} [${p.xy_m.join(", ")} m]</option>`).join("");
+    return metadata!.parcel.pois.map((p) => `<option value="${esc(p.id)}" ${p.id === selected ? "selected" : ""}>${esc(tOr(`nav.poi.${p.id}`, p.id))} · ${esc(t("nav.hypothetical"))} [${p.xy_m.map((v) => Number(v.toFixed(2))).join(", ")} m]</option>`).join("");
   }
   function preview() {
     if (!state) return;
@@ -146,11 +150,27 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     } else error = result.error;
     render();
   }
+  async function changeParcel(index: number) {
+    const registered = metadata?.health.registered_parcels[index];
+    if (!metadata || !registered) return;
+    const sequence = ++parcelLoadSequence;
+    state = null; loading = true; render();
+    const result = await loadParcel(registered.id, registered.version);
+    if (sequence !== parcelLoadSequence) return;
+    loading = false;
+    if (result.ok) {
+      metadata = { ...metadata, parcel: result.data };
+      state = baselineRequest(metadata); invalid.clear();
+    } else error = result.error;
+    render();
+  }
   root.addEventListener("input", (event) => {
     const el = event.target as HTMLInputElement | HTMLSelectElement;
     if (!state || !metadata || !el.name) return;
     edited(); // Invalid and reverted edits also invalidate pending work.
-    if (el.name === "template") {
+    if (el.name === "parcel") {
+      void changeParcel(Number(el.value)); return;
+    } else if (el.name === "template") {
       const template = metadata.catalogs.mission_templates.templates.find((v) => v.id === el.value)!;
       Object.assign(state.mission, { template_id: template.id, tasks: structuredClone(template.tasks), reserve_s: template.reserve_s, time_budget_s: template.time_budget_s });
       for (const name of invalid.keys()) if (name.startsWith("task-") || name === "reserve" || name === "budget") invalid.delete(name);
@@ -159,6 +179,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       state[el.name].poi_id = el.value;
     } else if (el.name === "scenario") {
       state.scenario.id = el.value;
+      state.scenario.version = metadata.parcel.scenarios.find((s) => s.id === el.value)!.version;
     } else if (el.name.startsWith("member:")) {
       const id = el.name.slice(7);
       const entry = metadata.catalogs.catalog.entries.find((p) => p.identity.profile_id === id)!;
@@ -257,6 +278,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     onChange(cb) { listeners.push(cb); if (state) cb(state); },
     onStale(cb) { staleListeners.push(cb); },
     getRequest: () => state ? structuredClone(state) : null,
+    getParcel: () => metadata ? structuredClone(metadata.parcel) : null,
     getSlopeLimit() {
       if (!metadata || !state) return Infinity;
       return Math.min(...[...state.team.humans, ...state.team.robots].map((p) => p.mission_overrides?.max_ascent_deg ??

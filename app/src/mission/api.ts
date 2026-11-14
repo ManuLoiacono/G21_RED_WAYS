@@ -26,13 +26,19 @@ export async function loadMetadata(): Promise<Result<ServiceMetadata>> {
   const [health, catalogs] = await Promise.all([read("/health", isHealth), read("/catalogs", isCatalogs)]);
   if (!health.ok) return health;
   if (!catalogs.ok) return catalogs;
-  // This consumer adopts only the explicitly reviewed synthetic development package.
-  const registered = health.data.registered_parcels.find((p) => p.id === "synthetic_metric_demo" && p.version === "v1");
+  // The service explicitly selects an exact default; never infer a newest package.
+  const selected = health.data.default_parcel;
+  const registered = health.data.registered_parcels.find((p) => p.id === selected.id && p.version === selected.version);
   if (!registered) return { ok: false, error: t("nav.noParcel") };
   const parcel = await read(`/parcel?id=${encodeURIComponent(registered.id)}&version=${encodeURIComponent(registered.version)}`, isParcel);
   if (!parcel.ok) return parcel;
   if (parcel.data.id !== registered.id || parcel.data.version !== registered.version) return { ok: false, error: t("api.badShape") };
   return { ok: true, data: { health: health.data, catalogs: catalogs.data, parcel: parcel.data } };
+}
+
+export async function loadParcel(id: string, version: string): Promise<Result<Parcel>> {
+  const result = await read(`/parcel?id=${encodeURIComponent(id)}&version=${encodeURIComponent(version)}`, isParcel);
+  return result.ok && (result.data.id !== id || result.data.version !== version) ? { ok: false, error: t("api.badShape") } : result;
 }
 
 export function requestPlan(req: PlanRequest): Promise<Result<PlanResponse>> {

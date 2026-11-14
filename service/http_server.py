@@ -84,15 +84,20 @@ def local_origin(value):
 class HTTPApplication:
     """One application owns one immutable registry and one reusable planner."""
 
-    def __init__(self, *, allowed_origins=DEFAULT_ORIGINS, registry=None):
+    def __init__(self, *, allowed_origins=DEFAULT_ORIGINS, registry=None, default_parcel=None):
         self.allowed_origins = frozenset(local_origin(item) for item in allowed_origins)
         self.registry = fixture_registry() if registry is None else registry
+        first = self.registry.parcels[0]
+        self.default_parcel = (first.id, first.version) if default_parcel is None else default_parcel
+        self.registry.parcel(*self.default_parcel)
         self.planner = PreparedPlanner(self.registry)
 
     def health(self):
         return {"status": "ok", "adapter_version": ADAPTER_VERSION,
                 "schema_version": DRAFT_SCHEMA_VERSION, "contract_status": "consumer_review_pending",
-                "scope": "local_synthetic_development", "geographic_conversion": "unavailable",
+                "scope": "local_terrain_development" if any(not p.grid.fixture for p in self.registry.parcels) else "local_synthetic_development",
+                "geographic_conversion": "available" if any(p.geographic_adapter for p in self.registry.parcels) else "unavailable",
+                "default_parcel": dict(zip(("id", "version"), self.default_parcel)),
                 "registered_parcels": [{"id": p.id, "version": p.version, "fixture": p.grid.fixture}
                                        for p in self.registry.parcels]}
 
@@ -127,11 +132,20 @@ class HTTPApplication:
         except PlanningInputError as exc:
             raise HTTPProblem(404, exc.code, exc.path, str(exc)) from exc
         grid = parcel.grid
+        scenarios = [s for s in self.registry.scenarios if (s.parcel_id, s.parcel_version) == (parcel.id, parcel.version)]
+        scenario = scenarios[0] if scenarios else None
         return {"schema_version": DRAFT_SCHEMA_VERSION, "contract_status": "consumer_review_pending",
                 "id": parcel.id, "version": parcel.version, "content_id": parcel.content_id,
                 "fixture": grid.fixture, "evaluation_location_id": parcel.evaluation_location_id,
                 "coordinate_frame": "parcel_metric", "coordinate_adapter": parcel.coordinate_adapter,
-                "geographic_conversion": "unavailable", "reference_description": parcel.reference_description,
+                "geographic_conversion": "available" if parcel.geographic_adapter else "unavailable",
+                "geographic_adapter": parcel.geographic_adapter,
+                "bounds_lonlat": loads_strict(parcel.metadata_json)["bounds_lonlat"] if parcel.metadata_json else None,
+                "reference_description": parcel.reference_description,
+                "scenarios": [{"id": s.id, "version": s.version, "fixture": s.fixture} for s in scenarios],
+                "planning_defaults": {"origin_poi_id": "base", "destination_poi_id": "sample",
+                                      "scenario": {"id": scenario.id, "version": scenario.version, "as_of_utc": scenario.clock.utc_epoch},
+                                      "departure_utc": scenario.clock.utc_epoch} if scenario else None,
                 "grid": {"shape": grid.shape, "spacing_m": grid.spacing_m,
                          "origin_center_xy_m": grid.origin_center_xy_m, "row_direction": grid.row_direction,
                          "data_version": grid.data_version, "aggregation_policy": grid.aggregation_policy},
@@ -306,16 +320,25 @@ def main(argv=None):
     parser.add_argument("--host", choices=("127.0.0.1", "localhost"), default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--allow-origin", action="append", help="Repeat to replace the default browser origins.")
+    parser.add_argument("--gale-package", help="Explicit trusted manifest path; register this exact Gale package and make it the UI default.")
     args = parser.parse_args(argv)
     if not 1 <= args.port <= 65535:
         parser.error("Port must be between 1 and 65535.")
     try:
-        app = HTTPApplication(allowed_origins=DEFAULT_ORIGINS if args.allow_origin is None else args.allow_origin)
+        registry = None
+        default_parcel = None
+        if args.gale_package:
+            from .gale import gale_registry
+            registry = gale_registry(args.gale_package)
+            real = registry.parcels[-1]
+            default_parcel = (real.id, real.version)
+        app = HTTPApplication(allowed_origins=DEFAULT_ORIGINS if args.allow_origin is None else args.allow_origin,
+                              registry=registry, default_parcel=default_parcel)
     except ValueError as exc:
         parser.error(str(exc))
     logging.basicConfig(level=logging.INFO)
     with LocalHTTPServer(app, args.host, args.port) as server:
-        print(f"P2 draft service at http://127.0.0.1:{server.server_port}; schema={DRAFT_SCHEMA_VERSION}; synthetic inputs only", flush=True)
+        print(f"P2 draft service at http://127.0.0.1:{server.server_port}; schema={DRAFT_SCHEMA_VERSION}; scope={app.health()['scope']}", flush=True)
         try:
             server.serve_forever()
         except KeyboardInterrupt:

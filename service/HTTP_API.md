@@ -1,6 +1,34 @@
 # Local HTTP adapter: unaccepted development draft
 
-Adapter version: `p2-http-local-1`. Planning schema: `p2-plan-draft-1`, with consumer review pending. This is a local synthetic development service, not shared v1 or real Gale integration. The adapter uses Python's standard library; there are no additional dependencies beyond the pinned `engine/requirements.txt`.
+Planning schema: `p2-plan-draft-1`, with consumer review pending. The default remains synthetic development. Explicit `--gale-package data/processed/gale/analytical/manifest.json` also registers the exact prepared real terrain and selects it as the UI default. Package preparation requires `scripts/analytical-requirements.txt`; the HTTP server adds no dependencies. Shared v0 is unchanged.
+
+## Additive Gale draft extension
+
+`GET /health` now includes an explicit `default_parcel: {id, version}` alongside the complete
+registered list. It never discovers an arbitrary newest package. `geographic_conversion` is
+`available` when an adapter is registered; this does not establish visual registration accuracy.
+`GET /parcel` additionally returns `geographic_adapter` (versioned `gale-eqc-scene-v1`, or null),
+exact `bounds_lonlat`, registered `scenarios`, and `planning_defaults` for the associated scenario,
+origin/destination IDs and UTC inputs. POIs include `classification`. The frontend offers exact
+registered parcel choices, including the original synthetic regression mode.
+
+Responses carry the same registered `geographic_adapter`; analytical legs remain in `parcel_metric`.
+Resolved locations additionally retain `requested_xy_m` and unshifted `effective_elevation_m`.
+`terrain_fixture: false` and `scenario_fixture: true` are independent. The Gale development
+scenario contains no fabricated weather/daylight records and preserves the existing assumed
+fixture clock mapping. A found route therefore reports `insufficient_evidence` for daylight.
+Requests are unchanged. Producer, frontend types/validators and examples adopt this additive
+draft together; it is not shared-contract acceptance.
+
+```powershell
+& '.\.venv\Scripts\python.exe' -m service --gale-package data/processed/gale/analytical/manifest.json
+& '.\.venv\Scripts\python.exe' -m service.client --request service/examples/gale.request.json
+& '.\.venv\Scripts\python.exe' -m scripts.benchmark_gale
+```
+
+See [the delivery handoff](../docs/handoffs/GALE_ROUTING_DELIVERY.md) for controls, measured resource
+use and review gaps. Missing files or altered content hashes fail startup; no synthetic Gale
+success is substituted. The legacy endpoint descriptions below remain the synthetic examples.
 
 ## Launch from the repository root
 

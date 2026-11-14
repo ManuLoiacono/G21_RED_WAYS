@@ -1,6 +1,6 @@
 # Marswalk frontend
 
-The mission UI explicitly consumes the local P2 development draft `p2-plan-draft-1`. Shared v0 is unchanged. The service calculates the result from synthetic metric inputs; it does not supply a real Gale route. Connection and schema errors are visible and never replaced with fixed response cards.
+The mission UI explicitly consumes the local P2 development draft `p2-plan-draft-1`. Shared v0 is unchanged. The service advertises an exact default parcel and registered choices. Start it with `--gale-package data/processed/gale/analytical/manifest.json` after [analytical preparation](../scripts/README.md) to enable real HiRISE terrain; synthetic regression mode remains selectable. Connection and schema errors are visible and never replaced with fixed response cards. The Gale scenario uses assumed movement/clock parameters and missing daylight evidence, not observed mission viability. See [the review handoff](../docs/handoffs/GALE_ROUTING_DELIVERY.md).
 
 ## Run the integrated development flow
 
