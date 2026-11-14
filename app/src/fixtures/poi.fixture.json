@@ -1,0 +1,49 @@
+{
+  "_comment": "FIXTURE de desarrollo con el formato de contracts/poi.example.json (v0). Base y destinos de prueba: NO son los destinos científicos de P3-05. Reemplazar cuando estén.",
+  "schema_version": 0,
+  "fixture": true,
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [137.3889, -4.826] },
+      "properties": { "id": "poi_base", "role": "base", "title": "Base hipotética", "hypothetical": true, "families": [], "provenance": { "kind": "supuesto" } }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [137.381, -4.81] },
+      "properties": {
+        "id": "poi_001",
+        "role": "destino",
+        "title": "Destino de prueba 1",
+        "hypothetical": true,
+        "families": ["observacion_geologica", "exploracion_topografica"],
+        "provenance": { "kind": "supuesto" }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [137.379, -4.802] },
+      "properties": {
+        "id": "poi_002",
+        "role": "destino",
+        "title": "Destino de prueba 2",
+        "hypothetical": true,
+        "families": ["reconocimiento", "exploracion_topografica"],
+        "provenance": { "kind": "supuesto" }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [137.3851, -4.8189] },
+      "properties": {
+        "id": "poi_003",
+        "role": "destino",
+        "title": "Destino de prueba 3",
+        "hypothetical": true,
+        "families": ["medicion_ambiental", "observacion_geologica", "reconocimiento"],
+        "provenance": { "kind": "supuesto" }
+      }
+    }
+  ]
+}

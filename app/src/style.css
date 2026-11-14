@@ -1,0 +1,96 @@
+/* Panel «Preparar misión» (P1-02). Escritorio: columna a la derecha. Tablet angosta: hoja inferior. */
+#missionPanel {
+  --mp-bg: rgba(18, 18, 22, 0.94);
+  --mp-fg: #ececf0;
+  --mp-muted: #a3a3ad;
+  --mp-line: #3a3a44;
+  --mp-accent: #3ff0ff;
+  --mp-error: #ff8a7a;
+
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  width: 360px;
+  max-height: calc(100% - 24px);
+  display: flex;
+  flex-direction: column;
+  background: var(--mp-bg);
+  color: var(--mp-fg);
+  border: 1px solid var(--mp-line);
+  border-radius: 10px;
+  font: 13px/1.4 system-ui, sans-serif;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+#missionPanel.collapsed .mp-body { display: none; }
+
+.mp-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--mp-line); }
+.mp-head h2 { margin: 0; font-size: 15px; font-weight: 600; }
+#missionPanel.collapsed .mp-head { border-bottom: none; }
+
+.mp-body { overflow-y: auto; overflow-x: hidden; padding: 4px 12px 12px; }
+.mp-body fieldset { border: none; border-top: 1px solid var(--mp-line); margin: 8px 0 0; padding: 8px 0 0; }
+.mp-body fieldset:first-of-type { border-top: none; }
+.mp-body legend { font-weight: 600; padding: 0; margin-bottom: 4px; color: var(--mp-accent); }
+.mp-body label { display: flex; flex-direction: column; gap: 3px; margin: 6px 0; color: var(--mp-muted); }
+
+.mp-body input,
+.mp-body select {
+  background: #24242b;
+  color: var(--mp-fg);
+  border: 1px solid #4a4a55;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font: inherit;
+  min-height: 32px;
+  box-sizing: border-box;
+}
+.mp-body input[readonly] { color: var(--mp-muted); }
+.mp-body input[aria-invalid="true"] { border-color: var(--mp-error); outline-color: var(--mp-error); }
+.mp-body input[type="range"] { padding: 0; min-height: 24px; accent-color: var(--mp-accent); }
+.mp-body :focus-visible { outline: 2px solid var(--mp-accent); outline-offset: 1px; }
+
+.mp-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 10px; }
+.mp-grid > label { min-width: 0; }
+.mp-grid input { width: 100%; }
+.mp-inline { display: flex; align-items: center; gap: 6px; }
+.mp-inline input { flex: 1; min-width: 0; }
+.mp-unit { color: var(--mp-muted); }
+.mp-hint { margin: 2px 0 4px; color: var(--mp-muted); font-size: 12px; }
+.mp-note { margin: 8px 0 0; padding: 6px 8px; border-radius: 6px; background: rgba(255, 196, 0, 0.12); color: #ffd666; font-size: 12px; }
+
+.mp-tasks { list-style: none; margin: 0; padding: 0; }
+.mp-tasks li { display: grid; grid-template-columns: 1fr 64px auto 32px; align-items: center; gap: 6px; margin: 6px 0; }
+.mp-tasks input { min-width: 0; }
+
+.mp-pref span { display: flex; justify-content: space-between; color: var(--mp-fg); }
+.mp-pref small { color: var(--mp-muted); }
+
+.mp-body button {
+  background: #24242b;
+  color: var(--mp-fg);
+  border: 1px solid #4a4a55;
+  border-radius: 6px;
+  padding: 6px 10px;
+  min-height: 32px;
+  font: inherit;
+  cursor: pointer;
+}
+.mp-body button:disabled { opacity: 0.45; cursor: not-allowed; }
+.mp-body button.mp-link { background: none; border: none; color: var(--mp-accent); padding: 4px 0; }
+.mp-head button { background: none; color: var(--mp-fg); border: 1px solid #4a4a55; border-radius: 6px; width: 32px; height: 32px; font-size: 16px; cursor: pointer; }
+
+.mp-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; }
+.mp-body button.mp-primary { background: var(--mp-accent); color: #062126; border-color: var(--mp-accent); font-weight: 600; flex: 1; }
+
+.mp-status { min-height: 1.4em; margin: 8px 0 0; color: var(--mp-muted); }
+.mp-status[data-kind="error"] { color: var(--mp-error); }
+
+.mp-sources, .mp-json { margin-top: 6px; color: var(--mp-muted); }
+.mp-sources summary, .mp-json summary { cursor: pointer; }
+.mp-sources ul { padding-left: 18px; margin: 4px 0; }
+.mp-json pre { max-height: 220px; overflow: auto; background: #101014; padding: 8px; border-radius: 6px; font-size: 11px; color: var(--mp-fg); }
+
+@media (max-width: 760px) {
+  #missionPanel { top: auto; bottom: 0; right: 0; left: 0; width: auto; max-height: 55%; border-radius: 10px 10px 0 0; }
+}

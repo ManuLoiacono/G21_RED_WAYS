@@ -22,6 +22,15 @@ npm run dev               # abre http://localhost:5173
    - Allowed URLs: `http://localhost:5173` (y más adelante el dominio publicado).
 3. Pegar el token en `.env`. **No** subir `.env` al repositorio. El token igual queda visible en el navegador; por eso se restringe.
 
+## Preparación de misión (P1-02)
+- Panel «Preparar misión» (`src/mission/`): familia (4 plantillas), destino (selector o clic en el mapa), tareas con duración, sol REMS, hora de salida, reserva, tiempo máximo, perfil y preferencias, y «Restaurar valores».
+- «Calcular rutas» envía `POST {VITE_SERVICE_URL}/plan` con el `plan_request` del contrato v0 (por defecto `http://localhost:8000`). El último pedido queda en `window.lastPlanRequest` y en «Ver pedido enviado al motor».
+- El servicio de P2 tiene que aceptar CORS desde `http://localhost:5173`: el navegador manda un `OPTIONS` antes del `POST`.
+- Valores iniciales en `src/mission/templates.ts`: supuestos editables. Reemplazarlos por los de P2-01 cuando existan.
+- Base y destinos: `src/fixtures/poi.fixture.json` (**fixture**) hasta tener P3-05.
+- Los puntos se dibujan con la altura que muestrea Cesium (`sampleHeightMostDetailed`). Con el globo oculto, `CLAMP_TO_GROUND` no funciona en puntos ni etiquetas; en polilíneas sí.
+- `npm run typecheck` revisa los tipos.
+
 ## Notas
 - `src/look.ts`: shader de color + sol bajo, atmósfera y ajustes de calidad (liviano / equilibrado / presentación).
 - No usar `scene.verticalExaggeration`: con este tileset deja de cargar el terreno detallado.
