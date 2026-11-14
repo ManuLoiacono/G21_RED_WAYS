@@ -10,6 +10,7 @@ Usage (from the repository root):
     python3 -m venv .venv && .venv/bin/pip install numpy rasterio pillow
     .venv/bin/python scripts/build_hirise_tiles.py
     # options: --bbox W S E N  --shift EAST NORTH  --offset METERS  --out data/processed/gale/tiles_hirise
+    # --grid-only: only the elevation grid for the app's cursor readout (elevation.bin + elevation.json)
 
 Reads only the parcel window over HTTP (COG on S3, without downloading the whole file).
 
@@ -158,7 +159,8 @@ class Parcel:
     ortho_res: float
 
 
-def read_parcel(bbox: tuple[float, float, float, float], tint: bool) -> Parcel:
+def read_dtm(bbox: tuple[float, float, float, float]) -> tuple[np.ndarray, float, float, float]:
+    """DTM window of the parcel: (z with NaN as nodata, x and y of the first cell center, cell size)."""
     west, south, east, north = bbox
     xw, xe = math.radians(west) * R_SPHERE, math.radians(east) * R_SPHERE
     ys, yn = math.radians(south) * R_SPHERE, math.radians(north) * R_SPHERE
@@ -180,6 +182,14 @@ def read_parcel(bbox: tuple[float, float, float, float], tint: bool) -> Parcel:
     ys_ = y0 - np.arange(z.shape[0]) * res
     z[:, (xs < xw) | (xs > xe)] = np.nan
     z[(ys_ < ys) | (ys_ > yn), :] = np.nan
+    return z, x0, y0, res
+
+
+def read_parcel(bbox: tuple[float, float, float, float], tint: bool) -> Parcel:
+    west, south, east, north = bbox
+    xw, xe = math.radians(west) * R_SPHERE, math.radians(east) * R_SPHERE
+    ys, yn = math.radians(south) * R_SPHERE, math.radians(north) * R_SPHERE
+    z, x0, y0, res = read_dtm(bbox)
 
     with rasterio.open(ORTHO_URL) as o:
         ores = o.res[0]
@@ -366,10 +376,58 @@ def build(p: Parcel, out: str, offset: float, shift: tuple[float, float], jpeg_q
     return {**stats, "levels": depth + 1}
 
 
+# --------------------------------------------------------------------------- elevation grid
+
+def write_elevation_grid(z: np.ndarray, x0: float, y0: float, res: float, out: str,
+                         shift: tuple[float, float]) -> dict:
+    """
+    DTM elevations of the parcel on the native 1 m grid, for the app's cursor readout
+    (elevation and slope under the mouse). Display only; the engine reads the DTM itself.
+
+    Format: elevation.bin = uint16 little-endian, row-major from the north-west cell;
+    value = round((z - z_min) / scale); 65535 = nodata. elevation.json describes the grid.
+    """
+    valid = ~np.isnan(z)
+    z_min, z_max = float(np.nanmin(z)), float(np.nanmax(z))
+    # 1 cm steps while the relief fits in 16 bits, coarser otherwise.
+    scale = max(0.01, math.ceil((z_max - z_min) / 65534 * 100) / 100)
+    q = np.full(z.shape, 65535, dtype="<u2")
+    q[valid] = np.round((z[valid] - z_min) / scale).astype("<u2")
+    with open(os.path.join(out, "elevation.bin"), "wb") as f:
+        f.write(q.tobytes())
+    info = {
+        "product": "DTM elevation grid of the parcel (cursor readout)",
+        "kind": "derivado",  # contract value: derived
+        "format": "uint16 little-endian, row-major from the north-west cell; z = z_min + value * scale; 65535 = nodata",
+        "cols": int(z.shape[1]),
+        "rows": int(z.shape[0]),
+        "cell_m": res,
+        # Center of the first (north-west) cell, DTM projected meters (lon = x / R, lat = y / R).
+        "x0_m": x0,
+        "y0_m": y0,
+        "radius_m": R_SPHERE,
+        "z_min_m": z_min,
+        "z_max_m": z_max,
+        "scale_m": scale,
+        "nodata": 65535,
+        "nodata_fraction": round(float(1 - valid.mean()), 4),
+        "elevation_reference": "DTM elevation (HiRISE DTM vertical datum), not Cesium scene height",
+        # The scene is the DTM moved by this amount: the app subtracts it to read the grid.
+        "scene_shift_m": {"east": shift[0], "north": shift[1]},
+        "source": {"class": "topografica", "mission": "MRO", "instrument": "HiRISE",
+                   "product": "DTEEC_019698_1750_019988_1750_U01", "url": DTM_URL, "kind": "observado"},
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    with open(os.path.join(out, "elevation.json"), "w") as f:
+        json.dump(info, f, ensure_ascii=False, indent=2)
+    print(f"Elevation grid: {z.shape[1]} x {z.shape[0]}, {z_min:.1f}–{z_max:.1f} m, step {scale} m", flush=True)
+    return info
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--bbox", nargs=4, type=float, metavar=("W", "S", "E", "N"),
-                    default=[137.370, -4.840, 137.400, -4.810],
+                    default=[137.360, -4.850, 137.410, -4.800],
                     help="degrees, east-positive longitude (default: parcel of the example manifest)")
     ap.add_argument("--offset", type=float, default=56.2,
                     help="meters added to the DTM to match Cesium Mars height (measured in the parcel: 56.2)")
@@ -379,11 +437,18 @@ def main():
     ap.add_argument("--tint", action="store_true",
                     help="ochre tint in the texture (default gray: the app colors it with the same shader as Cesium Mars)")
     ap.add_argument("--jpeg-quality", type=int, default=85)
+    ap.add_argument("--grid-only", action="store_true",
+                    help="only (re)write the elevation grid for the cursor readout; keeps the existing mesh")
     a = ap.parse_args()
 
     os.environ.setdefault("GDAL_DISABLE_READDIR_ON_OPEN", "EMPTY_DIR")
+    os.makedirs(a.out, exist_ok=True)
+    if a.grid_only:
+        write_elevation_grid(*read_dtm(tuple(a.bbox)), a.out, tuple(a.shift))
+        return
     p = read_parcel(tuple(a.bbox), tint=a.tint)
     stats = build(p, a.out, a.offset, tuple(a.shift), a.jpeg_quality)
+    write_elevation_grid(p.z, p.x0, p.y0, p.res, a.out, tuple(a.shift))
 
     meta = {
         "product": "3D mesh of the parcel (3D Tiles 1.1)",

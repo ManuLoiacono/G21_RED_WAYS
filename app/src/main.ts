@@ -1,7 +1,7 @@
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { getLanguage, onLanguageChange, setLanguage, t, translateStaticDom, type Language, type MessageKey } from "./i18n";
-import { applyAtmosphere, applyPreset, marsShader, sunDirectionWC, type Preset } from "./look";
+import { applyAtmosphere, applyPreset, marsShader, sunDirectionWC } from "./look";
 import fixtureRoute from "./fixture_route.json";
 import poiFixture from "./fixtures/poi.fixture.json";
 import "./style.css";
@@ -17,6 +17,11 @@ import { hideLoading, showError, showLoading, showToast, updateLoading } from ".
 import { createSourcesPanel } from "./provenance/panel";
 import { installWheelZoom, keepCameraAboveGround } from "./camera";
 import { loadHiriseLayer } from "./hirise";
+import { createLayersPanel } from "./ui/layers";
+import { createCursorReadout } from "./ui/readout";
+import { ElevationGrid } from "./terrain/elevationGrid";
+import { addParcelOutline } from "./terrain/parcel";
+import { createMissionContext, setUpSettingsMenu } from "./ui/hud";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -123,6 +128,8 @@ async function main() {
   // For debugging from the browser console (available even if loading never finishes).
   Object.assign(window, { viewer, tileset, Cesium });
   const initialTiles = waitForInitialTiles(tileset);
+  // DTM grid for the cursor readout (optional, built with the HiRISE mesh); loads in parallel.
+  const elevationGrid = ElevationGrid.load();
 
   // Look: low sun from the west (azimuth 280°, elevation 8°). It is an aesthetic value,
   // not a computed solar position: the real daylight window comes from REMS/Horizons.
@@ -168,6 +175,85 @@ async function main() {
   const results = createResultsPanel(document.getElementById("resultsPanel")!);
   const routes = new RouteLayer(viewer);
   results.onSelect((altId) => routes.select(altId));
+
+  // Parcel outline in red, moved like the HiRISE mesh (same shift as its metadata, if built).
+  const parcelOutline = addParcelOutline(viewer, hirise?.metadata.horizontal_shift_m);
+
+  // Top bar: mission context (center) and the "Layers" panel (left).
+  const context = createMissionContext(document.getElementById("hudContext")!, pois);
+  panel.onChange((state) => context.update(state));
+  let missionVisible = true;
+  const layers = createLayersPanel(document.getElementById("layersPanel")!, [
+    {
+      id: "hirise",
+      dataClass: "topografica",
+      name: "layers.hirise",
+      origin: "MRO · HiRISE",
+      sourceId: "hirise_mesh",
+      status: () => (hirise ? "loaded" : "missing"),
+      visibility: hirise && {
+        get: () => hirise.tileset.show,
+        set: (on) => hirise.setVisible(on),
+      },
+    },
+    {
+      id: "visual_terrain",
+      dataClass: "optica",
+      name: "layers.visualTerrain",
+      origin: "Cesium Mars · ion",
+      sourceId: "visual_terrain",
+      status: () => "streaming",
+      lockedKey: "layers.locked",
+    },
+    {
+      id: "rems",
+      dataClass: "atmosferica",
+      name: "layers.rems",
+      origin: "MSL · REMS",
+      sourceId: "rems",
+      status: () => "pending",
+    },
+    {
+      id: "themis",
+      dataClass: "termica",
+      name: "layers.themis",
+      origin: "Mars Odyssey · THEMIS",
+      status: () => "pending",
+    },
+    {
+      id: "parcel",
+      dataClass: "mission",
+      name: "layers.parcel",
+      origin: "gale_demo_v1",
+      status: () => "fixture",
+      visibility: {
+        get: () => parcelOutline.isVisible(),
+        set: (on) => parcelOutline.setVisible(on),
+      },
+    },
+    {
+      id: "mission",
+      dataClass: "mission",
+      name: "layers.mission",
+      origin: "Marswalk",
+      sourceId: "fixture_pois",
+      status: () => "fixture",
+      visibility: {
+        get: () => missionVisible,
+        set: (on) => {
+          missionVisible = on;
+          viewer.entities.show = on;
+          routes.setVisible(on);
+        },
+      },
+    },
+  ]);
+  const layersBtn = document.getElementById("toggleLayers") as HTMLButtonElement;
+  layersBtn.onclick = () => layers.setOpen(!layers.isOpen());
+  layers.onToggle((open) => {
+    layersBtn.setAttribute("aria-expanded", String(open));
+    layersBtn.classList.toggle("active", open);
+  });
   let lastResponseSimulated = false;
   let lastResponse: PlanResponse | null = null;
   document.addEventListener("plan-response", (e) => {
@@ -175,6 +261,7 @@ async function main() {
     lastResponseSimulated = simulated || response.fixture === true;
     lastResponse = response;
     fixtureRouteEntity.show = false; // the initial test route no longer adds anything
+    layers.setOpen(false); // make room for the results in the left column
     routes.show(response);
     results.show(response, simulated);
     // On narrow screens (portrait tablet) the form collapses so the map and results are visible.
@@ -193,6 +280,10 @@ async function main() {
   await initialTiles;
   loadingKey = null;
   hideLoading();
+
+  // Cursor readout: position, DTM elevation and slope (highlighted above the profile's maximum).
+  const readout = createCursorReadout(viewer, await elevationGrid);
+  panel.onChange((state) => readout.setSlopeLimit(state.profile.max_slope_deg));
 
   const poiEntities = await addPois(pois);
   onLanguageChange(() => {
@@ -220,27 +311,8 @@ async function main() {
     else if (entity.id.startsWith("route:")) sources.open(lastResponseSimulated ? "simulated_response" : "hirise_dtm");
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-  // Minimal controls
-  document.querySelectorAll<HTMLButtonElement>("#hud button[data-preset]").forEach((btn) => {
-    btn.onclick = () => {
-      applyPreset(viewer, tilesets, btn.dataset.preset as Preset, sun);
-      document.querySelectorAll("#hud button[data-preset]").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-    };
-  });
+  setUpSettingsMenu((preset) => applyPreset(viewer, tilesets, preset, sun));
   document.getElementById("resetView")!.onclick = resetView;
-
-  const hiriseBtn = document.getElementById("toggleHirise") as HTMLButtonElement;
-  if (hirise) {
-    hiriseBtn.hidden = false;
-    document.getElementById("hiriseInfo")!.hidden = false;
-    hiriseBtn.onclick = () => {
-      const on = hiriseBtn.getAttribute("aria-pressed") !== "true";
-      hirise.setVisible(on);
-      hiriseBtn.setAttribute("aria-pressed", String(on));
-      hiriseBtn.classList.toggle("active", on);
-    };
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -298,12 +370,23 @@ function highlightDestination(entities: Map<string, Cesium.Entity>, selectedId: 
   }
 }
 
-/** Keeps --hud-bottom in sync with the HUD height, so panels start right below it at any width. */
+/**
+ * Keeps --hud-bottom (bottom edge of the top bar) and --layers-bottom (bottom edge of the left
+ * column's "Layers" panel, or the bar if it is closed) in sync, so panels stack at any width.
+ */
 function trackHudHeight() {
   const hud = document.getElementById("hud")!;
-  const update = () =>
-    document.documentElement.style.setProperty("--hud-bottom", `${Math.ceil(hud.getBoundingClientRect().bottom) + 8}px`);
-  new ResizeObserver(update).observe(hud);
+  const layers = document.getElementById("layersPanel")!;
+  const root = document.documentElement.style;
+  const update = () => {
+    const hudBottom = Math.ceil(hud.getBoundingClientRect().bottom) + 8;
+    const layersBottom = layers.hidden ? hudBottom : Math.ceil(layers.getBoundingClientRect().bottom) + 8;
+    root.setProperty("--hud-bottom", `${hudBottom}px`);
+    root.setProperty("--layers-bottom", `${Math.max(hudBottom, layersBottom)}px`);
+  };
+  const observer = new ResizeObserver(update);
+  observer.observe(hud);
+  observer.observe(layers);
   update();
 }
 

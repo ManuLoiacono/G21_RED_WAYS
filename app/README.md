@@ -35,7 +35,7 @@ La app muestra el problema en pantalla con los pasos para resolverlo. El detalle
 | «Cesium ion rechazó el token» | Token mal copiado, vencido, sin `assets:read` o sin el asset de Cesium Mars, o URL no permitida | Revisar el token en ion; si restringiste URLs, agregar `http://localhost:5173` |
 | «Cesium Mars no está en tu cuenta de ion» | Falta agregar el asset `3644333` | Asset Depot → Cesium Mars → **Add to my assets** |
 | «No se pudo conectar con Cesium ion» | Sin internet o ion caído | Revisar la conexión y tocar **Reintentar** |
-| «La carga está tardando más de lo normal» | Conexión lenta | Esperar; sigue intentando. Si persiste, usar el ajuste **Liviano** |
+| «La carga está tardando más de lo normal» | Conexión lenta | Esperar; sigue intentando. Si persiste, elegir **Liviano** en el menú ⚙ |
 | «El navegador no puede mostrar la escena 3D» | Sin WebGL | Usar Chrome, Edge o Firefox recientes con aceleración por hardware |
 | «El servicio de rutas no responde: se muestra una respuesta simulada» | El servicio de P2 no está levantado | Esperado mientras no exista `service/`. Las tarjetas llevan el aviso «Respuesta simulada» |
 | «El servicio de rutas respondió 4xx/5xx» | Error en el servicio | Ver los registros del servicio (persona 2) |
@@ -78,21 +78,38 @@ La app muestra el problema en pantalla con los pasos para resolverlo. El detalle
 - **No usar `{ enableCollision: true }` en el tileset:** con Cesium Mars traba la carga de teselas (medido).
 - «Restablecer vista» vuelve a la vista inicial (137,374° E, −4,792°, rumbo 160°, inclinación −9°).
 
+## Barra superior y capas
+
+- **Barra superior:** a la izquierda, el nombre y el lugar. En el centro, la misión que se está preparando (familia, destino, sol y hora de salida), que se actualiza con el formulario. A la derecha, **Capas**, **Restablecer vista**, **Fuentes**, **ES | EN** y el menú ⚙ con la calidad visual (Liviano, Equilibrado y Presentación).
+- **Panel Capas** (`src/ui/layers.ts`): una fila por clase de dato. Cada fila tiene un interruptor (si la capa se puede ocultar), un ⓘ con su fuente, la misión e instrumento, y un estado: archivo local, en línea, datos de prueba, no generada o sin conectar. Las capas que todavía no existen (REMS, THEMIS) aparecen como «sin conectar»: no se inventan. Se cierra solo al llegar una respuesta, para dejar lugar a los resultados. En pantallas angostas arranca cerrado.
+- **Colores:** los tokens están en `:root` (`src/style.css`, variables `--ui-*`). Los cuatro estados de evaluación usan siempre los mismos colores.
+
 ## Detalle HiRISE de 1 m en la parcela (opcional)
 
 Dentro de la parcela, la escena puede mostrar una malla propia hecha con el DTM HiRISE (1 m) y la
 ortoimagen RED (0,25 m), en lugar de Cesium Mars (~2,5 m en Gale). Cesium Mars sigue alrededor como contexto.
 
 ```bash
-# desde la raíz del repo (una vez; ~1 min, lee solo la ventana de la parcela desde S3)
+# desde la raíz del repo (una vez; ~1,5 min, lee solo la ventana de la parcela desde S3)
 python3 -m venv .venv && .venv/bin/pip install numpy rasterio pillow
 .venv/bin/python scripts/build_hirise_tiles.py
 ```
 
-- Genera `data/processed/gale/tiles_hirise/` (~150 MB, no se versiona). `npm run dev` lo sirve en `/local-data/`.
-- Si no está generada, la app arranca igual con Cesium Mars. Si está, aparece el botón **Detalle HiRISE 1 m** para compararla.
+- La parcela es de ~3 × 3 km (137,360–137,410° E; −4,850 a −4,800°, en coordenadas del DTM), igual que `contracts/parcel_manifest.example.json`. En la escena se ve con un borde rojo (capa «Límite de la parcela»).
+- Genera `data/processed/gale/tiles_hirise/` (~420 MB y una grilla de elevación de ~17 MB; no se versiona). `npm run dev` lo sirve en `/local-data/`.
+- Si no está generada, la app arranca igual con Cesium Mars. Si está, se prende y apaga desde el panel **Capas** para compararla.
 - Es solo visual: el motor calcula sobre el DTM. El color ocre lo pone el shader de la app; la imagen RED es en grises.
 - Solo funciona con `npm run dev` (el build de producción todavía no copia las teselas).
+
+### Lectura bajo el cursor
+
+Al pasar el mouse sobre el terreno, abajo al centro se ven la posición, la **elevación** y la **pendiente** local del punto (`src/ui/readout.ts`).
+
+- Elevación y pendiente salen de la grilla de 1 m del DTM HiRISE (`elevation.bin` + `elevation.json`, que genera el mismo script; `--grid-only` arma solo la grilla en ~6 s). Están etiquetadas como **derivado**. La pendiente se calcula a 1 m con diferencias centrales.
+- La elevación es la del DTM, no la altura de la escena 3D (la escena está ~56 m más arriba y corrida −25 m E, +35 m N). Adentro de la parcela, las coordenadas también son las del DTM, el mismo marco que usa el motor.
+- Si la pendiente supera la máxima del perfil del formulario, se resalta en amarillo.
+- Fuera de la parcela, o sin la grilla generada, solo se ve la posición. En pantallas táctiles no aparece.
+- Es una grilla provisoria para visualizar: cuando P3-02 publique el paquete analítico, conviene leer de ahí.
 
 ## Coordenadas y alturas (medido el 14/11 con 20 posiciones de Curiosity, soles 1930–4857)
 - `Cartesian3.fromDegrees(lon, lat, h, Ellipsoid.MARS)` con la latitud tal como viene en los datos (MMGIS/HiRISE) cae en el lugar correcto del tileset. **No convertir** de planetocéntrica a geodésica: daría un corrimiento de ~3,3 km y un desfase vertical inconsistente (491 ± 41 m).
@@ -100,7 +117,7 @@ python3 -m venv .venv && .venv/bin/pip install numpy rasterio pillow
 
 ## Idioma (español / inglés)
 
-- El selector **ES | EN** del HUD marca el idioma en pantalla y lo cambia al instante, sin recargar: el formulario, los resultados, las fuentes y los nombres del mapa se reescriben y conservan lo que ya estaba cargado. La elección queda guardada en el navegador. También se puede forzar con `?lang=en` o `?lang=es` (útil para grabar el video).
+- El selector **ES | EN** de la barra superior marca el idioma en pantalla y lo cambia al instante, sin recargar: el formulario, los resultados, las fuentes y los nombres del mapa se reescriben y conservan lo que ya estaba cargado. La elección queda guardada en el navegador. También se puede forzar con `?lang=en` o `?lang=es` (útil para grabar el video).
 - Cada módulo que muestra texto se registra con `onLanguageChange` y se vuelve a dibujar; lo que escribió el usuario (por ejemplo, el nombre de una tarea) no se traduce.
 - Los textos están en `src/i18n/es.ts` y `src/i18n/en.ts`. Para agregar uno: sumar la clave en los dos archivos y usarla con `t("clave")`. Si falta en `en.ts`, `npm run typecheck` falla.
 - El código y los comentarios van siempre en inglés (ver `CLAUDE.md`, sección 8). Los valores de los contratos (`observacion_geologica`, `destino`, `observado`…) no se traducen.
