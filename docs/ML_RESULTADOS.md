@@ -200,11 +200,14 @@ No es ML: compara cada llegada a Marte predicha por WSA-ENLIL (2013–2025) con 
 | subida | 477 | 22 | 455 | 11 de 477 (0.024) | 58 | 41 | 1.84 / 12.43 |
 | bajada | 477 | 24 | 453 | 8 de 477 (0.016) | 40 | 22 | -0.16 / 12.54 |
 | cualquiera | 477 | 42 | 435 | 19 de 477 (0.039) | 98 | 63 | 0.64 / 11.78 |
+| MAVEN SEP iones (> 5× fondo) | 420 | 114 | 306 | 99 de 420 (0.235) ⚠️ | 216 ⚠️ | 108 ⚠️ | -0.3 / 10.64 |
+
+⚠️ MAVEN: solo se bajaron los 1573 días a ±3 días de cada alerta (agregados por hora; la serie a 2 s pesa ~1,7 MB/día). El azar, los eventos medidos y los «sin alerta» se calculan solo dentro de esas ventanas, que están sesgadas hacia períodos activos. Evento MAVEN = mediana de 5 h (~1 órbita) > 5× la mediana centrada de 7 días, ≥ 2 h. El flujo depende de la posición de la nave en su órbita.
 
 **Ventana final (25/10–05/12/2025):** 13 alertas, 3 con un evento RAD a ±24 h; eventos RAD: decrease desde 2025-10-30 03:00 (pico/fondo 0.93); increase desde 2025-11-11 12:00 (pico/fondo 1.95); increase desde 2025-12-01 09:00 (pico/fondo 1.27).
 Las llegadas predichas del 29/10 17:51 y 30/10 10:22 caen cerca de una bajada que empieza el 30/10 03:00; la subida del 11/11 (pico ×1,95) no tuvo alerta ENLIL. Pocos casos: no prueba que el sistema "acierta".
 
-**Lectura:** las alertas aciertan más que el azar (≈ 2× en esta definición), pero la gran mayoría son falsas alarmas y casi dos tercios de los eventos medidos no tuvieron alerta (muchos son partículas de fulguraciones, que ENLIL no modela). Sin MAVEN (pendiente) y sin FLR (endpoint caído), esto es una evaluación parcial.
+**Lectura:** las alertas aciertan más que el azar (≈ 2× en esta definición), pero la gran mayoría son falsas alarmas y casi dos tercios de los eventos medidos no tuvieron alerta (muchos son partículas de fulguraciones, que ENLIL no modela). Sin FLR (endpoint caído) y con MAVEN solo alrededor de las alertas, esto es una evaluación parcial.
 
 
 ## Limitaciones

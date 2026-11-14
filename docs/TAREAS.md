@@ -112,6 +112,6 @@ Plan: `docs/ML_PREDICCION.md`. Resultados: `docs/ML_RESULTADOS.md`. Solo toca `m
 | [~] ML-06 | P0 | `export/` + `contracts/forecast.example.json` (borrador) | JSON por sol de la ventana; P1 y P2 avisados (falta avisar) |
 | [x] ML-07 | P1 | `sources/rad.py`: leer un CDF y reportar variables, unidades y calidad | Informe en `docs/ML_RESULTADOS.md` |
 | [x] ML-08 | P1 | **DS-R** + **B1 dosis de fondo** (con S6 manchas solares) | Métricas vs. media móvil |
-| [~] ML-09 | P1 | **DS-S** (DONKI 2013–2025) + **C1 evaluación** contra MAVEN y RAD | Tabla de aciertos, falsas alarmas y error en horas, con `n` (hecho contra RAD; falta MAVEN; FLR caído) |
+| [x] ML-09 | P1 | **DS-S** (DONKI 2013–2025) + **C1 evaluación** contra MAVEN y RAD | Tabla de aciertos, falsas alarmas y error en horas, con `n` (RAD completo; MAVEN solo ±3 días alrededor de alertas; FLR caído) |
 | [ ] ML-10 | P2 | B2 eventos, D-proxy polvo, C2 corrección de DONKI, A3 UV | Solo si ML-00 a ML-09 están cerrados |
 | [~] ML-11 | P0 | `docs/ML_RESULTADOS.md`: números finales para el video, con `n` y limitaciones | Revisado por otro integrante (A1–A2 listos; faltan RAD/DONKI y la revisión) |

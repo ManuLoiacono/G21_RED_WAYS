@@ -88,6 +88,70 @@ def alerts(ev: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+MAVEN_RATIO = 5.0  # "more than 5x normal", as in the case described in docs/ML_PREDICCION.md
+
+
+def maven_events(hourly: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
+    """MAVEN SEP ion events: 5-hour median (~1 orbit) > MAVEN_RATIO x centred 7-day median, >= 2 hours."""
+    s = hourly.drop_duplicates("hour_utc").set_index("hour_utc")["ion_flux_median"].astype(float)
+    full = pd.date_range(s.index.min(), s.index.max(), freq="h", tz="UTC")
+    s = s.reindex(full)
+    r5 = s.rolling(5, min_periods=3).median()
+    bg = r5.rolling("7D", center=True, min_periods=72).median()
+    rows = []
+    for a, b in _runs((r5 > MAVEN_RATIO * bg).fillna(False), min_len=2, max_gap=1):
+        rows.append({"kind": "maven_ion", "start_utc": a, "end_utc": b, "ratio_peak_bg": float((r5[a:b] / bg[a]).max())})
+    return pd.DataFrame(rows, columns=["kind", "start_utc", "end_utc", "ratio_peak_bg"]), s.notna() & bg.notna()
+
+
+def evaluate_maven(al: pd.DataFrame) -> dict:
+    """Same matching as RAD, restricted to alerts whose +-WINDOW_H window has >= 75 % MAVEN hourly coverage.
+
+    MAVEN days were downloaded only around alerts, so 'events without alert' and the chance level are
+    computed inside the downloaded windows only (biased towards active periods).
+    """
+    from datetime import timedelta
+    from ml.sources import maven_sep
+    days = [(t + timedelta(days=k)).date() for t in al.loc[al["evaluable"], "predicted_arrival_utc"] for k in range(-3, 4)]
+    cached = maven_sep.fetch_days(days)  # cached days are not downloaded again
+    hourly = maven_sep.load_hourly(days)
+    if hourly.empty:
+        return {"available": False}
+    ev, has = maven_events(hourly)
+    w = pd.Timedelta(hours=WINDOW_H)
+    cov = [has[t - w:t + w].mean() if len(has[t - w:t + w]) else 0.0 for t in al["predicted_arrival_utc"]]
+    al["maven_coverage"] = cov
+    al["maven_evaluable"] = al["evaluable"] & (al["maven_coverage"] >= 0.75)
+    st = np.sort(_ns(ev["start_utc"]))
+    errs, hit = [], []
+    for t in _ns(al.loc[al["maven_evaluable"], "predicted_arrival_utc"]):
+        d = (st - t) / np.timedelta64(1, "h")
+        inside = d[np.abs(d) <= WINDOW_H]
+        hit.append(inside.size > 0)
+        if inside.size:
+            errs.append(float(inside[np.argmin(np.abs(inside))]))
+    al["hit_maven"] = False
+    al.loc[al["maven_evaluable"], "hit_maven"] = hit
+    hours = _ns(has.index[has])
+    w64 = np.timedelta64(WINDOW_H, "h")
+    pos = np.searchsorted(st, hours - w64)
+    nxt = np.where(pos < len(st), st[np.minimum(pos, len(st) - 1)], np.datetime64("NaT", "ns"))
+    chance = float(np.mean(~np.isnat(nxt) & (nxt <= hours + w64))) if len(hours) else None
+    at = np.sort(_ns(al["predicted_arrival_utc"]))
+    missed = sum(int(not (np.abs((at - t) / np.timedelta64(1, "h")) <= WINDOW_H).any()) for t in st)
+    ev.to_parquet(OUT_DIR / "maven_events.parquet", index=False)
+    return {
+        "available": True, "ratio_threshold": MAVEN_RATIO, "n_days_downloaded": int(len(cached)),
+        "n_alerts": int(len(hit)), "hits": int(np.sum(hit)), "false_alarms": int(len(hit) - np.sum(hit)),
+        "observed_events_in_downloaded_windows": int(len(st)), "observed_without_alert": missed,
+        "chance_hit_fraction_in_windows": round(chance, 4) if chance is not None else None,
+        "timing_error_h_median": round(float(np.median(errs)), 2) if errs else None,
+        "timing_error_h_mean_abs": round(float(np.mean(np.abs(errs))), 2) if errs else None,
+        "test_window_events": ev[(ev["start_utc"] >= config.TEST_START_UTC) & (ev["start_utc"] <= config.TEST_END_UTC + pd.Timedelta(days=1))]
+        .assign(start_utc=lambda x: x["start_utc"].astype(str), end_utc=lambda x: x["end_utc"].astype(str)).round(2).to_dict(orient="records"),
+    }
+
+
 def evaluate() -> dict:
     hr = pd.read_parquet(HOURLY_OUT)
     ev = pd.read_parquet(EVENTS_OUT)
@@ -137,6 +201,8 @@ def evaluate() -> dict:
             "timing_error_h_median": round(float(np.median(errs)), 2) if errs else None,
             "timing_error_h_mean_abs": round(float(np.mean(np.abs(errs))), 2) if errs else None,
         }
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    res["maven"] = evaluate_maven(al)
     res["lead_h_median"] = round(float(al.loc[al["evaluable"], "lead_h"].median()), 1)
     win = al[(al["predicted_arrival_utc"] >= config.TEST_START_UTC) & (al["predicted_arrival_utc"] <= config.TEST_END_UTC + pd.Timedelta(days=1))]
     res["test_window_alerts"] = win.assign(predicted_arrival_utc=win["predicted_arrival_utc"].astype(str),

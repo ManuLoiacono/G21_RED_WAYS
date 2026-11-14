@@ -114,6 +114,14 @@ def _c1_section() -> list[str]:
     names = {"increase": "subida", "decrease": "bajada", "any": "cualquiera"}
     for k, m in c1["by_kind"].items():
         lines.append(f"| {names[k]} | {m['n_alerts']} | {m['hits']} | {m['false_alarms']} | {m['chance_hit_fraction'] * m['n_alerts']:.0f} de {m['n_alerts']} ({m['chance_hit_fraction']:.3f}) | {m['observed_events']} | {m['observed_without_alert']} | {m['timing_error_h_median']} / {m['timing_error_h_mean_abs']} |")
+    mv = c1.get("maven", {})
+    if mv.get("available"):
+        lines.append(f"| MAVEN SEP iones (> {mv['ratio_threshold']:g}× fondo) | {mv['n_alerts']} | {mv['hits']} | {mv['false_alarms']} | "
+                     f"{mv['chance_hit_fraction_in_windows'] * mv['n_alerts']:.0f} de {mv['n_alerts']} ({mv['chance_hit_fraction_in_windows']:.3f}) ⚠️ | "
+                     f"{mv['observed_events_in_downloaded_windows']} ⚠️ | {mv['observed_without_alert']} ⚠️ | {mv['timing_error_h_median']} / {mv['timing_error_h_mean_abs']} |")
+        lines += ["", f"⚠️ MAVEN: solo se bajaron los {mv['n_days_downloaded']} días a ±3 días de cada alerta (agregados por hora; la serie a 2 s pesa ~1,7 MB/día). "
+                  "El azar, los eventos medidos y los «sin alerta» se calculan solo dentro de esas ventanas, que están sesgadas hacia períodos activos. "
+                  "Evento MAVEN = mediana de 5 h (~1 órbita) > 5× la mediana centrada de 7 días, ≥ 2 h. El flujo depende de la posición de la nave en su órbita."]
     hits = [a for a in c1["test_window_alerts"] if a.get("hit_any")]
     lines += [
         "",
@@ -121,7 +129,7 @@ def _c1_section() -> list[str]:
         + "; ".join(f"{e['kind']} desde {e['start_utc'][:16]} (pico/fondo {e['ratio_peak_bg']})" for e in c1["test_window_rad_events"]) + ".",
         "Las llegadas predichas del 29/10 17:51 y 30/10 10:22 caen cerca de una bajada que empieza el 30/10 03:00; la subida del 11/11 (pico ×1,95) no tuvo alerta ENLIL. Pocos casos: no prueba que el sistema \"acierta\".",
         "",
-        "**Lectura:** las alertas aciertan más que el azar (≈ 2× en esta definición), pero la gran mayoría son falsas alarmas y casi dos tercios de los eventos medidos no tuvieron alerta (muchos son partículas de fulguraciones, que ENLIL no modela). Sin MAVEN (pendiente) y sin FLR (endpoint caído), esto es una evaluación parcial.",
+        "**Lectura:** las alertas aciertan más que el azar (≈ 2× en esta definición), pero la gran mayoría son falsas alarmas y casi dos tercios de los eventos medidos no tuvieron alerta (muchos son partículas de fulguraciones, que ENLIL no modela). Sin FLR (endpoint caído) y con MAVEN solo alrededor de las alertas, esto es una evaluación parcial.",
         "",
     ]
     return lines
