@@ -46,6 +46,7 @@ class GridChecks(unittest.TestCase):
             dict(elevation_m=np.full((3, 4), np.nan)), dict(terrain_slope_deg=np.zeros((1, 1))),
             dict(terrain_slope_deg=np.full((3, 4), 90)), dict(terrain_slope_deg=np.full((3, 4), np.nan)),
             dict(fixture=False),
+            dict(spacing_m=(1e308, 1e308)),
         ]
         for case in cases:
             with self.subTest(case=case), self.assertRaises(GridInputError) as error:
@@ -61,6 +62,7 @@ class GridChecks(unittest.TestCase):
         value = grid(fixture=False, terrain_slope_deg=np.zeros((3, 4)))
         self.assertFalse(value.fixture)
         self.assertIsNone(value.cell((0, 0)).terrain_code)
+        self.assertEqual(grid(row_direction="increasing_y").xy_m((1, 2)), (16, 22))
 
 
 if __name__ == "__main__":

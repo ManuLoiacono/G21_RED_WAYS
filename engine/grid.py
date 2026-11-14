@@ -64,6 +64,11 @@ class MetricGrid:
             object.__setattr__(self, name, tuple(_number(value, f"grid.{name}[{i}]", positive=positive) for i, value in enumerate(values)))
         if not isinstance(self.row_direction, str) or self.row_direction not in ("increasing_y", "decreasing_y"):
             raise GridInputError("invalid_row_direction", "grid.row_direction", "Declare increasing_y or decreasing_y.")
+        row_sign = 1 if self.row_direction == "increasing_y" else -1
+        last_xy = (self.origin_center_xy_m[0] + (elevation.shape[1] - 1) * self.spacing_m[1],
+                   self.origin_center_xy_m[1] + row_sign * (elevation.shape[0] - 1) * self.spacing_m[0])
+        if not all(math.isfinite(value) for value in last_xy):
+            raise GridInputError("invalid_geometry", "grid.spacing_m", "Metric cell-center coordinates must remain finite.")
         for name in ("data_version", "aggregation_policy"):
             value = getattr(self, name)
             if not isinstance(value, str) or not value.strip():

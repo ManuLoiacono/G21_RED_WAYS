@@ -5,9 +5,15 @@ from .team import EffectiveParticipant, resolve_comparison, resolve_team
 from .movement import CellTerrain, DirectedMetricEdge, GroupEdgeResult, evaluate_edge, evaluate_path
 from .grid import GridInputError, MetricGrid
 from .graph import DirectedGridGraph, build_graph
+from .routing import (
+    RoundTripRoutes, RouteLeg, RouteReconstructionError, RoutingSearch,
+    reconstruct_route, routes_to, search_from_base,
+)
 
 __all__ = [
     "CATALOG", "Catalog", "CatalogEntry", "CellTerrain", "DirectedGridGraph", "DirectedMetricEdge",
     "EffectiveParticipant", "GridInputError", "GroupEdgeResult", "MetricGrid", "SelectionError",
-    "build_graph", "evaluate_edge", "evaluate_path", "resolve_comparison", "resolve_team", "select_team",
+    "RoundTripRoutes", "RouteLeg", "RouteReconstructionError", "RoutingSearch",
+    "build_graph", "evaluate_edge", "evaluate_path", "reconstruct_route", "resolve_comparison",
+    "resolve_team", "routes_to", "search_from_base", "select_team",
 ]

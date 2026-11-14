@@ -52,6 +52,8 @@ Para trabajar con Claude Code: pedir una tarea por ID («hacé P2-02») y manten
 | [ ] P2-11 | P1 | **Reevaluación** desde una posición simulada con tiempo transcurrido y un evento (demora o bloqueo); no reiniciar la autonomía | La demora reduce el margen; la recomendación se explica | P2-04 |
 | [ ] P2-12 | P2 | Restricción dominante y cambios admisibles, robot repetidor, explicación con IA | — | P2-05 |
 
+P2-02 update (2026-11-14): directed metric routing, synthetic acceptance checks and measured build/search performance are implemented on `p2/directed-routing`; consumer review is pending, so the task remains in progress. See [the mission/service handoff](handoffs/P2_03_04_MISSION_SERVICE.md). Original P2-01 template defaults and P2-06 real-parcel integration remain pending.
+
 ## Persona 3 — Datos y contexto (`scripts/`, `data/`)
 
 | ID | Prio | Tarea | Criterio de cierre | Depende de |
