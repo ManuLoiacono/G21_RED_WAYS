@@ -2,6 +2,7 @@ import { onLanguageChange, t, tOr, type MessageKey } from "../i18n";
 import { esc } from "../ui/format";
 import { infoButton } from "../provenance/sources";
 import type { Alternative, Check, PlanResponse } from "./draft";
+import { renderMetricPreview } from "./routes";
 
 export const ALT_COLORS = ["#3ff0ff", "#ffb347", "#c792ea", "#7ee787"];
 export const INCOMPATIBLE_COLOR = "#ff6b6b";
@@ -82,6 +83,7 @@ export function createResultsPanel(root: HTMLElement) {
         ${metric("daylight_reserved_return_margin_s", "nav.daylightReturn", m.daylight_reserved_return_margin_s)}
       </dl>
       <p class="mp-hint">${esc(t("nav.marginHint"))}</p>
+      ${renderMetricPreview(a, response!.locations, index)}
       ${m.unavailable_totals_reason ? `<p>${esc(label("reason", m.unavailable_totals_reason))}</p>` : ""}
       <table class="nav-margins"><caption>${esc(t("nav.participantMargins"))}</caption>
         <thead><tr><th>${esc(t("nav.participant"))}</th><th>${esc(t("nav.limit"))}</th><th>${esc(t("nav.margin"))}</th></tr></thead>

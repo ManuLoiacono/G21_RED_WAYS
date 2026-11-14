@@ -1,5 +1,7 @@
 # P1 HTTP API handoff: increment 3
 
+Frontend consumer follow-up: [P1/P2 integration handoff](P1_P2_FRONTEND_INTEGRATION.md) documents the explicit draft consumer on `p1/http-mission-integration`, its three deliveries, verification and remaining real Gale dependencies. The original backend handoff below describes the increment-3 delivery boundary.
+
 Date: 2026-11-14. Branch: `p2/http-service`, based on integrated main `abd987b`. Increment 3 is a local development adapter for **unaccepted draft** `p2-plan-draft-1`; shared v0 and `app/` are unchanged. The engine calculates every planning response, including synthetic cases. No fixed planning-response fallback exists in this service/client.
 
 ## Reproduce in two terminals

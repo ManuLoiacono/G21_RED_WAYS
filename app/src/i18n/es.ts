@@ -45,7 +45,7 @@ export const es = {
   "layers.rems": "Ambiente del sol elegido",
   "layers.themis": "Material suelto (infrarrojo nocturno)",
   "layers.parcel": "Límite de la parcela",
-  "layers.mission": "Base, destinos y rutas",
+  "layers.mission": "Puntos visuales de prueba y ruta de ejemplo",
   "layers.status.loaded": "Archivo local",
   "layers.status.streaming": "En línea",
   "layers.status.fixture": "Datos de prueba",
@@ -240,7 +240,7 @@ export const es = {
   "src.field.origin": "Obtención",
   "src.field.fetched": "Consultado",
   "src.field.link": "Enlace",
-  "src.notQueried": "La app no lo consulta: lo usa el motor",
+  "src.notQueried": "Fuente de referencia; sin conexión con el planificador actual.",
   "src.unnamed": "Fuente sin nombre",
   "src.fromEngine": "Informada por el motor en la respuesta.",
   "src.group.topografica": "Topográfica",
@@ -260,8 +260,7 @@ export const es = {
   "source.visual_terrain.title": "Terreno 3D (solo visual)",
   "source.visual_terrain.role": "Lo que se ve en la escena. No interviene en ningún cálculo.",
   "source.visual_terrain.mission": "MGS/MOLA, Mars Express/HRSC, Viking (bases de Cesium Mars)",
-  "source.visual_terrain.note1":
-    "Las alturas de Cesium quedan ~71 m por encima de las del DTM HiRISE en Gale. No se mezclan: las rutas se apoyan sobre el terreno y los puntos usan la altura de Cesium solo para dibujarse.",
+  "source.visual_terrain.note1": "Las alturas visuales se mantienen separadas de las analíticas. El ajuste de +71,2 m solo coloca panoramas respecto de elev_geoid del rover; no es una corrección del DTM ni del movimiento.",
   "source.hirise_mesh.title": "Detalle HiRISE de la parcela (solo visual)",
   "source.hirise_mesh.role":
     "Relieve de 1 m y textura de 0,25 m dentro de la parcela, en lugar de Cesium Mars (~2,5 m). No interviene en ningún cálculo.",
@@ -271,12 +270,11 @@ export const es = {
   "source.hirise_mesh.note2": "La imagen RED es en escala de grises: el color ocre lo pone la app y no es color medido.",
   "source.hirise_mesh.note3": "Los niveles lejanos submuestrean el DTM; el detalle de 1 m aparece al acercarse.",
   "source.hirise_dtm.title": "Modelo de elevación HiRISE (1 m)",
-  "source.hirise_dtm.role":
-    "Base del cálculo de rutas: pendientes, restricciones, distancia y desnivel de ida y vuelta (lo usa el motor).",
+  "source.hirise_dtm.role": "Elevación y pendiente del cursor visual de Gale. El cálculo sintético actual no usa este DTM; falta el paquete analítico real revisado.",
   "source.hirise_dtm.note1": "Un DTM de 1 m no detecta rocas chicas ni garantiza 1 m de precisión.",
   "source.hirise_dtm.note2": "Las trazas del rover no prueban que un paso sea transitable para una persona.",
   "source.rems.title": "Ambiente medido por Curiosity (REMS)",
-  "source.rems.role": "Regla de luz diurna: salida + ida + tareas + vuelta + reserva ≤ atardecer del sol elegido.",
+  "source.rems.role": "Referencia de observaciones históricas. El borrador actual usa evidencia sintética de luz diurna y no consulta REMS.",
   "source.rems.product": "Reporte diario por sol (amanecer, atardecer, temperaturas, presión)",
   "source.rems.note1": "Es una observación histórica del rover: no es el clima actual ni un pronóstico.",
   "source.rems.note2":
@@ -442,6 +440,14 @@ export const es = {
   "nav.reason.missing_daylight": "Falta la evidencia normalizada de luz diurna requerida.",
   "nav.reason.departure_outside_daylight": "La salida está fuera del intervalo de luz diurna.",
   "nav.reason.reserved_return_after_daylight": "El regreso con reserva supera el fin de luz diurna.",
+  "nav.previewTitle": "Vista previa métrica local",
+  "nav.previewHint": "Coordenadas de la parcela sintética en metros. Sin referencia geográfica ni colocación sobre Gale.",
+  "nav.previewDescription": "Geometría calculada de ida continua y regreso a trazos, con la misma escala en x e y.",
+  "nav.previewOverlap": "Los tramos pueden superponerse. Una celda única se muestra como un punto; los tramos no disponibles no se dibujan.",
+  "nav.previewEndpoints": "Centros efectivos: origen [{origin}] m · destino [{destination}] m",
+  "nav.geometry": "Coordenadas y estado de los tramos",
+  "nav.noGeometry": "El motor no devolvió geometría para este tramo.",
+  "nav.testHarness": "Prueba de regresión de componentes",
 } as const;
 
 export type MessageKey = keyof typeof es;

@@ -63,7 +63,7 @@ export interface PlanRequest {
 export interface Reason { code: string; path: string; message: string }
 export interface Leg {
   status: string;
-  reason: Reason | null;
+  reason: string | null;
   cells: Pair[];
   xy_m: Pair[];
   duration_s: number | null;

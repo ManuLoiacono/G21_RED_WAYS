@@ -286,7 +286,7 @@
 #appStatus.as-error { z-index: 5; background: rgba(8, 8, 10, 0.85); pointer-events: none; }
 #appStatus.as-error .as-card { pointer-events: auto; }
 .nav-member { margin: 10px 0; padding: 8px; border: 1px solid var(--ui-line); border-radius: 6px; }
-.nav-member-toggle { display: flex !important; align-items: center; gap: 8px; }
+.nav-member-toggle { display: flex !important; flex-direction: row !important; align-items: center; gap: 8px; }
 .nav-member-toggle input[type="checkbox"] { width: auto; }
 .nav-member small, .rs-checks small, .rs-checks span { display: block; }
 .nav-task { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; align-items: end; }
@@ -297,6 +297,13 @@
 .nav-margins th, .nav-margins td { text-align: left; padding: 6px 3px; border-bottom: 1px solid var(--ui-line); }
 .nav-important { padding: 8px; border-left: 3px solid #ffb347; }
 .nav-json { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; max-height: 320px; overflow: auto; }
+.nav-preview { margin: 12px 0; padding: 8px; background: #151820; border: 1px solid var(--ui-line); border-radius: 6px; }
+.nav-preview figcaption { font-weight: 600; }
+.nav-preview svg { display: block; width: 100%; }
+.nav-preview svg text { fill: #bec3d0; font: 11px system-ui, sans-serif; }
+.nav-legend { font-size: 12px; }
+.nav-outbound { color: #3ff0ff; }
+.nav-return { color: #ffb347; }
 #appStatus .as-card { background: rgba(18, 18, 22, 0.94); border: 1px solid #3a3a44; border-radius: 10px; padding: 16px 20px; max-width: 520px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); }
 #appStatus.as-loading .as-card { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
 #appStatus.as-loading p { margin: 0; }

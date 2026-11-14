@@ -12,6 +12,8 @@ const reason = (x: unknown) => object(x) && str(x.code) && str(x.path) && str(x.
 const assessment = (x: unknown) => x === null || ["viable_model", "conditional", "incompatible", "insufficient_evidence"].includes(x as string);
 const parameters = (x: unknown) => object(x) && ["flat_speed_m_s", "max_ascent_deg", "max_descent_deg", "carrying_limit_kg", "max_sortie_s"].every((key) => num(x[key]));
 const identity = (x: unknown) => object(x) && str(x.profile_id) && str(x.name);
+const finiteJson = (x: unknown): boolean => typeof x === "number" ? Number.isFinite(x) :
+  Array.isArray(x) ? x.every(finiteJson) : object(x) ? Object.values(x).every(finiteJson) : true;
 
 export function isHealth(x: unknown): x is Health {
   return object(x) && x.schema_version === DRAFT_SCHEMA && str(x.contract_status) && str(x.scope) && x.geographic_conversion === "unavailable" &&
@@ -31,7 +33,7 @@ export function isCatalogs(x: unknown): x is Catalogs {
     str(m.version) && typeof m.fixture === "boolean" && str(m.evidence_kind) && str(m.assumption) && strings(m.editable_fields) &&
     list(m.templates, (t) => str(t.id) && str(t.name) && num(t.time_budget_s) && num(t.reserve_s) && list(t.tasks, (v) => str(v.id) && num(v.duration_s)));
 }
-const leg = (x: unknown) => object(x) && str(x.status) && (x.reason === null || reason(x.reason)) &&
+const leg = (x: unknown) => object(x) && str(x.status) && (x.reason === null || str(x.reason)) &&
   Array.isArray(x.xy_m) && x.xy_m.every(pair) && Array.isArray(x.cells) && x.cells.every(pair) && x.cells.length === x.xy_m.length &&
   ["duration_s", "search_cost_s", "horizontal_distance_m", "ascent_m", "descent_m"].every((k) => nullableNum(x[k])) &&
   (x.status === "found" ? x.xy_m.length >= 1 && num(x.duration_s) : x.xy_m.length === 0 && x.duration_s === null);
@@ -45,7 +47,7 @@ const check = (c: Obj) => str(c.rule_id) && ["passed", "failed", "missing_eviden
 
 /** Validate all nested values read by the UI; null metrics stay unavailable. */
 export function isDraftResponse(x: unknown): x is PlanResponse {
-  if (!object(x)) return false;
+  if (!object(x) || !finiteJson(x)) return false;
   const e = x.environment;
   const locations = x.locations;
   return x.schema_version === DRAFT_SCHEMA && str(x.contract_status) && x.calculation_origin === "engine" &&

@@ -5,7 +5,8 @@ const ts = require("typescript");
 
 // Compile the actual browser-independent consumer modules, without a second implementation.
 require.extensions[".ts"] = (module, filename) => {
-  const source = fs.readFileSync(filename, "utf8");
+  // Vite normally injects this variable; Node transport checks use the default URL.
+  const source = fs.readFileSync(filename, "utf8").replaceAll("import.meta.env.VITE_SERVICE_URL", "undefined");
   module._compile(ts.transpileModule(source, { compilerOptions: {
     module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true,
   } }).outputText, filename);
@@ -123,7 +124,7 @@ test("unavailable and same-cell legs retain nullability and independent search s
   incomplete.assessment = null; incomplete.search_status = "search_inconclusive"; incomplete.status = "search_inconclusive";
   const a = incomplete.alternatives[0];
   a.assessment = null; a.search_status = "search_inconclusive";
-  a.return = { status: "search_inconclusive", reason: null, cells: [], xy_m: [], duration_s: null, search_cost_s: null, horizontal_distance_m: null, ascent_m: null, descent_m: null };
+  a.return = { status: "search_inconclusive", reason: "search_interrupted", cells: [], xy_m: [], duration_s: null, search_cost_s: null, horizontal_distance_m: null, ascent_m: null, descent_m: null };
   for (const key of ["elapsed_s", "reserved_total_s", "return_s", "mission_margin_s", "temporal_budget_limiting_margin_s", "daylight_reserved_return_margin_s", "estimated_return_offset_s", "reserved_deadline_offset_s"]) a.metrics[key] = null;
   a.metrics.unavailable_totals_reason = "movement_duration_unavailable";
   a.metrics.participant_margins.forEach((p) => { p.margin_s = null; });
@@ -132,4 +133,86 @@ test("unavailable and same-cell legs retain nullability and independent search s
   assert.ok(isDraftResponse(incomplete));
   a.return.xy_m = [[0, 0]];
   assert.equal(isDraftResponse(incomplete), false);
+});
+
+function browserLabels() {
+  // Minimal label context for pure render/transport checks; this is not a browser mock.
+  global.location = { search: "?lang=en" };
+  global.document = { documentElement: {} };
+}
+
+test("transport failures, HTTP errors and malformed success never produce a plan", async () => {
+  browserLabels();
+  const { requestPlan } = require("../src/mission/api.ts");
+  const originalFetch = global.fetch;
+  const request = require("../../service/examples/request.example.json");
+  try {
+    global.fetch = async () => { throw new TypeError("Connection refused"); };
+    let result = await requestPlan(request);
+    assert.equal(result.ok, false);
+    assert.match(result.error, /Could not reach/);
+    assert.equal(result.data, undefined);
+    for (const status of [409, 422, 500]) {
+      global.fetch = async () => new Response(JSON.stringify({ error: { code: "test_failure", path: "team", message: "Test error" } }), { status });
+      result = await requestPlan(request);
+      assert.equal(result.ok, false);
+      assert.match(result.error, /test_failure.*team.*Test error/);
+    }
+    global.fetch = async () => new Response("not json");
+    assert.equal((await requestPlan(request)).ok, false);
+    global.fetch = async () => new Response(JSON.stringify({ schema_version: 0, alternatives: [] }));
+    assert.equal((await requestPlan(request)).ok, false);
+  } finally { global.fetch = originalFetch; }
+});
+
+test("metric preview uses equal scale, real vertices and empty/same-cell semantics", { skip: !service }, async () => {
+  browserLabels();
+  const { metricProjection, renderMetricPreview } = require("../src/mission/routes.ts");
+  const p = metricProjection([[0, 0], [30, 30]]).project;
+  assert.equal(p([30, 0])[0] - p([0, 0])[0], p([0, 0])[1] - p([0, 30])[1]);
+  assert.deepEqual(metricProjection([[0, 0]]).project([0, 0]), [160, 100]);
+  const result = await post(require("../../service/examples/request.example.json"));
+  const a = result.alternatives[0];
+  let svg = renderMetricPreview(a, result.locations, 0);
+  assert.match(svg, /Local metric preview/);
+  assert.match(svg, /data-coordinate-frame="parcel_metric"/);
+  assert.match(svg, /data-leg="outbound"/);
+  assert.match(svg, /data-leg="return"/);
+  assert.match(svg, /stroke-dasharray="7 5"/);
+  a.return.xy_m = [];
+  svg = renderMetricPreview(a, result.locations, 0);
+  assert.doesNotMatch(svg, /data-leg="return"/);
+  assert.match(svg, /returned no geometry/);
+  a.outbound.xy_m = [[0, 0]];
+  svg = renderMetricPreview(a, result.locations, 0);
+  assert.match(svg, /<circle data-leg="outbound"/);
+  const invalid = structuredClone(result);
+  invalid.environment.clock_mapping.offset_at_epoch_s = Infinity;
+  assert.equal(isDraftResponse(invalid), false);
+});
+
+test("actual HTTP no-return and interrupted-search payloads validate and render", { skip: !process.env.P2_TEST_PYTHON }, () => {
+  browserLabels();
+  const { spawnSync } = require("node:child_process");
+  const path = require("node:path");
+  const run = spawnSync(process.env.P2_TEST_PYTHON, ["-m", "app.tests.edge_cases"], {
+    cwd: path.resolve(__dirname, "../.."), encoding: "utf8", timeout: 15000,
+  });
+  assert.equal(run.status, 0, run.stderr || run.error?.message);
+  const cases = JSON.parse(run.stdout);
+  const { renderMetricPreview } = require("../src/mission/routes.ts");
+  for (const result of Object.values(cases)) {
+    assert.ok(isDraftResponse(result));
+    const a = result.alternatives[0];
+    assert.equal(a.return.xy_m.length, 0);
+    assert.equal(typeof a.return.reason, "string");
+    assert.equal(a.metrics.reserved_total_s, null);
+    const svg = renderMetricPreview(a, result.locations, 0);
+    assert.doesNotMatch(svg, /data-leg="return"/);
+    assert.match(svg, /returned no geometry/);
+  }
+  assert.equal(cases.no_return.assessment, "incompatible");
+  assert.equal(cases.no_return.search_status, "complete");
+  assert.equal(cases.inconclusive.assessment, null);
+  assert.equal(cases.inconclusive.search_status, "search_inconclusive");
 });

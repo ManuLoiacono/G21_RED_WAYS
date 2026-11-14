@@ -29,6 +29,7 @@ npm run build
 npm run test:mission
 # Include actual HTTP consumer checks while the service runs:
 # PowerShell: $env:SERVICE_TEST_URL = 'http://127.0.0.1:8000'
+# Also set P2_TEST_PYTHON to the engine Python interpreter for HTTP edge cases.
 # POSIX: SERVICE_TEST_URL=http://127.0.0.1:8000 npm run test:mission
 ```
 
@@ -53,11 +54,19 @@ Reproduce the requested cases through the form:
 
 Restore defaults between cases. Changing inputs removes calculated cards immediately. ES/EN changes preserve the received result and form values.
 
+## Geometry preview and regression verification
+
+Calculated routes appear in a local metric preview in each returned card: equal x/y scale, solid cyan outbound and dashed orange return. Overlapping legs stay visible; a same-cell route is a point; unavailable legs have no path. The preview shows resolved centres and exact returned coordinates. It has no geographic transform or Cesium route placement. The +71.2 m panorama height correction remains visual only.
+
+The existing Gale scene, panorama observations/viewer, layers and camera implementation remain separate. A valid ion token is required to verify the full streamed scene. Scene buttons are disabled until their handlers are ready. The token-free component harness at http://127.0.0.1:5173/tests/browser.html exercises the actual panorama/layer/source modules without streamed terrain; it does not verify real Gale registration or camera clearance.
+
+Verified integration cases, limits, delayed-response tooling and remaining real-routing dependencies are recorded in the [integration handoff](../docs/handoffs/P1_P2_FRONTEND_INTEGRATION.md). The draft backend and shared v0 remain unchanged. The scene-inclusive production build retains Vite's large Cesium chunk warning.
+
 ## Procedencia bajo demanda (P1-05)
 - Botón **Fuentes** en la barra superior: abre un panel con todas las fuentes, agrupadas por clase (topográfica, óptica y visual, atmosférica, supuestos y datos de prueba). Se cierra con «×», con Escape o con un clic afuera.
 - Botones **ⓘ** junto al terreno (barra superior), las secciones del formulario, el aviso de datos de prueba, cada tarjeta y las restricciones con fuente. Abren el panel en esa fuente, resaltada. Un clic sobre una ruta del mapa también abre su fuente.
-- Cada fuente muestra: tipo de sustento (observado, derivado, modelado o supuesto), misión, instrumento, producto, obtención (en vivo o respaldo), fecha de consulta, enlace y advertencias.
-- Fuentes en `src/provenance/sources.ts`. Para una capa nueva: agregar una entrada y usar `infoButton("<id>", "<etiqueta>")`, o `data-source="<id>"` en cualquier botón. Si la respuesta del motor trae un bloque `provenance` que coincide con una fuente conocida (misma misión e instrumento), se agregan su origen, fecha, producto y enlace; si no coincide, se crea una entrada nueva.
+- Each source shows its evidence kind, mission/instrument/product, retrieval information, link and limitations. The active planner source explicitly identifies engine calculation on synthetic inputs; raw environment evidence and effective participants remain inspectable in the result details.
+- Sources are registered in `src/provenance/sources.ts`. New layer buttons can use `infoButton("<id>", "<label>")` or `data-source="<id>"`. The active draft does not claim that the visual HiRISE grid or historical REMS reference is a connected analytical input.
 - Nada técnico queda fijo sobre la escena (D8): todo está detrás de un ⓘ o del botón «Fuentes».
 
 ## Cámara (P1-01)
@@ -111,7 +120,7 @@ Al pasar el mouse sobre el terreno, abajo al centro se ven la posición, la **el
 - Cada módulo que muestra texto se registra con `onLanguageChange` y se vuelve a dibujar; lo que escribió el usuario (por ejemplo, el nombre de una tarea) no se traduce.
 - Los textos están en `src/i18n/es.ts` y `src/i18n/en.ts`. Para agregar uno: sumar la clave en los dos archivos y usarla con `t("clave")`. Si falta en `en.ts`, `npm run typecheck` falla.
 - El código y los comentarios van siempre en inglés (ver `CLAUDE.md`, sección 8). Los valores de los contratos (`observacion_geologica`, `destino`, `observado`…) no se traducen.
-- Lo que manda el motor (motivos, detalles) se muestra tal cual llega. Las respuestas simuladas y los títulos de los puntos de prueba (`title_en`) traen los dos idiomas.
+- Engine rule/status labels use the ES/EN dictionary when recognized; original engine messages and reason codes remain in technical details. Changing language preserves the received calculated object and geometry.
 
 ## Notas
 - `src/look.ts`: shader de color + sol bajo, atmósfera y ajustes de calidad (`light` / `balanced` / `presentation`).

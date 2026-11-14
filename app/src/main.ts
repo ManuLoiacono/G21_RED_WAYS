@@ -247,6 +247,7 @@ async function main() {
   ]);
   const layersBtn = document.getElementById("toggleLayers") as HTMLButtonElement;
   layersBtn.onclick = () => layers.setOpen(!layers.isOpen());
+  layersBtn.disabled = false;
   layers.onToggle((open) => {
     layersBtn.setAttribute("aria-expanded", String(open));
     layersBtn.classList.toggle("active", open);
@@ -282,7 +283,7 @@ async function main() {
     if (!entity) return;
     const pano = panoramaForEntity(entity.id);
     if (pano) panoViewer.open(pano);
-    else if (entity.id.startsWith("poi:")) panel.selectDestination(entity.id.slice(4));
+    else if (entity.id.startsWith("poi:")) showToast(t("nav.locations"));
     // Click on a route: opens its source (on-demand provenance, P1-05).
     else if (entity.id === "test_route") sources.open("test_route");
     else if (entity.id.startsWith("route:")) sources.open("navigation_draft");
@@ -291,6 +292,8 @@ async function main() {
 
   setUpSettingsMenu((preset) => applyPreset(viewer, tilesets, preset, sun));
   document.getElementById("resetView")!.onclick = resetView;
+  (document.getElementById("resetView") as HTMLButtonElement).disabled = false;
+  (document.getElementById("settingsBtn") as HTMLButtonElement).disabled = false;
 }
 
 // ---------------------------------------------------------------------------
@@ -394,6 +397,9 @@ function trackHudHeight() {
 
 setUpLanguage();
 trackHudHeight();
+for (const id of ["toggleLayers", "resetView", "settingsBtn"]) {
+  (document.getElementById(id) as HTMLButtonElement).disabled = true;
+}
 // Planning works independently of ion/terrain availability.
 const sources = createSourcesPanel(document.getElementById("sourcesDialog") as HTMLDialogElement);
 document.getElementById("openSources")!.onclick = () => sources.open();
