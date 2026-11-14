@@ -237,3 +237,22 @@ test("actual HTTP no-return and interrupted-search payloads validate and render"
   assert.equal(cases.inconclusive.assessment, null);
   assert.equal(cases.inconclusive.search_status, "search_inconclusive");
 });
+
+test("three Gale controls preserve source latitude and apply the registered scene shift once", () => {
+  const { metricToGeographic, geographicToMetric, metricToScene, sceneToMetric } = require("../src/mission/geography.ts");
+  const manifest = require("../../data/processed/gale/analytical/manifest.json");
+  const a = manifest.geographic_adapter;
+  for (const [row, col] of [[731, 1288], [790, 1317], [760, 1346]]) {
+    const xy = [manifest.grid.origin_center_xy_m[0] + col*manifest.grid.spacing_m[1],
+      manifest.grid.origin_center_xy_m[1] - row*manifest.grid.spacing_m[0]];
+    const geographic = metricToGeographic(xy, a);
+    const scene = metricToScene(xy, a);
+    const back = sceneToMetric(scene, a);
+    assert.ok(Math.hypot(back[0]-xy[0], back[1]-xy[1]) < 1e-7);
+    const native = geographicToMetric(geographic, a);
+    assert.ok(Math.hypot(native[0]-xy[0], native[1]-xy[1]) < 1e-7);
+    assert.ok(Math.abs((scene[0]-geographic[0])*Math.PI/180*a.radius_m - a.horizontal_shift_m.east) < 1e-7);
+    assert.ok(Math.abs((scene[1]-geographic[1])*Math.PI/180*a.radius_m - a.horizontal_shift_m.north) < 1e-7);
+    assert.ok(Math.abs(geographic[1]+4.826) < .01, "No additional planetocentric/geodetic conversion");
+  }
+});

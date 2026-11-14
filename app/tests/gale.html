@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marswalk — Gale</title>
+    <style>
+      /* overflow: clip keeps focus from scrolling the page when a panel does not fit. */
+      html, body, #cesiumContainer { margin: 0; width: 100%; height: 100%; overflow: clip; background: #000; }
+      /* The rest of the HUD styles live in src/style.css. */
+    </style>
+  </head>
+  <body>
+    <!-- Texts are filled in from src/i18n (data-i18n*); the ones here are only a fallback. -->
+    <div id="cesiumContainer"></div>
+    <header id="hud">
+      <div class="hud-brand">
+        <span class="hud-mark" aria-hidden="true"></span>
+        <div>
+          <strong>MARSWALK</strong>
+          <span data-i18n="hud.place">Cráter Gale · monte Sharp</span>
+        </div>
+      </div>
+      <div id="hudContext" class="hud-context" data-i18n-aria="hud.ctx.aria" role="status"></div>
+      <div class="hud-actions">
+        <button id="toggleLayers" type="button" aria-controls="layersPanel" aria-expanded="true" data-i18n="hud.layers">Capas</button>
+        <button id="resetView" type="button" data-i18n-title="hud.resetView" data-i18n-aria="hud.resetView"><span class="hud-glyph" aria-hidden="true">⟲</span><span class="hud-label" data-i18n="hud.resetView">Restablecer vista</span></button>
+        <button id="openSources" type="button" aria-haspopup="dialog" data-i18n="hud.sources">Fuentes</button>
+        <span id="languageSwitch" class="lang-switch" role="group" data-i18n-aria="hud.language">
+          <button type="button" data-lang="es" lang="es" data-i18n-title="hud.language.es" data-i18n-aria="hud.language.es">ES</button>
+          <button type="button" data-lang="en" lang="en" data-i18n-title="hud.language.en" data-i18n-aria="hud.language.en">EN</button>
+        </span>
+        <div class="hud-menu">
+          <button id="settingsBtn" type="button" class="hud-icon" aria-haspopup="true" aria-expanded="false" aria-controls="settingsMenu" data-i18n-aria="hud.settings" data-i18n-title="hud.settings">⚙</button>
+          <div id="settingsMenu" role="group" data-i18n-aria="hud.quality" hidden>
+            <p data-i18n="hud.quality">Calidad visual</p>
+            <button type="button" data-preset="light" aria-pressed="false"><span data-i18n="hud.preset.light">Liviano</span><small data-i18n="hud.preset.light.hint"></small></button>
+            <button type="button" data-preset="balanced" aria-pressed="true"><span data-i18n="hud.preset.balanced">Equilibrado</span><small data-i18n="hud.preset.balanced.hint"></small></button>
+            <button type="button" data-preset="presentation" aria-pressed="false"><span data-i18n="hud.preset.presentation">Presentación</span><small data-i18n="hud.preset.presentation.hint"></small></button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <aside id="layersPanel" data-i18n-aria="layers.title"></aside>
+    <aside id="missionPanel" data-i18n-aria="aside.mission"></aside>
+    <aside id="resultsPanel" data-i18n-aria="aside.results" hidden></aside>
+    <dialog id="sourcesDialog"></dialog>
+    <dialog id="panoDialog" class="pano"></dialog>
+    <script type="module" src="/src/main.ts"></script>
+  <script type="module" src="/tests/gale.ts"></script></body>
+</html>
+

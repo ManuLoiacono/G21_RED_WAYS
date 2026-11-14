@@ -27,7 +27,7 @@ export function isHealth(x: unknown): x is Health {
     list(x.registered_parcels, (p) => str(p.id) && str(p.version) && typeof p.fixture === "boolean");
 }
 export function isParcel(x: unknown): x is Parcel {
-  return object(x) && x.schema_version === DRAFT_SCHEMA && str(x.id) && str(x.version) && typeof x.fixture === "boolean" &&
+  return object(x) && x.schema_version === DRAFT_SCHEMA && str(x.id) && str(x.version) && str(x.content_id) && typeof x.fixture === "boolean" &&
     x.coordinate_frame === "parcel_metric" && geographicState(x.geographic_conversion) && str(x.reference_description) &&
     (x.geographic_conversion === "available" ? isGeographicAdapter(x.geographic_adapter) && object(x.bounds_lonlat) && ["west", "south", "east", "north"].every((k) => object(x.bounds_lonlat) && num(x.bounds_lonlat[k])) : x.geographic_adapter === null) &&
     list(x.scenarios, (s) => str(s.id) && str(s.version) && typeof s.fixture === "boolean") &&
@@ -70,6 +70,8 @@ export function isDraftResponse(x: unknown): x is PlanResponse {
       leg(a.outbound) && leg(a.return) && metrics(a.metrics) && list(a.checks, check)) &&
     list(x.resolved_team, (p) => str(p.kind) && identity(p.identity) && parameters(p.parameters) && num(p.payload_kg)) &&
     object(e) && strings(e.missing_required) && strings(e.missing_optional_variables) && Array.isArray(e.decision_records) && e.decision_records.every(object) && object(e.clock_mapping) && object(e.snapshot) &&
-    object(locations) && ["origin", "destination"].every((k) => object(locations[k]) && pair(locations[k].effective_xy_m)) &&
+    object(locations) && ["origin", "destination"].every((k) => object(locations[k]) && pair(locations[k].effective_xy_m) &&
+      pair(locations[k].requested_xy_m) && pair(locations[k].cell) && (locations[k].cell as number[]).every((n) => Number.isInteger(n) && n >= 0) &&
+      num(locations[k].effective_elevation_m) && str(locations[k].adapter_id) && geographicState(locations[k].geographic_conversion) && object(locations[k].requested)) &&
     strings(x.not_evaluated) && strings(x.assumptions) && object(x.versions) && Object.values(x.versions).every(str);
 }

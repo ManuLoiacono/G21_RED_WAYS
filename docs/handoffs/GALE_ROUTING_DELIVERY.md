@@ -50,5 +50,46 @@ semantics remain covered. Frontend parcel/scenario selection comes from exact se
 
 ## Review boundary
 
+## C: calculated geometry on the streamed Gale scene
+
+`gale-eqc-scene-v1` reads the registered radius/CRS and P1 display translation from the manifest.
+`metricToGeographic` uses source latitude directly; `metricToScene` adds (-25,+35) m once;
+`sceneToMetric` removes it once. No rover/geoid +71.2 m correction enters this path. Ground
+polylines use returned vertices; display markers use the same effective centres and scene
+sampling. Analytical ascent/descent/distance are displayed separately for both legs in metres.
+
+The mission owns a separate Cesium data source. Cyan outbound and thinner dashed orange return
+remain visible when coincident; short arrow overlays indicate direction using actual final
+vertices. Unavailable legs stay absent; same-cell legs are points. Every edit and new submission
+clears this source immediately. In-flight height sampling checks its generation before changing
+markers. ES/EN redraws labels without changing route identity/geometry. An explicit focus action
+uses resolved display markers, avoiding height-zero polyline bounds over negative terrain.
+
+Verified with the local private token on streamed Cesium Mars: one real 62+62 vertex result,
+endpoint markers and draping, overlapping styles, ES/EN preservation, stale edit clearing,
+same-cell points, route replacement, independent mission/panorama toggles and a loaded real
+Mastcam panorama. The development inspector's absent-return diagnostic removes that entity
+without adding a substitute; it is explicitly a renderer injection, not a real Gale no-return
+search claim. Real HTTP no-return/inconclusive cases remain covered by the regression suite.
+
+The three registered controls have numerical round-trip error <=5.83e-11 m (tolerance 1e-7 m).
+Every rendered route vertex inverts to the returned analytical vertex within 1.87e-9 m.
+Fresh scene height residuals after +56.2 m: base -0.578 m, sample -0.693 m, control -0.534 m.
+These samples compare two terrain representations and are not independent horizontal ground
+truth or a new survey accuracy estimate. See [control evidence](../evidence/gale-scene-controls.json)
+and [the calculated route screenshot](../evidence/gale-calculated-route.jpg).
+
+TypeScript and the full production Cesium build passed with a nonsecret placeholder token;
+the existing large-chunk warning remains. The new three-control transform test passed; all
+nine existing frontend checks passed against the actual service. No shared-v0 file changed.
+
+Pending review inputs: raw P1/P3 registration-control measurements with horizontal residuals;
+an independent optical/control-point check; a scientific exclusion/material mask if available;
+and location-matched solar records with reviewed physical-time normalization/availability.
+The optional generated HiRISE mesh was absent and is explicitly shown as not built. Its
+interaction/registration and exhaustive wheel-camera-clearance checks remain unverified.
+
+## Review boundary
+
 Stop after A-C for owner/P1/P3 review. Do not merge or begin scene picking, extra optimization,
 communication, weather effects or simulation. Original assignment: [implementation handoff](P1_P2_GALE_ROUTING_IMPLEMENTATION.md).

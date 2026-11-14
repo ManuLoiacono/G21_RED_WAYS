@@ -17,6 +17,8 @@ import { createCursorReadout } from "./ui/readout";
 import { ElevationGrid } from "./terrain/elevationGrid";
 import { addParcelOutline } from "./terrain/parcel";
 import { createMissionContext, setUpSettingsMenu } from "./ui/hud";
+import type { PlanResponse } from "./mission/draft";
+import { createSceneRoutes } from "./mission/sceneRoutes";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -32,6 +34,8 @@ Cesium.Ellipsoid.default = Cesium.Ellipsoid.MARS;
 // Viewer
 // ---------------------------------------------------------------------------
 let viewer!: Cesium.Viewer;
+let sceneRoutes: ReturnType<typeof createSceneRoutes> | null = null;
+let activeResponse: PlanResponse | null = null;
 /** Loading message on screen (re-translated on a language switch); null once loaded. */
 let loadingKey: MessageKey | null = null;
 
@@ -143,8 +147,13 @@ async function main() {
 
   resetView();
 
-  // Parcel outline in red, moved like the HiRISE mesh (same shift as its metadata, if built).
-  const parcelOutline = addParcelOutline(viewer, hirise?.metadata.horizontal_shift_m);
+  const parcelOutline = addParcelOutline(viewer, panel.getParcel());
+  let parcelIdentity = "";
+  panel.onChange(() => {
+    const p = panel.getParcel();
+    const identity = p ? `${p.id}/${p.version}` : "";
+    if (identity !== parcelIdentity) { parcelIdentity = identity; parcelOutline.setParcel(p); }
+  });
 
   // Top bar: mission context (center) and the "Layers" panel (left).
   let missionVisible = true;
@@ -191,8 +200,8 @@ async function main() {
       id: "parcel",
       dataClass: "mission",
       name: "layers.parcel",
-      origin: "gale_demo_v1",
-      status: () => "fixture",
+      origin: "HiRISE · analytical bounds",
+      status: () => panel.getParcel()?.geographic_adapter ? "loaded" : "pending",
       visibility: {
         get: () => parcelOutline.isVisible(),
         set: (on) => parcelOutline.setVisible(on),
@@ -214,12 +223,12 @@ async function main() {
       name: "layers.mission",
       origin: "Marswalk",
       sourceId: "navigation_draft",
-      status: () => "pending",
+      status: () => activeResponse?.geographic_adapter ? "loaded" : "pending",
       visibility: {
         get: () => missionVisible,
         set: (on) => {
           missionVisible = on;
-          viewer.entities.show = on;
+          sceneRoutes?.setVisible(on);
         },
       },
     },
@@ -232,6 +241,7 @@ async function main() {
     layersBtn.classList.toggle("active", open);
   });
   document.addEventListener("plan-response", () => {
+    layers.refresh();
     layers.setOpen(false);
     if (window.matchMedia("(max-width: 900px)").matches) panel.setCollapsed(true);
   });
@@ -239,6 +249,11 @@ async function main() {
   await initialTiles;
   loadingKey = null;
   hideLoading();
+  sceneRoutes = createSceneRoutes(viewer);
+  sceneRoutes.setVisible(missionVisible);
+  if (activeResponse) void showSceneResponse(activeResponse);
+  Object.assign(window, { missionRoutes: sceneRoutes });
+  panel.onChange(() => layers.refresh());
 
   // Cursor readout: position, DTM elevation and slope (highlighted above the profile's maximum).
   const readout = createCursorReadout(viewer, await elevationGrid);
@@ -318,8 +333,17 @@ const panel = createMissionPanel(document.getElementById("missionPanel")!);
 const results = createResultsPanel(document.getElementById("resultsPanel")!);
 const context = createMissionContext(document.getElementById("hudContext")!);
 panel.onChange((request) => context.update(request));
-panel.onStale(() => results.clear());
-document.addEventListener("plan-response", (event) => results.show((event as CustomEvent<PlanResponseEvent>).detail.response));
+panel.onStale(() => { activeResponse = null; results.clear(); sceneRoutes?.clear(); });
+async function showSceneResponse(response: PlanResponse) {
+  try { await sceneRoutes?.show(response, panel.getParcel()); }
+  catch (error) { console.error(error); showToast(t("nav.sceneMismatch")); }
+}
+document.addEventListener("plan-response", (event) => {
+  activeResponse = (event as CustomEvent<PlanResponseEvent>).detail.response;
+  results.show(activeResponse);
+  void showSceneResponse(activeResponse);
+});
+document.addEventListener("focus-calculated-route", () => { void sceneRoutes?.focus(); });
 main().catch((err) => {
   console.error(err);
   loadingKey = null;

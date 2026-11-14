@@ -30,6 +30,7 @@ export function createResultsPanel(root: HTMLElement) {
         <p class="mp-note">${esc(t("nav.engineCalculated"))} ${esc(t(r.geographic_adapter ? "nav.realTerrain" : "nav.synthetic"))} ${infoButton("navigation_draft", t("nav.provenance"))}</p>
         <p class="rs-summary">${esc(t("nav.assessment"))}: <span class="rs-badge" data-status="${esc(r.status)}">${esc(statusLabel(r.assessment))}</span></p>
         <p>${esc(t("nav.search"))}: ${esc(label("search", r.search_status))}</p>
+        ${r.geographic_adapter ? `<button type="button" data-act="focus-route">${esc(t("nav.focusRoute"))}</button><p class="nav-legend">━ ${esc(t("nav.outbound"))} · ┄ ${esc(t("nav.return"))}</p>` : ""}
         ${r.alternatives.length === 0 ? `<p>${esc(t("rs.noAlternatives"))}</p>` : ""}
         <ul class="rs-cards">${r.alternatives.map(card).join("")}</ul>
         <p class="mp-hint">${esc(t("rs.notEvaluated"))} ${r.not_evaluated.map((v) => esc(label("scope", v))).join(" · ")}</p>
@@ -83,6 +84,8 @@ export function createResultsPanel(root: HTMLElement) {
         ${metric("daylight_reserved_return_margin_s", "nav.daylightReturn", m.daylight_reserved_return_margin_s)}
       </dl>
       <p class="mp-hint">${esc(t("nav.marginHint"))}</p>
+      ${(["outbound", "return"] as const).map((name) => `<h3>${esc(t(`nav.${name}`))}</h3><dl class="rs-metrics">${(["horizontal_distance_m", "ascent_m", "descent_m"] as const).map((key) =>
+        `<div><dt>${esc(t(`nav.${key}`))}</dt><dd data-metric="${name}.${key}">${a[name][key] === null ? esc(t("nav.unavailableValue")) : `${Number(a[name][key].toFixed(2))} m`}</dd></div>`).join("")}</dl>`).join("")}
       ${renderMetricPreview(a, response!.locations, index)}
       ${m.unavailable_totals_reason ? `<p>${esc(label("reason", m.unavailable_totals_reason))}</p>` : ""}
       <table class="nav-margins"><caption>${esc(t("nav.participantMargins"))}</caption>
@@ -99,6 +102,7 @@ export function createResultsPanel(root: HTMLElement) {
   root.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
     if (target.closest('[data-act="collapse"]')) { collapsed = !collapsed; render(); }
+    if (target.closest('[data-act="focus-route"]')) root.dispatchEvent(new CustomEvent("focus-calculated-route", { bubbles: true }));
     const id = target.closest<HTMLButtonElement>("button[data-alt]")?.dataset.alt;
     if (id && response?.alternatives.some((a) => a.id === id)) { selectedId = id; render(); listeners.forEach((cb) => cb(id)); }
   });

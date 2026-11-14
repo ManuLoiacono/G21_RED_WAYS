@@ -1,0 +1,91 @@
+{
+  "adapter": "gale-eqc-scene-v1",
+  "numerical_tolerance_m": 1e-7,
+  "visual_check": "Three height samples on streamed Cesium Mars; no independent horizontal control error established.",
+  "controls": [
+    {
+      "poi": "base",
+      "cell": [
+        731,
+        1288
+      ],
+      "requested_xy_m": [
+        8144580.538492368,
+        -286000.41554995254
+      ],
+      "effective_xy_m": [
+        8144581.473491781,
+        -286000.58389174327
+      ],
+      "lonlat": [
+        137.40401577400564,
+        -4.825002840027833
+      ],
+      "scene_lonlat": [
+        137.4035940088842,
+        -4.824412368857799
+      ],
+      "analytical_elevation_m": -3339.572265625,
+      "round_trip_error_m": 0,
+      "sampled_scene_height_m": -3283.9506177302765,
+      "scene_minus_analytical_m": 55.62164789472354,
+      "residual_after_registered_vertical_offset_m": -0.5783521052764655
+    },
+    {
+      "poi": "sample",
+      "cell": [
+        790,
+        1317
+      ],
+      "requested_xy_m": [
+        8144639.813189891,
+        -286118.96494499914
+      ],
+      "effective_xy_m": [
+        8144640.154805867,
+        -286119.9700135037
+      ],
+      "lonlat": [
+        137.40500576326815,
+        -4.827016956113596
+      ],
+      "scene_lonlat": [
+        137.40458399814668,
+        -4.826426484943561
+      ],
+      "analytical_elevation_m": -3328.9900512695312,
+      "round_trip_error_m": 5.820766091346741e-11,
+      "sampled_scene_height_m": -3273.482674171713,
+      "scene_minus_analytical_m": 55.507377097818335,
+      "residual_after_registered_vertical_offset_m": -0.6926229021816681
+    },
+    {
+      "poi": "control",
+      "cell": [
+        760,
+        1346
+      ],
+      "requested_xy_m": [
+        8144699.087887415,
+        -286059.6902474758
+      ],
+      "effective_xy_m": [
+        8144698.836119953,
+        -286059.2652058289
+      ],
+      "lonlat": [
+        137.40599575253063,
+        -4.8259928292903265
+      ],
+      "scene_lonlat": [
+        137.40557398740918,
+        -4.825402358120293
+      ],
+      "analytical_elevation_m": -3331.9465942382812,
+      "round_trip_error_m": 5.820766091346741e-11,
+      "sampled_scene_height_m": -3276.2804687048547,
+      "scene_minus_analytical_m": 55.666125533426566,
+      "residual_after_registered_vertical_offset_m": -0.5338744665734367
+    }
+  ]
+}
