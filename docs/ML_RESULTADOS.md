@@ -188,6 +188,25 @@ La dosis sube hacia 2019–2020 (mínimo solar: más rayos cósmicos galácticos
 **Tormentas de partículas solares:** la serie incluye días con dosis muy por encima del fondo (máximo diario 1692 µGy/día en el año marciano 37). Se dejaron en los datos: B1 no las predice ni las filtra. Afectan la media móvil durante 27 soles y pesan en el MAE de validación. Detectarlas es tarea de B2/C1.
 
 
+## ML-09 — C1: alertas DONKI (WSA-ENLIL) vs. RAD
+
+No es ML: compara cada llegada a Marte predicha por WSA-ENLIL (2013–2025) con eventos medidos por RAD. Reglas fijadas antes de mirar resultados (detalle en `ml/evaluation/c1_donki.py`):
+- Alerta = última corrida de ENLIL antes de la llegada para cada conjunto de CME; llegadas a menos de 12 h se unen. 477 de 487 alertas tienen ≥ 75 % de horas de RAD en ±24 h. Anticipación mediana: 99.0 h.
+- Evento RAD: **subida** (dosis horaria > fondo de 7 días + 3 σ robustas, ≥ 2 h; partículas) o **bajada** (media de 6 h < fondo − 3 σ, ≥ 6 h; tipo Forbush). Detectados: {'increase': 58, 'decrease': 40}.
+- Acierto = un evento RAD empieza dentro de ±24 h de la llegada predicha. Azar = fracción de horas con un comienzo de evento a ±24 h (lo que acertaría una alerta puesta al azar).
+
+| Evento RAD | Alertas evaluables | Aciertos | Falsas alarmas | Acierto por azar | Eventos medidos | Medidos sin alerta | Error de hora (mediana / medio abs., h) |
+|---|---|---|---|---|---|---|---|
+| subida | 477 | 22 | 455 | 11 de 477 (0.024) | 58 | 41 | 1.84 / 12.43 |
+| bajada | 477 | 24 | 453 | 8 de 477 (0.016) | 40 | 22 | -0.16 / 12.54 |
+| cualquiera | 477 | 42 | 435 | 19 de 477 (0.039) | 98 | 63 | 0.64 / 11.78 |
+
+**Ventana final (25/10–05/12/2025):** 13 alertas, 3 con un evento RAD a ±24 h; eventos RAD: decrease desde 2025-10-30 03:00 (pico/fondo 0.93); increase desde 2025-11-11 12:00 (pico/fondo 1.95); increase desde 2025-12-01 09:00 (pico/fondo 1.27).
+Las llegadas predichas del 29/10 17:51 y 30/10 10:22 caen cerca de una bajada que empieza el 30/10 03:00; la subida del 11/11 (pico ×1,95) no tuvo alerta ENLIL. Pocos casos: no prueba que el sistema "acierta".
+
+**Lectura:** las alertas aciertan más que el azar (≈ 2× en esta definición), pero la gran mayoría son falsas alarmas y casi dos tercios de los eventos medidos no tuvieron alerta (muchos son partículas de fulguraciones, que ENLIL no modela). Sin MAVEN (pendiente) y sin FLR (endpoint caído), esto es una evaluación parcial.
+
+
 ## Limitaciones
 
 - **REMS es un resumen diario de divulgación** (CAB): valores enteros en °C y Pa, sin flags de calidad. Hay mínimas atípicas de −99/−100 °C (p. ej., soles 2803 y 2805) que se dejaron como están.

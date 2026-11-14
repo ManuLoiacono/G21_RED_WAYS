@@ -96,6 +96,37 @@ def _b1_section() -> list[str]:
     return lines
 
 
+def _c1_section() -> list[str]:
+    path = config.ARTIFACTS_DIR / "C1_donki" / "metrics.json"
+    if not path.exists():
+        return []
+    c1 = json.loads(path.read_text(encoding="utf-8"))
+    lines = [
+        "", "## ML-09 — C1: alertas DONKI (WSA-ENLIL) vs. RAD", "",
+        "No es ML: compara cada llegada a Marte predicha por WSA-ENLIL (2013–2025) con eventos medidos por RAD. Reglas fijadas antes de mirar resultados (detalle en `ml/evaluation/c1_donki.py`):",
+        f"- Alerta = última corrida de ENLIL antes de la llegada para cada conjunto de CME; llegadas a menos de 12 h se unen. {c1['n_alerts_evaluable']} de {c1['n_alerts_total']} alertas tienen ≥ 75 % de horas de RAD en ±{c1['window_h']} h. Anticipación mediana: {c1['lead_h_median']} h.",
+        f"- Evento RAD: **subida** (dosis horaria > fondo de 7 días + {c1['z']:g} σ robustas, ≥ 2 h; partículas) o **bajada** (media de 6 h < fondo − {c1['z']:g} σ, ≥ 6 h; tipo Forbush). Detectados: {c1['rad_events']}.",
+        f"- Acierto = un evento RAD empieza dentro de ±{c1['window_h']} h de la llegada predicha. Azar = fracción de horas con un comienzo de evento a ±{c1['window_h']} h (lo que acertaría una alerta puesta al azar).",
+        "",
+        "| Evento RAD | Alertas evaluables | Aciertos | Falsas alarmas | Acierto por azar | Eventos medidos | Medidos sin alerta | Error de hora (mediana / medio abs., h) |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    names = {"increase": "subida", "decrease": "bajada", "any": "cualquiera"}
+    for k, m in c1["by_kind"].items():
+        lines.append(f"| {names[k]} | {m['n_alerts']} | {m['hits']} | {m['false_alarms']} | {m['chance_hit_fraction'] * m['n_alerts']:.0f} de {m['n_alerts']} ({m['chance_hit_fraction']:.3f}) | {m['observed_events']} | {m['observed_without_alert']} | {m['timing_error_h_median']} / {m['timing_error_h_mean_abs']} |")
+    hits = [a for a in c1["test_window_alerts"] if a.get("hit_any")]
+    lines += [
+        "",
+        f"**Ventana final (25/10–05/12/2025):** {len(c1['test_window_alerts'])} alertas, {len(hits)} con un evento RAD a ±{c1['window_h']} h; eventos RAD: "
+        + "; ".join(f"{e['kind']} desde {e['start_utc'][:16]} (pico/fondo {e['ratio_peak_bg']})" for e in c1["test_window_rad_events"]) + ".",
+        "Las llegadas predichas del 29/10 17:51 y 30/10 10:22 caen cerca de una bajada que empieza el 30/10 03:00; la subida del 11/11 (pico ×1,95) no tuvo alerta ENLIL. Pocos casos: no prueba que el sistema \"acierta\".",
+        "",
+        "**Lectura:** las alertas aciertan más que el azar (≈ 2× en esta definición), pero la gran mayoría son falsas alarmas y casi dos tercios de los eventos medidos no tuvieron alerta (muchos son partículas de fulguraciones, que ENLIL no modela). Sin MAVEN (pendiente) y sin FLR (endpoint caído), esto es una evaluación parcial.",
+        "",
+    ]
+    return lines
+
+
 def build() -> str:
     summary = json.loads((config.PROCESSED_DIR / "daily_weather_summary.json").read_text(encoding="utf-8"))
     a1, a2 = _load("A1_pressure"), _load("A2_temperature")
@@ -131,6 +162,7 @@ def build() -> str:
         out += _table(r["metrics"], cands, "°C", {})
     out += _rad_section()
     out += _b1_section()
+    out += _c1_section()
     out += [
         "",
         "## Limitaciones",
