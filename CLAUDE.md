@@ -76,6 +76,10 @@ Datos: scripts/ + data/ (persona 3)          └─ caché: data/cache/ (última
 ### Visual
 - Cesium Mars: asset ion `3644333` (3D Tiles). En Gale carga hasta un error geométrico de ~2,5 m.
 - **Desfase vertical:** alturas de Cesium ≈ `elev_geoid` + ~71 m (medido: +70,2 a +71,5 m; el 14/11, 71,2 ± 0,3 m en 20 posiciones de Curiosity). No mezclar alturas sin corregir. Para dibujar, usar `clampToGround` (sirve para polilíneas; con el globo oculto no sirve para puntos ni etiquetas).
+- **Registro DTM ↔ Cesium Mars ↔ Curiosity (medido el 14/11 en la parcela):** no coinciden en planta.
+  - Cesium Mars ≈ DTM movido −25 m E, +35 m N y +56,2 m en altura (144 puntos, residuo 0,9 m).
+  - Posiciones de Curiosity ≈ DTM movido ~−43 m E, +33 m N; `elev_geoid` ≈ DTM − 17,9 m (563 puntos).
+  - Lo que esté en coordenadas del DTM (rutas del motor) debe moverse igual para dibujarse sobre la escena. Ver `scripts/README.md`.
 - **Latitudes en Cesium:** `Ellipsoid.MARS` es achatado, pero `fromDegrees(lon, lat, h, Ellipsoid.MARS)` con la latitud tal como viene en los datos cae en el lugar correcto del tileset (verificado con las posiciones de Curiosity). **No convertir** de planetocéntrica a geodésica: correría todo ~3,3 km.
 - Ajustes de calidad medidos en una GTX 1050 Ti a 1600×900, render puro:
   - Liviano: ~3,5 ms por cuadro.
@@ -141,6 +145,9 @@ Manifiesto de parcela · Elevación y grilla analítica · Coordenadas · Puntos
 - Git: ramas `p1/...`, `p2/...`, `p3/...`; commits chicos; PR o merge con una revisión rápida de otro integrante; `main` siempre arranca.
 - No versionar `.env`, tokens ni archivos multigigabyte (rasters completos). Sí versionar scripts, manifiestos, recortes reducidos y respaldos chicos.
 - Token de Cesium ion: en `app/.env` (`VITE_CESIUM_ION_TOKEN`), restringido en ion a `assets:read`, al asset de Cesium Mars y a las URLs permitidas. Las demás claves van en variables de entorno del servicio.
+- **Idioma del código: inglés, siempre.** Todo código que se escriba (identificadores, comentarios, docstrings, mensajes de log y de excepción, nombres de archivos y ramas nuevas) va en inglés. La documentación (`docs/`, README, este archivo) puede seguir en español.
+  - **Textos de la interfaz:** nunca escritos directo en el código. Van al diccionario de `app/src/i18n/` (`es.ts` es la referencia; `en.ts` debe tener las mismas claves, lo verifica el compilador) y se usan con `t("clave")`. La app se muestra en español o inglés (selector ES | EN del HUD, sin recargar; `?lang=es|en`). Todo módulo nuevo que muestre texto debe volver a dibujarlo con `onLanguageChange`.
+  - **Excepción: valores de los contratos.** Los valores que viajan entre app, motor y datos y están definidos en `contracts/` (`observacion_geologica`, `a_pie`, `destino`, `topografica`, `observado`, `menor_tiempo`, ids de tareas…) son datos acordados por el equipo y no se traducen en el código. Pasarlos a inglés es un cambio de contrato: se acuerda entre las tres personas.
 - Python 3.10+ (numpy, scipy, rasterio). Node 18+ para la app.
 - Cada entrega incluye cómo ejecutarla, un ejemplo de entrada y salida, sus limitaciones y la versión del contrato.
 

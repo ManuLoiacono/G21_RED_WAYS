@@ -3,9 +3,9 @@ import type { PlanResponse } from "./response";
 import { altColor } from "./results";
 
 /**
- * Dibuja las alternativas de la respuesta sobre el terreno (clampToGround, D2).
- * Ida: línea continua. Vuelta: línea a trazos (solo si difiere de la ida).
- * Incompatibles: rojo y a trazos. La seleccionada se resalta; las demás quedan tenues.
+ * Draws the response alternatives on the terrain (clampToGround, D2).
+ * Outbound: solid line. Return: dashed line (only if it differs from the outbound leg).
+ * Incompatible: red and dashed. The selected one is highlighted; the others are dimmed.
  */
 export class RouteLayer {
   private readonly source = new Cesium.CustomDataSource("plan-routes");
@@ -27,7 +27,7 @@ export class RouteLayer {
       entities.push(
         this.source.entities.add({
           id: `route:${alt.id}:out`,
-          name: `${alt.id} (ida)`,
+          name: `${alt.id} (outbound)`,
           polyline: { positions: toPositions(alt.outbound.lonlat), clampToGround: true },
         }),
       );
@@ -35,7 +35,7 @@ export class RouteLayer {
         entities.push(
           this.source.entities.add({
             id: `route:${alt.id}:ret`,
-            name: `${alt.id} (vuelta)`,
+            name: `${alt.id} (return)`,
             polyline: { positions: toPositions(alt.return.lonlat), clampToGround: true },
           }),
         );

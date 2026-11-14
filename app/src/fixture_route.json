@@ -1,5 +1,5 @@
 {
-  "_comment": "FIXTURE de desarrollo: ruta sintética cerca de la zona de Curiosity en Gale. NO es resultado del motor ni un recorrido real. Coordenadas [lon E, lat] planetocéntricas.",
+  "_comment": "Development FIXTURE: synthetic route near the Curiosity area in Gale. NOT an engine result or a real traverse. Coordinates [lon E, lat], planetocentric.",
   "type": "LineString",
   "coordinates": [
     [137.3790, -4.8020],

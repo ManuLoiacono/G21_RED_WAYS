@@ -24,3 +24,6 @@ data/raw/
 
 # Sistema
 .DS_Store
+
+# Teselas 3D generadas (se regeneran con scripts/build_hirise_tiles.py)
+data/processed/gale/tiles_hirise/

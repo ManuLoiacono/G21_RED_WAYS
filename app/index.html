@@ -5,25 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Marswalk — Gale</title>
     <style>
-      /* overflow: clip evita que el foco desplace la página cuando un panel no entra. */
+      /* overflow: clip keeps focus from scrolling the page when a panel does not fit. */
       html, body, #cesiumContainer { margin: 0; width: 100%; height: 100%; overflow: clip; background: #000; }
       #hud { position: absolute; top: 12px; left: 12px; z-index: 10; display: flex; flex-wrap: wrap; gap: 6px; max-width: calc(100% - 24px); font: 13px system-ui, sans-serif; }
       #hud button { background: #1b1b1f; color: #eee; border: 1px solid #444; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
       #hud button.active { border-color: #3ff0ff; color: #3ff0ff; }
+      /* Language switch: two joined buttons; the active one is the language on screen. */
+      #hud .lang-switch { display: inline-flex; }
+      #hud .lang-switch button { border-radius: 0; padding: 6px 9px; }
+      #hud .lang-switch button:first-child { border-radius: 6px 0 0 6px; }
+      #hud .lang-switch button:last-child { border-radius: 0 6px 6px 0; margin-left: -1px; }
+      #hud .lang-switch button[aria-pressed="true"] { border-color: #3ff0ff; color: #3ff0ff; background: #102a2e; position: relative; }
     </style>
   </head>
   <body>
+    <!-- Texts are filled in from src/i18n (data-i18n*); the ones here are only a fallback. -->
     <div id="cesiumContainer"></div>
     <div id="hud">
-      <button data-preset="liviano">Liviano</button>
-      <button data-preset="equilibrado" class="active">Equilibrado</button>
-      <button data-preset="presentacion">Presentación</button>
-      <button id="resetView">Restablecer vista</button>
-      <button data-source="terreno_visual" aria-label="Fuente del terreno 3D" title="Ver fuente del terreno">ⓘ</button>
-      <button id="openSources" aria-haspopup="dialog">Fuentes</button>
+      <button data-preset="light" data-i18n="hud.preset.light">Liviano</button>
+      <button data-preset="balanced" class="active" data-i18n="hud.preset.balanced">Equilibrado</button>
+      <button data-preset="presentation" data-i18n="hud.preset.presentation">Presentación</button>
+      <button id="resetView" data-i18n="hud.resetView">Restablecer vista</button>
+      <button id="toggleHirise" class="active" aria-pressed="true" hidden data-i18n="hud.hirise" data-i18n-title="hud.hirise.title">Detalle HiRISE 1 m</button>
+      <button id="hiriseInfo" hidden data-source="hirise_mesh" data-i18n-aria="hud.hiriseInfo.aria" data-i18n-title="hud.hiriseInfo.title">ⓘ</button>
+      <button data-source="visual_terrain" data-i18n-aria="hud.terrainInfo.aria" data-i18n-title="hud.terrainInfo.title">ⓘ</button>
+      <button id="openSources" aria-haspopup="dialog" data-i18n="hud.sources">Fuentes</button>
+      <span id="languageSwitch" class="lang-switch" role="group" data-i18n-aria="hud.language">
+        <button type="button" data-lang="es" lang="es" data-i18n-title="hud.language.es" data-i18n-aria="hud.language.es">ES</button>
+        <button type="button" data-lang="en" lang="en" data-i18n-title="hud.language.en" data-i18n-aria="hud.language.en">EN</button>
+      </span>
     </div>
-    <aside id="missionPanel" aria-label="Preparar misión"></aside>
-    <aside id="resultsPanel" aria-label="Alternativas" hidden></aside>
+    <aside id="missionPanel" data-i18n-aria="aside.mission"></aside>
+    <aside id="resultsPanel" data-i18n-aria="aside.results" hidden></aside>
     <dialog id="sourcesDialog"></dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>

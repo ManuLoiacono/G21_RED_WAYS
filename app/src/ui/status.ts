@@ -1,15 +1,16 @@
+import { t } from "../i18n";
 import { esc } from "./format";
 
 /**
- * Mensajes de estado de la app (P1-06): carga, error bloqueante y avisos breves.
- * Reemplaza los `alert()` y la pantalla negra cuando algo falla al arrancar.
+ * App status messages (P1-06): loading, blocking error and short notices.
+ * They replace `alert()` and the black screen when something fails at startup.
  */
 
 export interface AppError {
   title: string;
   detail: string;
   steps?: string[];
-  /** Mensaje técnico original, plegado (para quien depura). */
+  /** Original technical message, folded (for whoever is debugging). */
   technical?: string;
 }
 
@@ -52,14 +53,14 @@ export function showError(err: AppError) {
       <h2>${esc(err.title)}</h2>
       <p>${esc(err.detail)}</p>
       ${err.steps?.length ? `<ol>${err.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>` : ""}
-      ${err.technical ? `<details><summary>Detalle técnico</summary><pre>${esc(err.technical)}</pre></details>` : ""}
-      <button type="button" data-act="reload">Reintentar</button>
+      ${err.technical ? `<details><summary>${esc(t("status.technical"))}</summary><pre>${esc(err.technical)}</pre></details>` : ""}
+      <button type="button" data-act="reload">${esc(t("status.retry"))}</button>
     </div>`;
   el.hidden = false;
   el.querySelector<HTMLButtonElement>('[data-act="reload"]')!.onclick = () => location.reload();
 }
 
-/** Aviso breve no bloqueante (por ejemplo, teselas que fallaron). */
+/** Short non-blocking notice (for example, tiles that failed). */
 export function showToast(message: string, timeoutMs = 8000) {
   let el = document.getElementById("appToast");
   if (!el) {

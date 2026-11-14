@@ -1,4 +1,4 @@
-/* Panel «Preparar misión» (P1-02). Escritorio: columna a la derecha. Tablet angosta: hoja inferior. */
+/* "Plan mission" panel (P1-02). Desktop: right-hand column. Narrow tablet: bottom sheet. */
 #missionPanel, #resultsPanel {
   --mp-bg: rgba(18, 18, 22, 0.94);
   --mp-fg: #ececf0;
@@ -91,8 +91,9 @@
 .mp-sources ul { padding-left: 18px; margin: 4px 0; }
 .mp-json pre { max-height: 220px; overflow: auto; background: #101014; padding: 8px; border-radius: 6px; font-size: 11px; color: var(--mp-fg); }
 
-/* Panel de resultados (P1-03): columna izquierda, debajo de los botones de calidad. */
-#resultsPanel { top: 56px; left: 12px; right: auto; width: 380px; max-height: calc(100% - 68px); }
+/* Results panel (P1-03): left-hand column, below the HUD buttons.
+   --hud-bottom is the HUD's bottom edge, measured in main.ts (the HUD wraps to more rows on narrow screens). */
+#resultsPanel { top: var(--hud-bottom, 56px); left: 12px; right: auto; width: 380px; max-height: calc(100% - var(--hud-bottom, 56px) - 12px); }
 #resultsPanel[hidden] { display: none; }
 
 .rs-summary { margin: 10px 0 4px; }
@@ -133,14 +134,10 @@
 
 @media (max-width: 900px) {
   #missionPanel { top: auto; bottom: 0; right: 0; left: 0; width: auto; max-height: 50%; border-radius: 10px 10px 0 0; }
-  #resultsPanel { top: 56px; left: 8px; right: 8px; width: auto; max-height: calc(50% - 72px); }
-}
-/* Muy angosto: los botones de calidad ocupan dos filas. */
-@media (max-width: 420px) {
-  #resultsPanel { top: 96px; max-height: calc(50% - 112px); }
+  #resultsPanel { left: 8px; right: 8px; width: auto; max-height: calc(50% - var(--hud-bottom, 56px) - 16px); }
 }
 
-/* Estado de la app (P1-06): carga, error bloqueante y avisos. */
+/* App status (P1-06): loading, blocking error and notices. */
 #missionPanel:empty { display: none; }
 
 #appStatus[hidden], #appToast[hidden] { display: none; }
@@ -164,7 +161,7 @@
 
 #appToast { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 25; max-width: calc(100% - 32px); background: rgba(18, 18, 22, 0.94); color: #ffd666; border: 1px solid #5a4a1a; border-radius: 8px; padding: 8px 14px; font: 13px system-ui, sans-serif; }
 
-/* Procedencia bajo demanda (P1-05): botones ⓘ y panel «Fuentes». */
+/* On-demand provenance (P1-05): ⓘ buttons and "Sources" panel. */
 .info-btn,
 .mp-body button.info-btn {
   display: inline-flex; align-items: center; justify-content: center;

@@ -1,25 +1,27 @@
 import { requestPlan, SERVICE_URL } from "./api";
 import { toPlanRequest } from "./request";
 import type { PlanResponse } from "./response";
-import { esc } from "../ui/format";
+import { onLanguageChange, t } from "../i18n";
+import { esc, fmtNumber } from "../ui/format";
 import { infoButton } from "../provenance/sources";
-import { DEFAULT_PROFILE, stateFromTemplate, TEMPLATES } from "./templates";
+import { defaultProfile, relabelState, stateFromTemplate, templateDescription, templateLabel, TEMPLATES } from "./templates";
+import { poiTitle } from "./pois";
 import { TEMPLATE_IDS, type MissionState, type Poi, type PlanRequest, type TemplateId } from "./types";
 
 /**
- * Panel «Preparar misión» (P1-02).
- * Todo lo que se edita acá viaja en el `plan_request` que se envía a POST /plan.
- * En pantalla se usan minutos y horas; el estado y el pedido van en segundos (SI).
+ * "Plan mission" panel (P1-02).
+ * Everything edited here travels in the `plan_request` sent to POST /plan.
+ * The screen shows minutes and hours; state and request use seconds (SI).
  */
 
-/** Detalle del evento `plan-response` que emite el panel al recibir una respuesta. */
+/** Detail of the `plan-response` event the panel emits when a response arrives. */
 export interface PlanResponseEvent {
   response: PlanResponse;
   simulated: boolean;
 }
 
 export interface MissionPanel {
-  /** Elige un destino (por ejemplo, desde un clic en el mapa). Devuelve un motivo si no se puede. */
+  /** Picks a destination (for example, from a map click). Returns a reason if it cannot. */
   selectDestination(poiId: string): string | null;
   onDestinationChange(cb: (poiId: string) => void): void;
   getRequest(): PlanRequest;
@@ -29,7 +31,8 @@ export interface MissionPanel {
 const MIN = 60;
 const HOUR = 3600;
 
-const fmt = (n: number, digits = 2) => String(Number(n.toFixed(digits)));
+/** Value for an <input type="number"> (always a dot as decimal separator). */
+const inputValue = (n: number, digits = 2) => String(Number(n.toFixed(digits)));
 
 function slugify(s: string): string {
   return s
@@ -42,7 +45,7 @@ function slugify(s: string): string {
 
 export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: string): MissionPanel {
   const maybeBase = pois.find((p) => p.role === "base");
-  if (!maybeBase) throw new Error("No hay base entre los puntos de interés.");
+  if (!maybeBase) throw new Error("There is no base among the points of interest.");
   const base: Poi = maybeBase;
   const destinations = pois.filter((p) => p.role === "destino");
 
@@ -53,135 +56,138 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
   let collapsed = false;
   let customTaskCount = 0;
   const invalid = new Set<string>();
-  const destListeners: ((id: string) => void)[] = [];
+  const destinationListeners: ((id: string) => void)[] = [];
 
-  const notifyDestination = () => destListeners.forEach((cb) => cb(state.destination_poi));
+  const notifyDestination = () => destinationListeners.forEach((cb) => cb(state.destination_poi));
 
   // -------------------------------------------------------------------------
   // Render
   // -------------------------------------------------------------------------
   function render() {
-    const tpl = TEMPLATES[state.template_id];
     const dests = compatible(state.template_id);
     const usesFixture = pois.some((p) => p.fixture);
-    const src = state.profile.parameter_sources;
+    const sources = state.profile.parameter_sources;
+    const defaults = defaultProfile().parameter_sources;
 
     root.classList.toggle("collapsed", collapsed);
     root.innerHTML = `
       <header class="mp-head">
-        <h2>Preparar misión</h2>
+        <h2>${esc(t("mp.title"))}</h2>
         <button type="button" class="mp-collapse" data-act="collapse" aria-expanded="${!collapsed}"
-          aria-label="${collapsed ? "Mostrar" : "Ocultar"} panel">${collapsed ? "+" : "−"}</button>
+          aria-label="${esc(t(collapsed ? "mp.show" : "mp.hide"))}">${collapsed ? "+" : "−"}</button>
       </header>
       <form class="mp-body" novalidate>
-        ${usesFixture ? `<p class="mp-note">Base y destinos <strong>de prueba</strong> (fixture), no son destinos científicos reales. ${infoButton("pois_fixture", "base y destinos de prueba")}</p>` : ""}
+        ${usesFixture ? `<p class="mp-note">${t("mp.fixtureNote")} ${infoButton("fixture_pois", t("mp.fixtureNote.info"))}</p>` : ""}
 
         <fieldset>
-          <legend>Misión ${infoButton("plantillas", "plantillas de misión")}</legend>
-          <label>Familia
+          <legend>${esc(t("mp.mission"))} ${infoButton("mission_templates", t("mp.mission.info"))}</legend>
+          <label>${esc(t("mp.family"))}
             <select name="template">
-              ${TEMPLATE_IDS.map((id) => `<option value="${id}" ${id === state.template_id ? "selected" : ""}>${esc(TEMPLATES[id].label)}</option>`).join("")}
+              ${TEMPLATE_IDS.map((id) => `<option value="${id}" ${id === state.template_id ? "selected" : ""}>${esc(templateLabel(id))}</option>`).join("")}
             </select>
           </label>
-          <p class="mp-hint">${esc(tpl.description)}</p>
-          <label>Salida desde
-            <input type="text" value="${esc(base.title)}" readonly />
+          <p class="mp-hint">${esc(templateDescription(state.template_id))}</p>
+          <label>${esc(t("mp.departFrom"))}
+            <input type="text" value="${esc(poiTitle(base))}" readonly />
           </label>
-          <label>Destino
+          <label>${esc(t("mp.destination"))}
             <select name="destination" ${dests.length ? "" : "disabled"}>
               ${
                 dests.length
                   ? dests
-                      .map((d) => `<option value="${d.id}" ${d.id === state.destination_poi ? "selected" : ""}>${esc(d.title)}${d.hypothetical ? " (hipotético)" : ""}</option>`)
+                      .map(
+                        (d) =>
+                          `<option value="${d.id}" ${d.id === state.destination_poi ? "selected" : ""}>${esc(poiTitle(d))}${d.hypothetical ? esc(t("mp.hypothetical")) : ""}</option>`,
+                      )
                       .join("")
-                  : `<option>Ningún destino admite esta familia</option>`
+                  : `<option>${esc(t("mp.noDestination"))}</option>`
               }
             </select>
           </label>
-          <p class="mp-hint">También podés elegir el destino con un clic en el mapa.</p>
+          <p class="mp-hint">${esc(t("mp.destination.hint"))}</p>
         </fieldset>
 
         <fieldset>
-          <legend>Tareas en el destino ${infoButton("plantillas", "duraciones de las tareas")}</legend>
+          <legend>${esc(t("mp.tasks"))} ${infoButton("mission_templates", t("mp.tasks.info"))}</legend>
           <ul class="mp-tasks">
             ${state.tasks
               .map(
-                (t, i) => `
+                (task, i) => `
               <li>
-                <input type="text" name="task-label" data-i="${i}" value="${esc(t.label)}" aria-label="Nombre de la tarea ${i + 1}" />
-                <input type="number" name="task-min" data-i="${i}" min="1" step="1" value="${fmt(t.duration_s / MIN, 1)}" aria-label="Duración de la tarea ${i + 1} en minutos" />
+                <input type="text" name="task-label" data-i="${i}" value="${esc(task.label)}" aria-label="${esc(t("mp.task.name", { n: i + 1 }))}" />
+                <input type="number" name="task-min" data-i="${i}" min="1" step="1" value="${inputValue(task.duration_s / MIN, 1)}" aria-label="${esc(t("mp.task.duration", { n: i + 1 }))}" />
                 <span class="mp-unit">min</span>
-                <button type="button" data-act="remove-task" data-i="${i}" aria-label="Quitar tarea ${i + 1}" ${state.tasks.length <= 1 ? "disabled" : ""}>×</button>
+                <button type="button" data-act="remove-task" data-i="${i}" aria-label="${esc(t("mp.task.remove", { n: i + 1 }))}" ${state.tasks.length <= 1 ? "disabled" : ""}>×</button>
               </li>`,
               )
               .join("")}
           </ul>
-          <button type="button" class="mp-link" data-act="add-task">+ Agregar tarea</button>
+          <button type="button" class="mp-link" data-act="add-task">${esc(t("mp.task.add"))}</button>
         </fieldset>
 
         <fieldset>
-          <legend>Horario y presupuesto ${infoButton("rems", "amanecer y atardecer (REMS)")}</legend>
+          <legend>${esc(t("mp.schedule"))} ${infoButton("rems", t("mp.schedule.info"))}</legend>
           <div class="mp-grid">
-            <label>Sol (REMS)
+            <label>${esc(t("mp.sol"))}
               <input type="number" name="sol" min="1" step="1" value="${state.sol}" />
             </label>
-            <label>Hora de salida
+            <label>${esc(t("mp.departure"))}
               <input type="time" name="departure" value="${state.departure_local}" />
             </label>
-            <label>Reserva
-              <span class="mp-inline"><input type="number" name="reserve-min" min="0" step="5" value="${fmt(state.reserve_s / MIN, 1)}" /><span class="mp-unit">min</span></span>
+            <label>${esc(t("mp.reserve"))}
+              <span class="mp-inline"><input type="number" name="reserve-min" min="0" step="5" value="${inputValue(state.reserve_s / MIN, 1)}" /><span class="mp-unit">min</span></span>
             </label>
-            <label>Tiempo máximo fuera de la base
-              <span class="mp-inline"><input type="number" name="budget-h" min="0.5" step="0.5" value="${fmt(state.time_budget_s / HOUR)}" /><span class="mp-unit">h</span></span>
+            <label>${esc(t("mp.budget"))}
+              <span class="mp-inline"><input type="number" name="budget-h" min="0.5" step="0.5" value="${inputValue(state.time_budget_s / HOUR)}" /><span class="mp-unit">h</span></span>
             </label>
           </div>
-          <p class="mp-hint">El sol elige el amanecer y el atardecer medidos por Curiosity ese día (observación histórica, no pronóstico). La hora es solar local.</p>
+          <p class="mp-hint">${esc(t("mp.schedule.hint"))}</p>
         </fieldset>
 
         <fieldset>
-          <legend>Perfil del explorador ${infoButton("perfil_humano", "perfil del explorador")}</legend>
-          <label>Modo
+          <legend>${esc(t("mp.profile"))} ${infoButton("human_profile", t("mp.profile.info"))}</legend>
+          <label>${esc(t("mp.mode"))}
             <select name="mode">
-              <option value="a_pie" selected>A pie</option>
-              <option value="con_robot" disabled>Con robot de apoyo (próximamente)</option>
+              <option value="a_pie" selected>${esc(t("mp.mode.onFoot"))}</option>
+              <option value="con_robot" disabled>${esc(t("mp.mode.robot"))}</option>
             </select>
           </label>
           <div class="mp-grid">
-            <label>Pendiente máxima
-              <span class="mp-inline"><input type="number" name="max-slope" min="1" max="45" step="0.1" value="${fmt(state.profile.max_slope_deg, 1)}" /><span class="mp-unit">°</span></span>
+            <label>${esc(t("mp.maxSlope"))}
+              <span class="mp-inline"><input type="number" name="max-slope" min="1" max="45" step="0.1" value="${inputValue(state.profile.max_slope_deg, 1)}" /><span class="mp-unit">°</span></span>
             </label>
-            <label>Velocidad en llano
-              <span class="mp-inline"><input type="number" name="speed" min="0.05" max="3" step="0.01" value="${fmt(state.profile.flat_speed_m_s)}" /><span class="mp-unit">m/s</span></span>
+            <label>${esc(t("mp.flatSpeed"))}
+              <span class="mp-inline"><input type="number" name="speed" min="0.05" max="3" step="0.01" value="${inputValue(state.profile.flat_speed_m_s)}" /><span class="mp-unit">m/s</span></span>
             </label>
           </div>
-          <p class="mp-hint" data-role="speed-kmh">≈ ${fmt(state.profile.flat_speed_m_s * 3.6, 1)} km/h</p>
+          <p class="mp-hint" data-role="speed-kmh">≈ ${fmtNumber(state.profile.flat_speed_m_s * 3.6)} km/h</p>
           <details class="mp-sources">
-            <summary>¿De dónde salen estos valores?</summary>
-            <p>Son valores de referencia, editables. No son límites operativos para Marte (otra gravedad, traje y terreno).</p>
+            <summary>${esc(t("mp.values.summary"))}</summary>
+            <p>${esc(t("mp.values.text"))}</p>
             <ul>
-              <li><strong>Pendiente:</strong> ${esc(src.max_slope_deg ?? DEFAULT_PROFILE.parameter_sources.max_slope_deg)}</li>
-              <li><strong>Velocidad:</strong> ${esc(src.flat_speed_m_s ?? DEFAULT_PROFILE.parameter_sources.flat_speed_m_s)}</li>
-              <li>Tareas, reserva y tiempo máximo: supuestos de la plantilla.</li>
+              <li><strong>${esc(t("mp.values.slope"))}</strong> ${esc(sources.max_slope_deg ?? defaults.max_slope_deg)}</li>
+              <li><strong>${esc(t("mp.values.speed"))}</strong> ${esc(sources.flat_speed_m_s ?? defaults.flat_speed_m_s)}</li>
+              <li>${esc(t("mp.values.assumptions"))}</li>
             </ul>
           </details>
         </fieldset>
 
         <fieldset>
-          <legend>Preferencias</legend>
-          ${prefRow("time", "Tiempo", "Llegar y volver rápido")}
-          ${prefRow("effort", "Esfuerzo", "Evitar subidas y pendientes")}
-          ${prefRow("comm", "Enlace con la base", "Mantener visibilidad con la base (próximamente)")}
-          <p class="mp-hint">Las preferencias ordenan las alternativas; nunca compensan una restricción incumplida.</p>
+          <legend>${esc(t("mp.prefs"))}</legend>
+          ${prefRow("time", t("mp.pref.time"), t("mp.pref.time.hint"))}
+          ${prefRow("effort", t("mp.pref.effort"), t("mp.pref.effort.hint"))}
+          ${prefRow("comm", t("mp.pref.comm"), t("mp.pref.comm.hint"))}
+          <p class="mp-hint">${esc(t("mp.prefs.hint"))}</p>
         </fieldset>
 
         <div class="mp-actions">
-          <button type="button" data-act="reset">Restaurar valores</button>
-          <button type="submit" class="mp-primary">Calcular rutas</button>
+          <button type="button" data-act="reset">${esc(t("mp.reset"))}</button>
+          <button type="submit" class="mp-primary">${esc(t("mp.submit"))}</button>
         </div>
         <p class="mp-status" role="status" aria-live="polite"></p>
 
         <details class="mp-json">
-          <summary>Ver pedido enviado al motor</summary>
+          <summary>${esc(t("mp.json"))}</summary>
           <pre></pre>
         </details>
       </form>
@@ -194,14 +200,14 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
     const v = state.preferences[key];
     return `
       <label class="mp-pref">
-        <span>${label} <output data-pref-out="${key}">${fmt(v, 1)}</output></span>
+        <span>${esc(label)} <output data-pref-out="${key}">${fmtNumber(v)}</output></span>
         <input type="range" name="pref-${key}" min="0" max="1" step="0.1" value="${v}" title="${esc(hint)}" />
         <small>${esc(hint)}</small>
       </label>`;
   }
 
   // -------------------------------------------------------------------------
-  // Estado ← formulario
+  // State ← form
   // -------------------------------------------------------------------------
   function readNumber(input: HTMLInputElement, min: number, max = Infinity): number | null {
     const v = input.valueAsNumber;
@@ -230,10 +236,10 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
         notifyDestination();
         break;
       case "task-label": {
-        const t = state.tasks[i];
-        t.label = el.value;
-        // Las tareas agregadas a mano toman su id del nombre; las de la plantilla lo conservan.
-        if (!(t.id in taskIdsOfTemplate())) t.id = slugify(el.value) || `tarea_${i + 1}`;
+        const task = state.tasks[i];
+        task.label = el.value;
+        // Tasks added by hand take their id from the name; template tasks keep theirs.
+        if (!(task.id in templateTaskIds())) task.id = slugify(el.value) || `task_${i + 1}`;
         break;
       }
       case "task-min": {
@@ -269,7 +275,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
         if (v !== null) {
           state.profile.flat_speed_m_s = v;
           const kmh = root.querySelector<HTMLElement>('[data-role="speed-kmh"]');
-          if (kmh) kmh.textContent = `≈ ${fmt(v * 3.6, 1)} km/h`;
+          if (kmh) kmh.textContent = `≈ ${fmtNumber(v * 3.6)} km/h`;
         }
         break;
       }
@@ -279,7 +285,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
         const key = el.name.slice(5) as keyof MissionState["preferences"];
         state.preferences[key] = Number(el.value);
         const out = root.querySelector<HTMLOutputElement>(`[data-pref-out="${key}"]`);
-        if (out) out.value = fmt(state.preferences[key], 1);
+        if (out) out.value = fmtNumber(state.preferences[key]);
         break;
       }
       case "mode":
@@ -289,9 +295,9 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
     updatePreview();
   }
 
-  /** IDs de tareas propias de la plantilla actual (no se renombran al editar la etiqueta). */
-  function taskIdsOfTemplate(): Record<string, true> {
-    return Object.fromEntries(TEMPLATES[state.template_id].tasks.map((t) => [t.id, true]));
+  /** Task ids that belong to the current template (not renamed when the label is edited). */
+  function templateTaskIds(): Record<string, true> {
+    return Object.fromEntries(TEMPLATES[state.template_id].tasks.map((task) => [task.id, true]));
   }
 
   function onClick(e: Event) {
@@ -303,7 +309,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
         break;
       case "add-task":
         customTaskCount += 1;
-        state.tasks.push({ id: `tarea_${customTaskCount}`, label: `Tarea ${customTaskCount}`, duration_s: 15 * MIN });
+        state.tasks.push({ id: `task_${customTaskCount}`, label: t("mp.task.default", { n: customTaskCount }), duration_s: 15 * MIN });
         render();
         break;
       case "remove-task":
@@ -314,7 +320,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
         const dest = state.destination_poi;
         state = stateFromTemplate(state.template_id, state.origin_poi, dest);
         render();
-        setStatus("Valores de la plantilla restaurados.");
+        setStatus(t("mp.status.reset"));
         break;
       }
     }
@@ -323,24 +329,22 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
   async function onSubmit(e: Event) {
     e.preventDefault();
     if (invalid.size) {
-      setStatus("Hay valores fuera de rango (marcados en rojo). Corregilos antes de calcular.", "error");
+      setStatus(t("mp.status.invalid"), "error");
       return;
     }
     if (!state.destination_poi) {
-      setStatus("Elegí un destino.", "error");
+      setStatus(t("mp.status.noDestination"), "error");
       return;
     }
     const req = getRequest();
     const submit = root.querySelector<HTMLButtonElement>('button[type="submit"]');
     if (submit) submit.disabled = true;
-    setStatus("Calculando…");
+    setStatus(t("mp.status.calculating"));
     const res = await requestPlan(req);
     if (submit) submit.disabled = false;
     if (res.ok) {
       setStatus(
-        res.simulated
-          ? `El servicio de rutas (${SERVICE_URL}) no responde: se muestra una respuesta simulada.`
-          : "Respuesta recibida del motor.",
+        res.simulated ? t("mp.status.simulated", { url: SERVICE_URL }) : t("mp.status.received"),
         res.simulated ? "error" : "info",
       );
       Object.assign(window, { lastPlanResponse: res.data });
@@ -351,7 +355,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
   }
 
   // -------------------------------------------------------------------------
-  // Salida
+  // Output
   // -------------------------------------------------------------------------
   function getRequest(): PlanRequest {
     return toPlanRequest(state, parcelId);
@@ -373,7 +377,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
 
   root.addEventListener("input", onInput);
   root.addEventListener("change", (e) => {
-    // Los <select> y el campo de hora disparan solo "change" en algunos navegadores.
+    // <select> and the time field only fire "change" in some browsers.
     const el = e.target as HTMLElement;
     if (el.tagName === "SELECT" || (el as HTMLInputElement).type === "time") onInput(e);
   });
@@ -381,38 +385,45 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
   root.addEventListener("submit", onSubmit);
   render();
 
+  // Language switch: re-render in place, keeping every value of the form. The last status
+  // message is dropped (it was written in the other language).
+  onLanguageChange(() => {
+    relabelState(state);
+    render();
+  });
+
   const api: MissionPanel = {
     selectDestination(poiId) {
       const poi = destinations.find((d) => d.id === poiId);
-      if (!poi) return "Ese punto no es un destino.";
+      if (!poi) return t("mp.status.notDestination");
       if (!poi.families.includes(state.template_id)) {
-        const msg = `«${poi.title}» no admite la familia «${TEMPLATES[state.template_id].label}».`;
+        const msg = t("mp.status.familyNotAllowed", { poi: poiTitle(poi), family: templateLabel(state.template_id) });
         setStatus(msg, "error");
         return msg;
       }
       state.destination_poi = poiId;
       const sel = root.querySelector<HTMLSelectElement>('select[name="destination"]');
       if (sel) sel.value = poiId;
-      setStatus(`Destino: ${poi.title}.`);
+      setStatus(t("mp.status.destination", { poi: poiTitle(poi) }));
       updatePreview();
       notifyDestination();
       return null;
     },
     onDestinationChange(cb) {
-      destListeners.push(cb);
+      destinationListeners.push(cb);
       cb(state.destination_poi);
     },
     getRequest,
     setCollapsed(value) {
       if (collapsed === value) return;
-      // Plegar no re-renderiza el formulario: así no se pierde el estado de los campos ni el mensaje.
+      // Collapsing does not re-render the form, so field state and the status message survive.
       collapsed = value;
       root.classList.toggle("collapsed", collapsed);
       const btn = root.querySelector<HTMLButtonElement>('[data-act="collapse"]');
       if (btn) {
         btn.textContent = collapsed ? "+" : "−";
         btn.setAttribute("aria-expanded", String(!collapsed));
-        btn.setAttribute("aria-label", `${collapsed ? "Mostrar" : "Ocultar"} panel`);
+        btn.setAttribute("aria-label", t(collapsed ? "mp.show" : "mp.hide"));
       }
     },
   };

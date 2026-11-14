@@ -1,6 +1,9 @@
 /**
- * Tipos de la preparación de misión. Siguen el borrador v0 de `contracts/plan_request.example.json`.
- * Si el contrato cambia en T0-01, ajustar acá y en `request.ts`.
+ * Mission planning types. They follow draft v0 of `contracts/plan_request.example.json`.
+ * If the contract changes in T0-01, update this file and `request.ts`.
+ *
+ * Note: template ids, modes and POI roles are contract wire values (agreed with the team in
+ * Spanish). They are data, not identifiers of this code base, so they stay as the contract says.
  */
 
 export const TEMPLATE_IDS = [
@@ -11,7 +14,11 @@ export const TEMPLATE_IDS = [
 ] as const;
 export type TemplateId = (typeof TEMPLATE_IDS)[number];
 
+/** Contract values: on foot / with support robot. */
 export type Mode = "a_pie" | "con_robot";
+
+/** Contract values: base / destination. */
+export type PoiRole = "base" | "destino";
 
 export interface Task {
   id: string;
@@ -33,13 +40,13 @@ export interface Preferences {
   comm: number;
 }
 
-/** Estado editable del formulario (unidades SI, igual que el contrato). */
+/** Editable form state (SI units, same as the contract). */
 export interface MissionState {
   template_id: TemplateId;
   origin_poi: string;
   destination_poi: string;
   tasks: Task[];
-  departure_local: string; // "HH:MM", hora solar local
+  departure_local: string; // "HH:MM", local solar time
   sol: number;
   reserve_s: number;
   time_budget_s: number;
@@ -48,7 +55,7 @@ export interface MissionState {
   preferences: Preferences;
 }
 
-/** Pedido de planificación (contrato v0). */
+/** Planning request (contract v0). */
 export interface PlanRequest {
   schema_version: number;
   parcel_id: string;
@@ -67,11 +74,14 @@ export interface PlanRequest {
   preferences: Preferences;
 }
 
-/** Punto de interés (base o destino), leído del GeoJSON del contrato `poi`. */
+/** Point of interest (base or destination), read from the `poi` contract GeoJSON. */
 export interface Poi {
   id: string;
-  role: "base" | "destino";
+  role: PoiRole;
+  /** Contract title. For display use `poiTitle(poi)`, which picks the UI language. */
   title: string;
+  /** Optional titles by language code (from `title_<lang>` properties). */
+  titles: Record<string, string>;
   hypothetical: boolean;
   families: TemplateId[];
   lonlat: [number, number];

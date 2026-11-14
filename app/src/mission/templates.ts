@@ -1,30 +1,42 @@
+import { isAnyTranslation, t, type MessageKey } from "../i18n";
 import type { MissionState, Preferences, Profile, Task, TemplateId } from "./types";
 
 /**
- * Valores iniciales de las cuatro familias de misión.
+ * Initial values of the four mission types.
  *
- * SUPUESTOS editables para la POC: duraciones de tareas, reserva y presupuesto son hipotéticos.
- * El perfil humano usa valores de referencia de Apollo y de ensayos en la Tierra: no son límites
- * operativos para Marte. Cuando P2-01 (motor) publique sus plantillas, reemplazar estos valores
- * por los suyos para que haya una sola fuente.
+ * Editable ASSUMPTIONS for the POC: task durations, reserve and budget are hypothetical.
+ * The human profile uses reference values from Apollo and Earth tests: they are not operational
+ * limits for Mars. When P2-01 (engine) publishes its templates, replace these values with theirs
+ * so there is a single source.
+ *
+ * Labels are never stored here: they are read from the dictionary when needed, so a language
+ * switch shows them in the new language.
  */
 
-export const DEFAULT_PROFILE: Profile = {
-  id: "astronauta_a_pie",
-  max_slope_deg: 16.7,
-  flat_speed_m_s: 0.42,
-  speed_model: "tobler_like_v0",
-  parameter_sources: {
-    max_slope_deg: "Ensayo Mark III al 30 % de pendiente (Tierra, 2 sujetos): referencia, no límite marciano",
-    flat_speed_m_s: "Apollo 15 ~1,5 km/h (Luna): referencia",
-  },
-};
+const SOURCE_KEYS = { max_slope_deg: "profile.source.maxSlope", flat_speed_m_s: "profile.source.flatSpeed" } as const;
+
+export function defaultProfile(): Profile {
+  return {
+    id: "astronauta_a_pie", // contract value
+    max_slope_deg: 16.7,
+    flat_speed_m_s: 0.42,
+    speed_model: "tobler_like_v0",
+    parameter_sources: {
+      max_slope_deg: t(SOURCE_KEYS.max_slope_deg),
+      flat_speed_m_s: t(SOURCE_KEYS.flat_speed_m_s),
+    },
+  };
+}
+
+interface TemplateTask {
+  /** Contract task id; its label is `task.<id>` in the dictionary. */
+  id: string;
+  duration_s: number;
+}
 
 export interface MissionTemplate {
   id: TemplateId;
-  label: string;
-  description: string;
-  tasks: Task[];
+  tasks: TemplateTask[];
   reserve_s: number;
   time_budget_s: number;
   preferences: Preferences;
@@ -36,11 +48,9 @@ const HOUR = 3600;
 export const TEMPLATES: Record<TemplateId, MissionTemplate> = {
   observacion_geologica: {
     id: "observacion_geologica",
-    label: "Observación geológica",
-    description: "Ir a un afloramiento, documentarlo y tomar muestras.",
     tasks: [
-      { id: "foto_contexto", label: "Foto de contexto", duration_s: 15 * MIN },
-      { id: "muestreo", label: "Muestreo", duration_s: 30 * MIN },
+      { id: "foto_contexto", duration_s: 15 * MIN },
+      { id: "muestreo", duration_s: 30 * MIN },
     ],
     reserve_s: 1 * HOUR,
     time_budget_s: 7 * HOUR,
@@ -48,11 +58,9 @@ export const TEMPLATES: Record<TemplateId, MissionTemplate> = {
   },
   exploracion_topografica: {
     id: "exploracion_topografica",
-    label: "Exploración topográfica",
-    description: "Relevar el relieve de un sector y marcar puntos de referencia.",
     tasks: [
-      { id: "relevamiento_fotogrametrico", label: "Relevamiento fotogramétrico", duration_s: 40 * MIN },
-      { id: "marcar_puntos", label: "Marcar puntos de referencia", duration_s: 15 * MIN },
+      { id: "relevamiento_fotogrametrico", duration_s: 40 * MIN },
+      { id: "marcar_puntos", duration_s: 15 * MIN },
     ],
     reserve_s: 1 * HOUR,
     time_budget_s: 7 * HOUR,
@@ -60,20 +68,16 @@ export const TEMPLATES: Record<TemplateId, MissionTemplate> = {
   },
   reconocimiento: {
     id: "reconocimiento",
-    label: "Reconocimiento",
-    description: "Recorrido corto para inspeccionar un sitio antes de una misión mayor.",
-    tasks: [{ id: "inspeccion_visual", label: "Inspección visual", duration_s: 20 * MIN }],
+    tasks: [{ id: "inspeccion_visual", duration_s: 20 * MIN }],
     reserve_s: 45 * MIN,
     time_budget_s: 5 * HOUR,
     preferences: { time: 1.0, effort: 0.3, comm: 0.0 },
   },
   medicion_ambiental: {
     id: "medicion_ambiental",
-    label: "Medición ambiental",
-    description: "Instalar un sensor y registrar una serie de mediciones.",
     tasks: [
-      { id: "instalar_sensor", label: "Instalar sensor", duration_s: 20 * MIN },
-      { id: "medicion", label: "Medición", duration_s: 45 * MIN },
+      { id: "instalar_sensor", duration_s: 20 * MIN },
+      { id: "medicion", duration_s: 45 * MIN },
     ],
     reserve_s: 1 * HOUR,
     time_budget_s: 7 * HOUR,
@@ -81,23 +85,46 @@ export const TEMPLATES: Record<TemplateId, MissionTemplate> = {
   },
 };
 
-export const DEFAULT_SOL = 4995; // último sol con datos REMS (observación histórica)
+export const templateLabel = (id: TemplateId) => t(`template.${id}` as MessageKey);
+export const templateDescription = (id: TemplateId) => t(`template.${id}.desc` as MessageKey);
+const taskKey = (id: string) => `task.${id}` as MessageKey;
+
+export const DEFAULT_SOL = 4995; // last sol with REMS data (historical observation)
 export const DEFAULT_DEPARTURE = "09:00";
 
-/** Estado inicial de una familia. Conserva origen/destino si se pasan. */
+/** Initial state of a mission type. Keeps origin/destination if given. */
 export function stateFromTemplate(id: TemplateId, origin_poi: string, destination_poi: string): MissionState {
-  const t = TEMPLATES[id];
+  const tpl = TEMPLATES[id];
   return {
     template_id: id,
     origin_poi,
     destination_poi,
-    tasks: t.tasks.map((task) => ({ ...task })),
+    tasks: tpl.tasks.map((task): Task => ({ id: task.id, label: t(taskKey(task.id)), duration_s: task.duration_s })),
     departure_local: DEFAULT_DEPARTURE,
     sol: DEFAULT_SOL,
-    reserve_s: t.reserve_s,
-    time_budget_s: t.time_budget_s,
-    profile: structuredClone(DEFAULT_PROFILE),
+    reserve_s: tpl.reserve_s,
+    time_budget_s: tpl.time_budget_s,
+    profile: defaultProfile(),
     mode: "a_pie",
-    preferences: { ...t.preferences },
+    preferences: { ...tpl.preferences },
   };
+}
+
+/**
+ * After a language switch, translates the texts the app generated (template task labels,
+ * "Task N" labels, profile source notes). Anything the user typed is left untouched.
+ */
+export function relabelState(state: MissionState) {
+  state.tasks.forEach((task) => {
+    if (TEMPLATES[state.template_id].tasks.some((tt) => tt.id === task.id) && isAnyTranslation(task.label, taskKey(task.id))) {
+      task.label = t(taskKey(task.id));
+      return;
+    }
+    const n = /^task_(\d+)$/.exec(task.id)?.[1];
+    if (n && isAnyTranslation(task.label, "mp.task.default", { n })) task.label = t("mp.task.default", { n });
+  });
+  const sources = state.profile.parameter_sources;
+  for (const [field, key] of Object.entries(SOURCE_KEYS)) {
+    if (sources[field] !== undefined && isAnyTranslation(sources[field], key)) sources[field] = t(key);
+  }
 }
