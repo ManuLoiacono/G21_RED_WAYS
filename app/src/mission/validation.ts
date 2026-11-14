@@ -37,6 +37,7 @@ const leg = (x: unknown) => object(x) && str(x.status) && (x.reason === null || 
   (x.status === "found" ? x.xy_m.length >= 1 && num(x.duration_s) : x.xy_m.length === 0 && x.duration_s === null);
 const metricKeys = ["outbound_s", "tasks_s", "return_s", "elapsed_s", "reserve_s", "reserved_total_s", "time_budget_s", "mission_margin_s", "temporal_budget_limiting_margin_s", "daylight_departure_margin_s", "daylight_reserved_return_margin_s", "estimated_return_offset_s", "reserved_deadline_offset_s"];
 const metrics = (x: unknown) => object(x) && metricKeys.every((k) => nullableNum(x[k])) &&
+  ["tasks_s", "reserve_s", "time_budget_s"].every((k) => num(x[k])) &&
   (x.unavailable_totals_reason === null || str(x.unavailable_totals_reason)) &&
   list(x.participant_margins, (p) => str(p.participant_id) && str(p.kind) && num(p.max_sortie_s) && nullableNum(p.margin_s) && str(p.model_id));
 const check = (c: Obj) => str(c.rule_id) && ["passed", "failed", "missing_evidence", "not_evaluated"].includes(c.status as string) && reason(c.reason) &&

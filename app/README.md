@@ -34,6 +34,25 @@ npm run test:mission
 
 Only registered service POIs are submitted. Geographic fixture points and optical panorama observations are separate from planning. Synthetic metric geometry is never interpreted as longitude/latitude. Effort, communication, weather effects and other unsupported capabilities are explained in the form.
 
+## Mission configuration and calculated results
+
+Select 1–4 fixed humans and 0–2 fixed robots from the service catalog. Selected participants have assigned payloads and optional per-mission overrides for flat speed, ascent/descent grade limits, carrying limit and sortie availability. Empty override fields inherit catalog defaults. Identity and the movement model stay fixed. The reset button restores the initial baseline, including the roster.
+
+All four mission templates come from the central export. Sequential tasks can be added, removed, renamed by unique occurrence ID and edited in seconds (up to 64 tasks). Reserve and mission budget use seconds. UTC departure and decision cutoff are explicit assumed scenario inputs. The scenario selector is intentionally limited to the two registered synthetic scenarios documented by P2; the service has no scenario-discovery endpoint. REMS sol selection and local solar time are unavailable in this draft.
+
+Cards display only returned alternatives. Assessment and search status stay separate. Elapsed activity excludes unused reserve; reserved total includes it. Mission budget, every participant margin, limiting temporal margin and both daylight checks have separate labels. Missing values remain unavailable; no null becomes zero. Failed and missing-evidence checks show reasons, values, limits and evidence IDs. Expand evidence/reproducibility details for the actual returned metadata, classifications, assumptions, effective overrides and versions.
+
+Reproduce the requested cases through the form:
+
+| Case | Edit from the baseline | Expected |
+| --- | --- | --- |
+| Task +1 s | Visual reconnaissance: 601 | 801 / 2601 s |
+| Rover limit | Support rover override: maximum sortie 2599 | Incompatible; rover margin -1 s |
+| Exact daylight | Departure UTC 2025-10-25 12:38:20 | Daylight reserved return margin 0 s |
+| Missing daylight | Select missing-daylight scenario | Insufficient evidence; daylight margins unavailable |
+
+Restore defaults between cases. Changing inputs removes calculated cards immediately. ES/EN changes preserve the received result and form values.
+
 ## Procedencia bajo demanda (P1-05)
 - Botón **Fuentes** en la barra superior: abre un panel con todas las fuentes, agrupadas por clase (topográfica, óptica y visual, atmosférica, supuestos y datos de prueba). Se cierra con «×», con Escape o con un clic afuera.
 - Botones **ⓘ** junto al terreno (barra superior), las secciones del formulario, el aviso de datos de prueba, cada tarjeta y las restricciones con fuente. Abren el panel en esa fuente, resaltada. Un clic sobre una ruta del mapa también abre su fuente.

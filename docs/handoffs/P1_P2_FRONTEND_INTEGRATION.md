@@ -13,4 +13,12 @@ Date: 2026-11-14. Branch: `p1/http-mission-integration`, based on `origin/main` 
 
 Verification: frontend typecheck/build passed; two focused consumer checks passed against the running Python service. Browser submission showed 800/2600 s. No local Cesium token was available, so the real scene was not loaded during this delivery. Run commands are in [app/README.md](../../app/README.md).
 
-Deliveries B (configuration/results) and C (metric preview/regression verification) follow on this branch before review. Do not merge automatically.
+## Delivery B: configuration and calculated results
+
+The service catalog drives the fixed roster (1–4 humans, 0–2 robots), all four templates and parameter defaults. Payload and the five allowlisted overrides are connected. Empty overrides inherit defaults, and requested override provenance remains in the request/response. Task occurrences, UTC cutoff/departure, reserve and mission budget are editable. The two documented synthetic scenarios are explicit choices; there is no scenario-discovery endpoint. Unsupported scientific effects/preferences have explanations instead of active controls.
+
+Cards expose separate assessment/search states, elapsed/reserved totals, leg/task/reserve durations, mission and participant budgets, separate daylight checks, structured reasons and missing evidence. Exact zero and negative margins are preserved; unavailable metrics are not coerced to zero. Evidence/assumption/version details preserve the actual returned metadata. Results survive ES/EN changes without replay or recalculation.
+
+Verification: five focused checks passed against the real running HTTP service, including all requested arithmetic cases, six-member and zero-robot selections, all allowlisted overrides, same-cell geometry and intentionally incomplete/null payload validation. Typecheck/build passed. Through the running frontend and service, browser verification passed baseline 800/2600, task +1 801/2601, rover -1, exact daylight 0, missing-daylight insufficient evidence and ES/EN preservation. Input edits removed cards immediately.
+
+Delivery C (metric preview and regression verification) follows before review. Do not merge automatically.
