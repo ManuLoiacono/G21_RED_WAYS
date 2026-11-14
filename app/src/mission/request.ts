@@ -22,3 +22,15 @@ export function toPlanRequest(s: MissionState, parcelId: string): PlanRequest {
     preferences: { ...s.preferences },
   };
 }
+
+/**
+ * Key of the calculation inputs of a request. Two requests with the same key ask the engine the
+ * same question. Translated free text (`parameter_sources`) is left out, so a language switch
+ * does not make a result stale.
+ */
+export function calculationKey(req: PlanRequest): string {
+  return JSON.stringify({
+    ...req,
+    profiles: req.profiles.map(({ parameter_sources: _sources, ...rest }) => rest),
+  });
+}

@@ -299,6 +299,8 @@ export const es = {
   "source.test_route.title": "Ruta de prueba inicial",
   "source.test_route.role": "Línea de ejemplo al abrir la app, para verificar que las rutas se apoyan sobre el terreno.",
   "source.test_route.note1": "Sintética: no es un recorrido real ni un resultado del motor.",
+  "mp.status.stale": "Cambiaste la misión: el resultado anterior se quitó. Volvé a calcular.",
+  "mp.status.discarded": "La misión cambió mientras se calculaba: se descartó esa respuesta. Volvé a calcular.",
 } as const;
 
 export type MessageKey = keyof typeof es;

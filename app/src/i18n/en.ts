@@ -295,4 +295,6 @@ export const en: Record<MessageKey, string> = {
   "source.test_route.title": "Initial test route",
   "source.test_route.role": "Sample line shown when the app opens, to check that routes are draped on the terrain.",
   "source.test_route.note1": "Synthetic: not a real traverse and not an engine result.",
+  "mp.status.stale": "The mission changed: the previous result was removed. Plan again.",
+  "mp.status.discarded": "The mission changed during the calculation: that response was discarded. Plan again.",
 };
