@@ -1,14 +1,14 @@
 import * as Cesium from "cesium";
 
 /**
- * Aspecto visual de la escena (probado en Gale, cruce E21).
- * - Shader propio: normales por derivadas de pantalla + paleta marciana + sol bajo + bruma.
- *   Necesario porque la textura de Cesium Mars trae el relieve horneado y casi no reacciona a la luz.
- * - Sombras proyectadas con bias ajustado (sin ajuste aparecen bandas).
- * - NO usar scene.verticalExaggeration: con este tileset rompe la selección de teselas.
+ * Visual look of the scene (tested in Gale, cross-check E21).
+ * - Custom shader: screen-space derivative normals + Martian palette + low sun + haze.
+ *   Needed because the Cesium Mars texture has the relief baked in and barely reacts to light.
+ * - Cast shadows with a tuned bias (without it, banding appears).
+ * - Do NOT use scene.verticalExaggeration: with this tileset it breaks tile selection.
  */
 
-/** Dirección del sol (marco fijo de Marte) a partir de azimut/elevación en un punto de la superficie. */
+/** Sun direction (Mars fixed frame) from azimuth/elevation at a point on the surface. */
 export function sunDirectionWC(lonDeg: number, latDeg: number, azimuthDeg: number, elevationDeg: number): Cesium.Cartesian3 {
   const site = Cesium.Cartesian3.fromDegrees(lonDeg, latDeg, -3330, Cesium.Ellipsoid.MARS);
   const enu = Cesium.Transforms.eastNorthUpToFixedFrame(site, Cesium.Ellipsoid.MARS);
@@ -47,20 +47,25 @@ export function marsShader(sunWC: Cesium.Cartesian3): Cesium.CustomShader {
   });
 }
 
-export type Preset = "liviano" | "equilibrado" | "presentacion";
+export type Preset = "light" | "balanced" | "presentation";
 
 /**
- * Ajustes de calidad medidos en GTX 1050 Ti a 1600×900 (render puro, sin streaming):
- *  liviano      ~3,5 ms/cuadro · equilibrado ~10 ms · presentacion ~18 ms
- * Medir de nuevo en la máquina de presentación con la pestaña visible.
+ * Quality presets measured on a GTX 1050 Ti at 1600×900 (pure render, no streaming):
+ *  light ~3.5 ms/frame · balanced ~10 ms · presentation ~18 ms
+ * Measure again on the presentation machine with the tab visible.
  */
-export function applyPreset(viewer: Cesium.Viewer, tileset: Cesium.Cesium3DTileset, preset: Preset, sunWC: Cesium.Cartesian3) {
+export function applyPreset(
+  viewer: Cesium.Viewer,
+  tilesets: Cesium.Cesium3DTileset[],
+  preset: Preset,
+  sunWC: Cesium.Cartesian3,
+) {
   const scene = viewer.scene;
 
-  // Luz direccional = sol (usada por las sombras).
+  // Directional light = sun (used by shadows).
   scene.light = new Cesium.DirectionalLight({ direction: Cesium.Cartesian3.negate(sunWC, new Cesium.Cartesian3()) });
 
-  // Bias de sombras (evita bandas). _primitiveBias es interno de Cesium: revisar si cambia de versión.
+  // Shadow bias (avoids banding). _primitiveBias is a Cesium internal: check it when upgrading.
   const bias = (scene.shadowMap as any)._primitiveBias;
   if (bias) {
     bias.polygonOffsetFactor = 4.0;
@@ -73,23 +78,14 @@ export function applyPreset(viewer: Cesium.Viewer, tileset: Cesium.Cesium3DTiles
   scene.shadowMap.softShadows = true;
   scene.shadowMap.maximumDistance = 8000;
 
-  if (preset === "liviano") {
-    tileset.maximumScreenSpaceError = 16;
-    viewer.shadows = false;
-    scene.msaaSamples = 1;
-  } else if (preset === "equilibrado") {
-    tileset.maximumScreenSpaceError = 6;
-    viewer.shadows = true;
-    tileset.shadows = Cesium.ShadowMode.ENABLED;
-    scene.shadowMap.size = 2048;
-    scene.msaaSamples = 4;
-  } else {
-    tileset.maximumScreenSpaceError = 4;
-    viewer.shadows = true;
-    tileset.shadows = Cesium.ShadowMode.ENABLED;
-    scene.shadowMap.size = 4096;
-    scene.msaaSamples = 4;
+  const sse = preset === "light" ? 16 : preset === "balanced" ? 6 : 4;
+  for (const tileset of tilesets) {
+    tileset.maximumScreenSpaceError = sse;
+    tileset.shadows = preset === "light" ? Cesium.ShadowMode.DISABLED : Cesium.ShadowMode.ENABLED;
   }
+  viewer.shadows = preset !== "light";
+  scene.shadowMap.size = preset === "presentation" ? 4096 : 2048;
+  scene.msaaSamples = preset === "light" ? 1 : 4;
 }
 
 export function applyAtmosphere(scene: Cesium.Scene) {

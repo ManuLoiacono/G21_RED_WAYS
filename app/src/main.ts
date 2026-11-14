@@ -1,5 +1,6 @@
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
+import { language, setLanguage, t, translateStaticDom } from "./i18n";
 import { applyAtmosphere, applyPreset, marsShader, sunDirectionWC, type Preset } from "./look";
 import fixtureRoute from "./fixture_route.json";
 import poiFixture from "./fixtures/poi.fixture.json";
@@ -9,24 +10,25 @@ import { createResultsPanel } from "./mission/results";
 import { RouteLayer } from "./mission/routes";
 import { parsePois } from "./mission/pois";
 import type { Poi } from "./mission/types";
-import { ConfigError, describeStartupError, MISSING_TOKEN } from "./ui/errors";
+import { ConfigError, describeStartupError, missingTokenError } from "./ui/errors";
 import { hideLoading, showError, showLoading, showToast, updateLoading } from "./ui/status";
 import { createSourcesPanel } from "./provenance/panel";
 import { installWheelZoom, keepCameraAboveGround } from "./camera";
+import { loadHiriseLayer } from "./hirise";
 
 // ---------------------------------------------------------------------------
-// Configuración
+// Configuration
 // ---------------------------------------------------------------------------
-const CESIUM_MARS_ASSET_ID = 3644333; // Cesium Mars (3D Tiles), en Cesium ion
-const GALE = { lon: 137.374, lat: -4.792 }; // cerca de la última posición de Curiosity (sol 5073)
-const PARCEL_ID = "gale_demo_v1"; // fixture del contrato; cambiar cuando P3-02 publique la parcela real
-const SLOW_LOAD_MS = 20_000; // a partir de acá se avisa que la carga está tardando
+const CESIUM_MARS_ASSET_ID = 3644333; // Cesium Mars (3D Tiles) on Cesium ion
+const GALE = { lon: 137.374, lat: -4.792 }; // near Curiosity's last position (sol 5073)
+const PARCEL_ID = "gale_demo_v1"; // contract fixture; change when P3-02 publishes the real parcel
+const SLOW_LOAD_MS = 20_000; // after this, warn that loading is slow
 
-// Marte como cuerpo por defecto: todas las conversiones lat/lon usan el elipsoide marciano.
+// Mars as the default body: every lat/lon conversion uses the Martian ellipsoid.
 Cesium.Ellipsoid.default = Cesium.Ellipsoid.MARS;
 
 // ---------------------------------------------------------------------------
-// Visor
+// Viewer
 // ---------------------------------------------------------------------------
 let viewer!: Cesium.Viewer;
 
@@ -47,7 +49,7 @@ function createViewer(): Cesium.Viewer {
     skyBox: false,
     skyAtmosphere: new Cesium.SkyAtmosphere(Cesium.Ellipsoid.MARS),
   });
-  // El terreno lo pone el tileset 3D; el globo vacío se oculta.
+  // The terrain comes from the 3D tileset; the empty globe is hidden.
   v.scene.globe.show = false;
   return v;
 }
@@ -59,62 +61,74 @@ function resetView() {
   });
 }
 
-/** Espera a que carguen las primeras teselas; avisa si tarda o si fallan teselas. */
+/** Waits for the first tiles to load; warns if it is slow or if tiles fail. */
 function waitForInitialTiles(tileset: Cesium.Cesium3DTileset): Promise<void> {
   let failed = 0;
   tileset.tileFailed.addEventListener(() => {
     failed += 1;
-    if (failed === 5) showToast("Algunas partes del terreno no se pudieron descargar. Revisá la conexión.");
+    if (failed === 5) showToast(t("load.tilesFailed"));
   });
   return new Promise((resolve) => {
-    const slow = window.setTimeout(
-      () => updateLoading("La carga está tardando más de lo normal. Revisá la conexión; sigue intentando…"),
-      SLOW_LOAD_MS,
-    );
+    const slow = window.setTimeout(() => updateLoading(t("load.slow")), SLOW_LOAD_MS);
     const done = () => {
       window.clearTimeout(slow);
       resolve();
     };
-    // initialTilesLoaded es el evento esperado; allTilesLoaded es un respaldo por si no se dispara.
+    // initialTilesLoaded is the expected event; allTilesLoaded is a fallback in case it does not fire.
     tileset.initialTilesLoaded.addEventListener(done);
     tileset.allTilesLoaded.addEventListener(done);
   });
 }
 
+/** Static HUD text and the ES/EN switch. Works even if the scene fails to start. */
+function setUpLanguage() {
+  translateStaticDom();
+  document.getElementById("toggleLanguage")!.onclick = () => setLanguage(language === "es" ? "en" : "es");
+}
+
 async function main() {
-  showLoading("Cargando el terreno de Gale…");
+  showLoading(t("load.terrain"));
 
   const token = import.meta.env.VITE_CESIUM_ION_TOKEN?.trim();
-  if (!token) throw new ConfigError(MISSING_TOKEN);
+  if (!token) throw new ConfigError(missingTokenError());
   Cesium.Ion.defaultAccessToken = token;
 
   viewer = createViewer();
-  // No usar { enableCollision: true }: con este tileset traba la carga de teselas (medido).
-  // La cámara se mantiene sobre el terreno con installWheelZoom + keepCameraAboveGround.
+  // Do not use { enableCollision: true }: with this tileset it stalls tile loading (measured).
+  // The camera stays above the terrain with installWheelZoom + keepCameraAboveGround.
   const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(CESIUM_MARS_ASSET_ID);
   viewer.scene.primitives.add(tileset);
   installWheelZoom(viewer);
   keepCameraAboveGround(viewer);
-  // Para depurar desde la consola del navegador (disponible aunque la carga no termine)
+  // For debugging from the browser console (available even if loading never finishes).
   Object.assign(window, { viewer, tileset, Cesium });
   const initialTiles = waitForInitialTiles(tileset);
 
-  // Aspecto: sol bajo desde el oeste (azimut 280°, elevación 8°). Es un valor estético,
-  // no una posición solar calculada: la ventana solar real va por REMS/Horizons.
+  // Look: low sun from the west (azimuth 280°, elevation 8°). It is an aesthetic value,
+  // not a computed solar position: the real daylight window comes from REMS/Horizons.
   const sun = sunDirectionWC(GALE.lon, GALE.lat, 280, 8);
   tileset.customShader = marsShader(sun);
   applyAtmosphere(viewer.scene);
-  applyPreset(viewer, tileset, "equilibrado", sun);
+
+  // 1 m HiRISE mesh inside the parcel (if it has been built; see app/src/hirise.ts).
+  const hirise = await loadHiriseLayer(viewer, tileset).catch((err) => {
+    console.warn("Could not load the HiRISE mesh; continuing with Cesium Mars.", err);
+    return undefined;
+  });
+  if (hirise) hirise.tileset.customShader = marsShader(sun);
+  const tilesets = hirise ? [tileset, hirise.tileset] : [tileset];
+  Object.assign(window, { hirise });
+  applyPreset(viewer, tilesets, "balanced", sun);
 
   resetView();
 
-  // Ruta de prueba (FIXTURE, no es cálculo del motor): apoyada sobre el terreno.
+  // Test route (FIXTURE, not an engine result): draped on the terrain.
   const positions = (fixtureRoute.coordinates as [number, number][]).map(([lon, lat]) =>
     Cesium.Cartesian3.fromDegrees(lon, lat, 0, Cesium.Ellipsoid.MARS),
   );
   const fixtureRouteEntity = viewer.entities.add({
-    id: "ruta_prueba",
-    name: "Ruta de prueba (fixture)",
+    id: "test_route",
+    name: "Test route (fixture)",
     polyline: {
       positions,
       width: 6,
@@ -123,14 +137,14 @@ async function main() {
     },
   });
 
-  // Procedencia bajo demanda (P1-05): panel «Fuentes» + botones ⓘ (data-source).
+  // On-demand provenance (P1-05): "Sources" panel + ⓘ buttons (data-source).
   const sources = createSourcesPanel(document.getElementById("sourcesDialog") as HTMLDialogElement);
   document.getElementById("openSources")!.onclick = () => sources.open();
 
-  // Base y destinos (FIXTURE hasta P3-05) + panel de preparación de misión (P1-02)
+  // Base and destinations (FIXTURE until P3-05) + mission planning panel (P1-02)
   const pois = parsePois(poiFixture);
   const panel = createMissionPanel(document.getElementById("missionPanel")!, pois, PARCEL_ID);
-  // Resultados y comparación (P1-03): tarjetas + rutas en el mapa, sincronizadas por selección.
+  // Results and comparison (P1-03): cards + routes on the map, kept in sync by selection.
   const results = createResultsPanel(document.getElementById("resultsPanel")!);
   const routes = new RouteLayer(viewer);
   results.onSelect((altId) => routes.select(altId));
@@ -138,10 +152,10 @@ async function main() {
   document.addEventListener("plan-response", (e) => {
     const { response, simulated } = (e as CustomEvent<PlanResponseEvent>).detail;
     lastResponseSimulated = simulated || response.fixture === true;
-    fixtureRouteEntity.show = false; // la ruta de prueba inicial ya no aporta
+    fixtureRouteEntity.show = false; // the initial test route no longer adds anything
     routes.show(response);
     results.show(response, simulated);
-    // En pantallas angostas (tablet vertical) el formulario se pliega para dejar ver mapa y resultados.
+    // On narrow screens (portrait tablet) the form collapses so the map and results are visible.
     if (window.matchMedia("(max-width: 900px)").matches) panel.setCollapsed(true);
   });
 
@@ -151,7 +165,7 @@ async function main() {
   const poiEntities = await addPois(pois);
   panel.onDestinationChange((id) => {
     highlightDestination(poiEntities, id);
-    // Cambiar de destino invalida el resultado anterior.
+    // Changing the destination invalidates the previous result.
     routes.clear();
     results.clear();
   });
@@ -161,31 +175,44 @@ async function main() {
     const entity = Cesium.defined(picked) ? picked.id : undefined;
     if (!(entity instanceof Cesium.Entity)) return;
     if (entity.id.startsWith("poi:")) panel.selectDestination(entity.id.slice(4));
-    // Clic sobre una ruta: abre su fuente (procedencia bajo demanda, P1-05).
-    else if (entity.id === "ruta_prueba") sources.open("ruta_prueba");
-    else if (entity.id.startsWith("route:")) sources.open(lastResponseSimulated ? "respuesta_simulada" : "dtm_hirise");
+    // Click on a route: opens its source (on-demand provenance, P1-05).
+    else if (entity.id === "test_route") sources.open("test_route");
+    else if (entity.id.startsWith("route:")) sources.open(lastResponseSimulated ? "simulated_response" : "hirise_dtm");
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-  // Controles mínimos
+  // Minimal controls
   document.querySelectorAll<HTMLButtonElement>("#hud button[data-preset]").forEach((btn) => {
     btn.onclick = () => {
-      applyPreset(viewer, tileset, btn.dataset.preset as Preset, sun);
+      applyPreset(viewer, tilesets, btn.dataset.preset as Preset, sun);
       document.querySelectorAll("#hud button[data-preset]").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
     };
   });
   document.getElementById("resetView")!.onclick = resetView;
+
+  const hiriseBtn = document.getElementById("toggleHirise") as HTMLButtonElement;
+  if (hirise) {
+    hiriseBtn.hidden = false;
+    document.getElementById("hiriseInfo")!.hidden = false;
+    hiriseBtn.onclick = () => {
+      const on = hiriseBtn.getAttribute("aria-pressed") !== "true";
+      hirise.setVisible(on);
+      hiriseBtn.setAttribute("aria-pressed", String(on));
+      hiriseBtn.classList.toggle("active", on);
+    };
+  }
 }
 
 // ---------------------------------------------------------------------------
-// Puntos de interés
+// Points of interest
 // ---------------------------------------------------------------------------
+/** Colors by contract role ("destino" = destination). */
 const POI_COLOR = { base: "#ffd166", destino: "#e8e8ee", selected: "#3ff0ff" };
 
 /**
- * Dibuja base y destinos. Con el globo oculto, `HeightReference.CLAMP_TO_GROUND` no apoya puntos
- * ni etiquetas sobre el tileset (las polilíneas sí), así que se muestrea la altura de Cesium en
- * cada punto. Esa altura es SOLO para dibujar: no se mezcla con las del DTM (desfase ~71 m).
+ * Draws the base and destinations. With the globe hidden, `HeightReference.CLAMP_TO_GROUND` does
+ * not drape points or labels on the tileset (polylines do), so the Cesium height is sampled at
+ * each point. That height is ONLY for drawing: it is never mixed with DTM heights (~71 m offset).
  */
 async function addPois(pois: Poi[]): Promise<Map<string, Cesium.Entity>> {
   const cartos = pois.map((p) => Cesium.Cartographic.fromDegrees(p.lonlat[0], p.lonlat[1]));
@@ -231,6 +258,7 @@ function highlightDestination(entities: Map<string, Cesium.Entity>, selectedId: 
   }
 }
 
+setUpLanguage();
 main().catch((err) => {
   console.error(err);
   showError(describeStartupError(err, CESIUM_MARS_ASSET_ID));

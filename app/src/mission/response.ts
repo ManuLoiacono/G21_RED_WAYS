@@ -1,6 +1,6 @@
 /**
- * Respuesta de planificación. Sigue el borrador v0 de `contracts/plan_response.example.json`.
- * La UI tolera estados desconocidos (los muestra tal cual) para no romperse si el contrato crece.
+ * Planning response. Follows draft v0 of `contracts/plan_response.example.json`.
+ * The UI tolerates unknown statuses (shows them as they come) so it does not break if the contract grows.
  */
 
 export type EvalStatus = "viable_model" | "conditional" | "incompatible" | "insufficient_evidence";
@@ -64,7 +64,7 @@ export interface PlanResponse {
   input_versions?: Record<string, string>;
 }
 
-/** Comprobación mínima de forma antes de dibujar (no reemplaza un validador de esquema). */
+/** Minimal shape check before drawing (not a replacement for a schema validator). */
 export function isPlanResponse(x: unknown): x is PlanResponse {
   if (!x || typeof x !== "object") return false;
   const r = x as Record<string, unknown>;

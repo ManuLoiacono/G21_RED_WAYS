@@ -2,7 +2,7 @@ import type { MissionState, PlanRequest } from "./types";
 
 export const PLAN_REQUEST_SCHEMA_VERSION = 0;
 
-/** Arma el pedido de planificación (contrato v0) a partir del estado del formulario. */
+/** Builds the planning request (contract v0) from the form state. */
 export function toPlanRequest(s: MissionState, parcelId: string): PlanRequest {
   return {
     schema_version: PLAN_REQUEST_SCHEMA_VERSION,

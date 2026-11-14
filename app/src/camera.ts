@@ -1,24 +1,24 @@
 import * as Cesium from "cesium";
 
 /**
- * Zoom con la rueda del mouse para terreno por debajo del elipsoide (P1-01).
+ * Mouse-wheel zoom for terrain below the ellipsoid (P1-01).
  *
- * En Gale el terreno está ~3,4–4,4 km POR DEBAJO del elipsoide de Marte. El zoom de Cesium usa
- * la «altura sobre el elipsoide» como medida de distancia cuando no encuentra superficie bajo el
- * centro de la pantalla: esa altura es negativa, el zoom se invierte y la cámara termina debajo
- * del terreno o subiendo hacia 0 m. Este zoom se acerca o se aleja respecto del punto bajo el
- * cursor y respeta un margen mínimo sobre el suelo.
+ * In Gale the terrain is ~3.4–4.4 km BELOW the Mars ellipsoid. Cesium's zoom uses the
+ * "height above the ellipsoid" as its distance measure when it finds no surface under the
+ * center of the screen: that height is negative, the zoom inverts and the camera ends up under
+ * the terrain or climbing towards 0 m. This zoom moves towards or away from the point under the
+ * cursor and keeps a minimum clearance above the ground.
  *
- * El zoom por pellizco (tablet) sigue siendo el de Cesium; `keepCameraAboveGround` corrige la
- * cámara si cualquier gesto la deja debajo del terreno. (`enableCollision` del tileset haría lo
- * mismo, pero con Cesium Mars traba la carga de teselas.)
+ * Pinch zoom (tablet) is still Cesium's; `keepCameraAboveGround` fixes the camera if any
+ * gesture leaves it under the terrain. (The tileset's `enableCollision` would do the same, but
+ * with Cesium Mars it stalls tile loading.)
  */
 export interface WheelZoomOptions {
-  /** Fracción de la distancia al punto apuntado que avanza cada paso de rueda. */
+  /** Fraction of the distance to the target point covered by each wheel step. */
   stepFraction?: number;
-  /** Altura mínima de la cámara sobre el terreno, en metros. */
+  /** Minimum camera height above the terrain, in meters. */
   minClearance_m?: number;
-  /** Altura máxima de la cámara sobre el terreno, en metros. */
+  /** Maximum camera height above the terrain, in meters. */
   maxClearance_m?: number;
 }
 
@@ -29,7 +29,7 @@ export function installWheelZoom(viewer: Cesium.Viewer, opts: WheelZoomOptions =
   const { scene, camera, canvas } = viewer;
   const ellipsoid = scene.ellipsoid;
 
-  // Cesium deja de manejar la rueda (y el arrastre con botón derecho, que usa el mismo zoom).
+  // Cesium stops handling the wheel (and right-button drag, which uses the same zoom).
   scene.screenSpaceCameraController.zoomEventTypes = [Cesium.CameraEventType.PINCH];
 
   const scratchDir = new Cesium.Cartesian3();
@@ -41,7 +41,7 @@ export function installWheelZoom(viewer: Cesium.Viewer, opts: WheelZoomOptions =
       e.preventDefault();
       if (e.deltaY === 0) return;
       const zoomIn = e.deltaY < 0;
-      // Varios pasos de rueda juntos (o trackpad) avanzan proporcionalmente, con tope.
+      // Several wheel steps at once (or a trackpad) move proportionally, with a cap.
       const notches = Math.min(Math.abs(e.deltaY) / 100, 3) || 1;
 
       const rect = canvas.getBoundingClientRect();
@@ -55,7 +55,7 @@ export function installWheelZoom(viewer: Cesium.Viewer, opts: WheelZoomOptions =
         distance = Cesium.Cartesian3.distance(origin, target);
         dir = Cesium.Cartesian3.normalize(Cesium.Cartesian3.subtract(target, origin, scratchDir), scratchDir);
       } else {
-        // Sin superficie bajo el cursor (cielo): avanza en la dirección de la vista según la altura al suelo.
+        // No surface under the cursor (sky): move along the view direction based on the height above ground.
         dir = Cesium.Cartesian3.clone(camera.directionWC, scratchDir);
         distance = Math.max(clearanceAt(origin) ?? 1000, 200);
       }
@@ -91,8 +91,8 @@ export function installWheelZoom(viewer: Cesium.Viewer, opts: WheelZoomOptions =
 }
 
 /**
- * Si un gesto (arrastre, inclinación, pellizco) deja la cámara debajo del terreno o a menos de
- * `minClearance_m` del suelo, la sube. Se evalúa cuando la cámara cambia, no en cada cuadro.
+ * If a gesture (drag, tilt, pinch) leaves the camera under the terrain or closer than
+ * `minClearance_m` to the ground, it lifts it. Checked when the camera changes, not every frame.
  */
 export function keepCameraAboveGround(viewer: Cesium.Viewer, minClearance_m = 30) {
   const { scene, camera } = viewer;

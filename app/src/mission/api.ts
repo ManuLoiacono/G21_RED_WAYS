@@ -1,8 +1,9 @@
 import { SIMULATED_RESPONSES } from "../fixtures/plan_responses.fixture";
+import { t } from "../i18n";
 import { isPlanResponse, type PlanResponse } from "./response";
 import type { PlanRequest } from "./types";
 
-/** URL del servicio de rutas (persona 2). Se puede cambiar con VITE_SERVICE_URL en app/.env. */
+/** Route service URL (persona 2). Can be changed with VITE_SERVICE_URL in app/.env. */
 export const SERVICE_URL = import.meta.env.VITE_SERVICE_URL ?? "http://localhost:8000";
 
 export type PlanResult =
@@ -10,9 +11,9 @@ export type PlanResult =
   | { ok: false; error: string };
 
 /**
- * Envía el pedido al motor. Si el servicio no responde (no está levantado o se cayó),
- * devuelve una respuesta SIMULADA (fixture) marcada como tal. Si el servicio responde con
- * un error, se informa el error: no se tapa con una simulación.
+ * Sends the request to the engine. If the service does not answer (not running or down),
+ * returns a SIMULATED response (fixture) flagged as such. If the service answers with an
+ * error, the error is reported: it is never hidden behind a simulation.
  */
 export async function requestPlan(req: PlanRequest): Promise<PlanResult> {
   let res: Response;
@@ -25,22 +26,20 @@ export async function requestPlan(req: PlanRequest): Promise<PlanResult> {
   } catch {
     return simulatedPlan(req);
   }
-  if (!res.ok) return { ok: false, error: `El servicio de rutas respondió ${res.status}.` };
+  if (!res.ok) return { ok: false, error: t("api.httpError", { status: res.status }) };
   let data: unknown;
   try {
     data = await res.json();
   } catch {
-    return { ok: false, error: "El servicio de rutas devolvió una respuesta que no es JSON." };
+    return { ok: false, error: t("api.notJson") };
   }
-  if (!isPlanResponse(data)) return { ok: false, error: "La respuesta del servicio no tiene el formato del contrato." };
+  if (!isPlanResponse(data)) return { ok: false, error: t("api.badShape") };
   return { ok: true, data, simulated: false };
 }
 
 function simulatedPlan(req: PlanRequest): PlanResult {
   const fixture = SIMULATED_RESPONSES[req.destination_poi];
-  if (!fixture) {
-    return { ok: false, error: `No se pudo contactar el servicio de rutas (${SERVICE_URL}) y no hay respuesta simulada para este destino.` };
-  }
+  if (!fixture) return { ok: false, error: t("api.noSimulation", { url: SERVICE_URL }) };
   const data: PlanResponse = {
     ...structuredClone(fixture),
     request_echo: { parcel_id: req.parcel_id, origin_poi: req.origin_poi, destination_poi: req.destination_poi },

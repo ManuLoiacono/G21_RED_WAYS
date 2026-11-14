@@ -1,21 +1,13 @@
+import { t, tOr } from "../i18n";
 import { esc, fmtDistance, fmtDuration, fmtMeters, fmtPercent } from "../ui/format";
 import type { Alternative, PlanResponse } from "./response";
 import { infoButton, sourceIdFor } from "../provenance/sources";
 
 /**
- * Panel de resultados y comparación (P1-03).
- * Muestra solo lo que viene en la respuesta: no calcula ni inventa alternativas.
- * Sin porcentajes de éxito: estado por categoría + motivos concretos.
+ * Results and comparison panel (P1-03).
+ * Shows only what comes in the response: it does not compute or invent alternatives.
+ * No success percentages: status by category plus concrete reasons.
  */
-
-export const STATUS_LABEL: Record<string, string> = {
-  viable_model: "Viable en el modelo",
-  conditional: "Condicionada",
-  incompatible: "Incompatible",
-  insufficient_evidence: "Evidencia insuficiente",
-  search_inconclusive: "Búsqueda inconclusa",
-  error: "Error técnico",
-};
 
 const STATUS_ICON: Record<string, string> = {
   viable_model: "✓",
@@ -26,29 +18,18 @@ const STATUS_ICON: Record<string, string> = {
   error: "✕",
 };
 
-const CRITERION_LABEL: Record<string, string> = {
-  menor_tiempo: "Menor tiempo",
-  menor_esfuerzo: "Menor esfuerzo",
-  mejor_enlace: "Mejor enlace con la base",
-  menor_pendiente: "Menor pendiente",
-};
+/** Labels for contract values; unknown values are shown as they come. */
+export const statusLabel = (status: string) => tOr(`status.${status}`, status);
+const criterionLabel = (criterion: string) => tOr(`criterion.${criterion}`, criterion);
+const constraintLabel = (id: string) => tOr(`constraint.${id}`, id);
 
-const CONSTRAINT_LABEL: Record<string, string> = {
-  max_slope: "Pendiente máxima",
-  daylight: "Luz diurna",
-  budget: "Tiempo máximo",
-  nodata: "Cobertura del DTM",
-};
-
-/** Colores de las alternativas en tarjetas y mapa (mismo orden). */
+/** Alternative colors in cards and on the map (same order). */
 export const ALT_COLORS = ["#3ff0ff", "#ffb347", "#c792ea", "#7ee787"];
 export const INCOMPATIBLE_COLOR = "#ff6b6b";
 
 export function altColor(alt: Alternative, index: number): string {
   return alt.status === "incompatible" ? INCOMPATIBLE_COLOR : ALT_COLORS[index % ALT_COLORS.length];
 }
-
-const label = (map: Record<string, string>, key: string) => map[key] ?? key;
 
 export interface ResultsPanel {
   show(response: PlanResponse, simulated: boolean): void;
@@ -74,19 +55,19 @@ export function createResultsPanel(root: HTMLElement): ResultsPanel {
     const r = response;
     root.innerHTML = `
       <header class="mp-head">
-        <h2>Alternativas</h2>
-        <button type="button" data-act="collapse" aria-expanded="${!collapsed}" aria-label="${collapsed ? "Mostrar" : "Ocultar"} resultados">${collapsed ? "+" : "−"}</button>
+        <h2>${esc(t("rs.title"))}</h2>
+        <button type="button" data-act="collapse" aria-expanded="${!collapsed}" aria-label="${esc(t(collapsed ? "rs.show" : "rs.hide"))}">${collapsed ? "+" : "−"}</button>
       </header>
       <div class="mp-body">
-        ${simulated || r.fixture ? `<p class="mp-note"><strong>Respuesta simulada (fixture).</strong> No la calculó el motor y no cambia con los parámetros del formulario. ${infoButton("respuesta_simulada", "respuesta simulada")}</p>` : ""}
+        ${simulated || r.fixture ? `<p class="mp-note">${t("rs.simulatedNote")} ${infoButton("simulated_response", t("rs.simulated.info"))}</p>` : ""}
         <p class="rs-summary">${statusBadge(r.status)} ${esc(r.summary_reason)}</p>
-        ${r.alternatives.length === 0 ? `<p class="mp-hint">El motor no devolvió alternativas.</p>` : ""}
+        ${r.alternatives.length === 0 ? `<p class="mp-hint">${esc(t("rs.noAlternatives"))}</p>` : ""}
         <ul class="rs-cards">
           ${r.alternatives.map((a, i) => card(a, i)).join("")}
         </ul>
         ${
           r.not_evaluated?.length
-            ? `<p class="mp-hint"><strong>No evaluado:</strong> ${r.not_evaluated.map(esc).join(" · ")}</p>`
+            ? `<p class="mp-hint"><strong>${esc(t("rs.notEvaluated"))}</strong> ${r.not_evaluated.map(esc).join(" · ")}</p>`
             : ""
         }
       </div>
@@ -94,7 +75,7 @@ export function createResultsPanel(root: HTMLElement): ResultsPanel {
   }
 
   function statusBadge(status: string) {
-    return `<span class="rs-badge" data-status="${esc(status)}"><span aria-hidden="true">${STATUS_ICON[status] ?? "•"}</span> ${esc(label(STATUS_LABEL, status))}</span>`;
+    return `<span class="rs-badge" data-status="${esc(status)}"><span aria-hidden="true">${STATUS_ICON[status] ?? "•"}</span> ${esc(statusLabel(status))}</span>`;
   }
 
   function card(a: Alternative, i: number) {
@@ -104,8 +85,9 @@ export function createResultsPanel(root: HTMLElement): ResultsPanel {
     const others = a.constraints.filter((c) => c.status !== "violated");
     const unfavorable = a.preferences.filter((p) => p.status === "unfavorable");
     const nodata = a.evidence?.nodata_fraction;
-    // Respuesta simulada → su fixture; respuesta real → derivada del DTM HiRISE (motor).
-    const cardSource = simulated || response?.fixture ? "respuesta_simulada" : "dtm_hirise";
+    // Simulated response → its fixture; real response → derived from the HiRISE DTM (engine).
+    const cardSource = simulated || response?.fixture ? "simulated_response" : "hirise_dtm";
+    const name = criterionLabel(a.criterion);
 
     return `
       <li>
@@ -113,48 +95,55 @@ export function createResultsPanel(root: HTMLElement): ResultsPanel {
           <div class="rs-card-head">
             <button type="button" class="rs-select" data-alt="${esc(a.id)}" aria-pressed="${selected}">
               <span class="rs-swatch" aria-hidden="true"></span>
-              <span class="rs-title">${esc(label(CRITERION_LABEL, a.criterion))}</span>
+              <span class="rs-title">${esc(name)}</span>
               ${statusBadge(a.status)}
             </button>
-            ${infoButton(cardSource, `cálculo de la alternativa ${label(CRITERION_LABEL, a.criterion)}`)}
+            ${infoButton(cardSource, t("rs.altInfo", { name }))}
           </div>
 
           ${
             violated.length
               ? `<div class="rs-block rs-violated">
-                  <h4>Restricción incumplida</h4>
-                  <ul>${violated.map((c) => `<li><strong>${esc(label(CONSTRAINT_LABEL, c.id))}:</strong> ${esc(c.detail)}</li>`).join("")}</ul>
+                  <h4>${esc(t("rs.violated"))}</h4>
+                  <ul>${violated.map((c) => `<li><strong>${esc(constraintLabel(c.id))}:</strong> ${esc(c.detail)}</li>`).join("")}</ul>
                 </div>`
               : ""
           }
-          ${a.warnings.length ? `<div class="rs-block rs-warn"><h4>Condición</h4><ul>${a.warnings.map((w) => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
+          ${a.warnings.length ? `<div class="rs-block rs-warn"><h4>${esc(t("rs.condition"))}</h4><ul>${a.warnings.map((w) => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
 
           <dl class="rs-metrics">
-            <div><dt>Tiempo total</dt><dd>${fmtDuration(a.budget.total_s)}</dd></div>
-            <div><dt>Margen de regreso</dt><dd class="${marginNegative ? "rs-neg" : ""}">${marginNegative ? `Excede ${fmtDuration(-a.budget.margin_s)}` : fmtDuration(a.budget.margin_s)}</dd></div>
-            <div><dt>Distancia (ida + vuelta)</dt><dd>${fmtDistance(a.outbound.distance_m + a.return.distance_m)}</dd></div>
-            <div><dt>Desnivel de ida</dt><dd>+${fmtMeters(a.outbound.ascent_m)} / −${fmtMeters(a.outbound.descent_m)}</dd></div>
+            <div><dt>${esc(t("rs.totalTime"))}</dt><dd>${fmtDuration(a.budget.total_s)}</dd></div>
+            <div><dt>${esc(t("rs.returnMargin"))}</dt><dd class="${marginNegative ? "rs-neg" : ""}">${marginNegative ? esc(t("rs.exceeds", { d: fmtDuration(-a.budget.margin_s) })) : fmtDuration(a.budget.margin_s)}</dd></div>
+            <div><dt>${esc(t("rs.distance"))}</dt><dd>${fmtDistance(a.outbound.distance_m + a.return.distance_m)}</dd></div>
+            <div><dt>${esc(t("rs.outboundElevation"))}</dt><dd>+${fmtMeters(a.outbound.ascent_m)} / −${fmtMeters(a.outbound.descent_m)}</dd></div>
           </dl>
           <p class="rs-breakdown">
-            Ida ${fmtDuration(a.outbound.duration_s)} · tareas ${fmtDuration(a.tasks_s)} · vuelta ${fmtDuration(a.return.duration_s)} · reserva ${fmtDuration(a.reserve_s)}
-            <br />Tiempo máximo fuera de la base: ${fmtDuration(a.budget.time_budget_s)}
+            ${esc(
+              t("rs.breakdown", {
+                out: fmtDuration(a.outbound.duration_s),
+                tasks: fmtDuration(a.tasks_s),
+                ret: fmtDuration(a.return.duration_s),
+                reserve: fmtDuration(a.reserve_s),
+              }),
+            )}
+            <br />${esc(t("rs.budget", { d: fmtDuration(a.budget.time_budget_s) }))}
           </p>
 
           <details class="rs-details">
-            <summary>Restricciones y preferencias</summary>
+            <summary>${esc(t("rs.details"))}</summary>
             <ul class="rs-checks">
               ${others
                 .map(
                   (c) => `<li data-status="${esc(c.status)}"><span aria-hidden="true">${c.status === "ok" ? "✓" : "•"}</span>
-                    <span><strong>${esc(label(CONSTRAINT_LABEL, c.id))}</strong> (${c.status === "ok" ? "cumple" : esc(c.status)}): ${esc(c.detail)}
-                    ${c.provenance ? `<small class="rs-prov">${esc([c.provenance.mission, c.provenance.instrument, c.provenance.kind].filter(Boolean).join(" · "))} ${infoButton(sourceIdFor(c.provenance), label(CONSTRAINT_LABEL, c.id))}</small>` : ""}</span></li>`,
+                    <span><strong>${esc(constraintLabel(c.id))}</strong> (${c.status === "ok" ? esc(t("rs.meets")) : esc(c.status)}): ${esc(c.detail)}
+                    ${c.provenance ? `<small class="rs-prov">${esc([c.provenance.mission, c.provenance.instrument, c.provenance.kind].filter(Boolean).join(" · "))} ${infoButton(sourceIdFor(c.provenance), constraintLabel(c.id))}</small>` : ""}</span></li>`,
                 )
                 .join("")}
-              ${unfavorable.map((p) => `<li data-status="unfavorable"><span aria-hidden="true">↓</span><span><strong>Preferencia desfavorable:</strong> ${esc(p.detail)}</span></li>`).join("")}
+              ${unfavorable.map((p) => `<li data-status="unfavorable"><span aria-hidden="true">↓</span><span><strong>${esc(t("rs.unfavorable"))}</strong> ${esc(p.detail)}</span></li>`).join("")}
             </ul>
             <p class="mp-hint">
-              ${nodata !== undefined ? `Celdas sin datos en el recorrido: ${fmtPercent(nodata)}. ` : ""}
-              ${a.evidence?.analytic_cell_m ? `Celda de búsqueda: ${a.evidence.analytic_cell_m} m. ` : ""}
+              ${nodata !== undefined ? esc(t("rs.nodata", { p: fmtPercent(nodata) })) : ""}
+              ${a.evidence?.analytic_cell_m ? esc(t("rs.cell", { m: a.evidence.analytic_cell_m })) : ""}
               ${a.evidence?.notes ? esc(a.evidence.notes) : ""}
             </p>
           </details>
@@ -186,7 +175,7 @@ export function createResultsPanel(root: HTMLElement): ResultsPanel {
       response = r;
       simulated = sim;
       collapsed = false;
-      // Por defecto: la primera alternativa que no sea incompatible; si no hay, la primera.
+      // Default: the first alternative that is not incompatible; otherwise the first one.
       const first = r.alternatives.find((a) => a.status !== "incompatible") ?? r.alternatives[0];
       selectedId = first?.id ?? null;
       render();

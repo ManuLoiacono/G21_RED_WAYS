@@ -78,12 +78,35 @@ La app muestra el problema en pantalla con los pasos para resolverlo. El detalle
 - **No usar `{ enableCollision: true }` en el tileset:** con Cesium Mars traba la carga de teselas (medido).
 - «Restablecer vista» vuelve a la vista inicial (137,374° E, −4,792°, rumbo 160°, inclinación −9°).
 
+## Detalle HiRISE de 1 m en la parcela (opcional)
+
+Dentro de la parcela, la escena puede mostrar una malla propia hecha con el DTM HiRISE (1 m) y la
+ortoimagen RED (0,25 m), en lugar de Cesium Mars (~2,5 m en Gale). Cesium Mars sigue alrededor como contexto.
+
+```bash
+# desde la raíz del repo (una vez; ~1 min, lee solo la ventana de la parcela desde S3)
+python3 -m venv .venv && .venv/bin/pip install numpy rasterio pillow
+.venv/bin/python scripts/build_hirise_tiles.py
+```
+
+- Genera `data/processed/gale/tiles_hirise/` (~150 MB, no se versiona). `npm run dev` lo sirve en `/local-data/`.
+- Si no está generada, la app arranca igual con Cesium Mars. Si está, aparece el botón **Detalle HiRISE 1 m** para compararla.
+- Es solo visual: el motor calcula sobre el DTM. El color ocre lo pone el shader de la app; la imagen RED es en grises.
+- Solo funciona con `npm run dev` (el build de producción todavía no copia las teselas).
+
 ## Coordenadas y alturas (medido el 14/11 con 20 posiciones de Curiosity, soles 1930–4857)
 - `Cartesian3.fromDegrees(lon, lat, h, Ellipsoid.MARS)` con la latitud tal como viene en los datos (MMGIS/HiRISE) cae en el lugar correcto del tileset. **No convertir** de planetocéntrica a geodésica: daría un corrimiento de ~3,3 km y un desfase vertical inconsistente (491 ± 41 m).
 - Desfase vertical Cesium − `elev_geoid`: **71,2 m ± 0,3 m** (de 70,4 a 71,8). Es el dato que busca P3-03.
 
+## Idioma (español / inglés)
+
+- El botón del HUD (**English** / **Español**) cambia el idioma de toda la interfaz y recarga la página; la elección queda guardada en el navegador. También se puede forzar con `?lang=en` o `?lang=es` (útil para grabar el video).
+- Los textos están en `src/i18n/es.ts` y `src/i18n/en.ts`. Para agregar uno: sumar la clave en los dos archivos y usarla con `t("clave")`. Si falta en `en.ts`, `npm run typecheck` falla.
+- El código y los comentarios van siempre en inglés (ver `CLAUDE.md`, sección 8). Los valores de los contratos (`observacion_geologica`, `destino`, `observado`…) no se traducen.
+- Lo que manda el motor (motivos, detalles) se muestra tal cual llega. Las respuestas simuladas y los títulos de los puntos de prueba (`title_en`) traen los dos idiomas.
+
 ## Notas
-- `src/look.ts`: shader de color + sol bajo, atmósfera y ajustes de calidad (liviano / equilibrado / presentación).
+- `src/look.ts`: shader de color + sol bajo, atmósfera y ajustes de calidad (`light` / `balanced` / `presentation`).
 - Ajustes de calidad verificados en una Mac con WebGL 2: los tres se aplican sin errores (SSE 16/6/4, sombras no/2048/4096, MSAA 1/4/4) y la escena se mantiene a 60 cuadros por segundo, el tope del monitor. Medir de nuevo en la máquina de presentación.
 - No usar `scene.verticalExaggeration`: con este tileset deja de cargar el terreno detallado.
 - `src/fixture_route.json` es una **ruta sintética de prueba**, no un cálculo del motor.
