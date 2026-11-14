@@ -2,13 +2,9 @@ import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import { getLanguage, onLanguageChange, setLanguage, t, translateStaticDom, type Language, type MessageKey } from "./i18n";
 import { applyAtmosphere, applyPreset, marsShader, sunDirectionWC } from "./look";
-import fixtureRoute from "./fixture_route.json";
-import poiFixture from "./fixtures/poi.fixture.json";
 import "./style.css";
 import { createMissionPanel, type PlanResponseEvent } from "./mission/panel";
 import { createResultsPanel } from "./mission/results";
-import { parsePois, poiTitle } from "./mission/pois";
-import type { Poi } from "./mission/types";
 import { ConfigError, describeStartupError, missingTokenError } from "./ui/errors";
 import { hideLoading, showError, showLoading, showToast, updateLoading } from "./ui/status";
 import { createSourcesPanel } from "./provenance/panel";
@@ -147,23 +143,6 @@ async function main() {
 
   resetView();
 
-  // Test route (FIXTURE, not an engine result): draped on the terrain.
-  const positions = (fixtureRoute.coordinates as [number, number][]).map(([lon, lat]) =>
-    Cesium.Cartesian3.fromDegrees(lon, lat, 0, Cesium.Ellipsoid.MARS),
-  );
-  const fixtureRouteEntity = viewer.entities.add({
-    id: "test_route",
-    name: "Test route (fixture)",
-    polyline: {
-      positions,
-      width: 6,
-      clampToGround: true,
-      material: new Cesium.PolylineGlowMaterialProperty({ glowPower: 0.25, color: Cesium.Color.fromCssColorString("#3ff0ff") }),
-    },
-  });
-
-  // Geographic POIs remain visual fixtures, separate from registered metric locations.
-  const pois = parsePois(poiFixture);
   // Parcel outline in red, moved like the HiRISE mesh (same shift as its metadata, if built).
   const parcelOutline = addParcelOutline(viewer, hirise?.metadata.horizontal_shift_m);
 
@@ -234,8 +213,8 @@ async function main() {
       dataClass: "mission",
       name: "layers.mission",
       origin: "Marswalk",
-      sourceId: "fixture_pois",
-      status: () => "fixture",
+      sourceId: "navigation_draft",
+      status: () => "pending",
       visibility: {
         get: () => missionVisible,
         set: (on) => {
@@ -253,7 +232,6 @@ async function main() {
     layersBtn.classList.toggle("active", open);
   });
   document.addEventListener("plan-response", () => {
-    fixtureRouteEntity.show = false;
     layers.setOpen(false);
     if (window.matchMedia("(max-width: 900px)").matches) panel.setCollapsed(true);
   });
@@ -268,24 +246,12 @@ async function main() {
 
   panoLayer = addPanoramas(viewer); // points appear on their own; does not delay the mission points
   layers.refresh();
-  const poiEntities = await addPois(pois);
-  onLanguageChange(() => {
-    for (const p of pois) {
-      const entity = poiEntities.get(p.id);
-      if (!entity) continue;
-      entity.name = poiTitle(p);
-      if (entity.label) entity.label.text = new Cesium.ConstantProperty(poiTitle(p));
-    }
-  });
 
   viewer.screenSpaceEventHandler.setInputAction((click: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
     const entity = pickEntity(click.position);
     if (!entity) return;
     const pano = panoramaForEntity(entity.id);
     if (pano) panoViewer.open(pano);
-    else if (entity.id.startsWith("poi:")) showToast(t("nav.locations"));
-    // Click on a route: opens its source (on-demand provenance, P1-05).
-    else if (entity.id === "test_route") sources.open("test_route");
     else if (entity.id.startsWith("route:")) sources.open("navigation_draft");
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
   showPointerOverClickables();
@@ -294,50 +260,6 @@ async function main() {
   document.getElementById("resetView")!.onclick = resetView;
   (document.getElementById("resetView") as HTMLButtonElement).disabled = false;
   (document.getElementById("settingsBtn") as HTMLButtonElement).disabled = false;
-}
-
-// ---------------------------------------------------------------------------
-// Points of interest
-// ---------------------------------------------------------------------------
-/** Colors by contract role ("destino" = destination). */
-const POI_COLOR = { base: "#ffd166", destino: "#e8e8ee", selected: "#3ff0ff" };
-
-/**
- * Draws the base and destinations. With the globe hidden, `HeightReference.CLAMP_TO_GROUND` does
- * not drape points or labels on the tileset (polylines do), so the Cesium height is sampled at
- * each point. That height is ONLY for drawing: it is never mixed with DTM heights (~71 m offset).
- */
-async function addPois(pois: Poi[]): Promise<Map<string, Cesium.Entity>> {
-  const cartos = pois.map((p) => Cesium.Cartographic.fromDegrees(p.lonlat[0], p.lonlat[1]));
-  const sampled = await viewer.scene.sampleHeightMostDetailed(cartos);
-  const entities = new Map<string, Cesium.Entity>();
-  pois.forEach((p, i) => {
-    const c = sampled[i] ?? cartos[i];
-    const entity = viewer.entities.add({
-      id: `poi:${p.id}`,
-      name: poiTitle(p),
-      position: Cesium.Cartesian3.fromRadians(c.longitude, c.latitude, c.height ?? 0, Cesium.Ellipsoid.MARS),
-      point: {
-        pixelSize: p.role === "base" ? 13 : 11,
-        color: Cesium.Color.fromCssColorString(POI_COLOR[p.role]),
-        outlineColor: Cesium.Color.BLACK,
-        outlineWidth: 2,
-        disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      },
-      label: {
-        text: poiTitle(p),
-        font: "13px system-ui, sans-serif",
-        fillColor: Cesium.Color.WHITE,
-        outlineColor: Cesium.Color.BLACK,
-        outlineWidth: 3,
-        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-        pixelOffset: new Cesium.Cartesian2(0, -20),
-        disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      },
-    });
-    entities.set(p.id, entity);
-  });
-  return entities;
 }
 
 /** Entity under a screen position, with a few pixels of tolerance so small points are easy to hit. */
@@ -356,23 +278,12 @@ function showPointerOverClickables() {
     if (!pending) {
       requestAnimationFrame(() => {
         const id = pending ? pickEntity(pending)?.id ?? "" : "";
-        canvas.style.cursor = /^(pano:|poi:|route:)|^test_route$/.test(id) ? "pointer" : "";
+        canvas.style.cursor = /^(pano:|route:)/.test(id) ? "pointer" : "";
         pending = null;
       });
     }
     pending = Cesium.Cartesian2.clone(move.endPosition);
   }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-}
-
-function highlightDestination(entities: Map<string, Cesium.Entity>, selectedId: string) {
-  for (const [id, entity] of entities) {
-    if (id === "poi_base" || !entity.point) continue;
-    const selected = id === selectedId;
-    entity.point.color = new Cesium.ConstantProperty(
-      Cesium.Color.fromCssColorString(selected ? POI_COLOR.selected : POI_COLOR.destino),
-    );
-    entity.point.pixelSize = new Cesium.ConstantProperty(selected ? 15 : 11);
-  }
 }
 
 /**
