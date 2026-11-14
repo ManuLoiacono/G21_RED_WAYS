@@ -35,3 +35,16 @@ All planning results are calculated by the engine from prepared inputs. Syntheti
 ```sh
 python -m unittest discover -s service/tests -p 'test_*.py' -v
 ```
+
+## Strict draft exchange and calculated CLI cases (delivery C)
+
+`service.exchange.plan_draft(planner, payload)` accepts only `schema_version: "p2-plan-draft-1"` and returns compact finite JSON. It echoes request/revision, requested/resolved locations, requested overrides and effective team, context/versions, as-of evidence and all checks/margins. Temporal-budget and daylight margins have distinct names. Unsupported versions/capabilities fail explicitly; there is no v0 adapter. `export_catalogs()` reuses the authoritative engine roster/templates. Full draft fields, error/status mapping and runnable request/response examples are documented in [EXCHANGE_DRAFT.md](EXCHANGE_DRAFT.md).
+
+```sh
+python -m service.example
+python -m service.example --case exact_daylight
+```
+
+Every example calculates through the engine on every run. The baseline is 800 s elapsed, 2600 s including reserve, +15400 s limiting participant margin and +2300 s daylight margin. A task edit changes those values and reuses searches. A rover availability override fails by 1 s. Exact daylight equality has zero daylight margin. Missing solar evidence remains insufficient. Responses distinguish `calculation_origin: "engine"` from `input_provenance.fixture: true`; no fixed-response planning fallback is implemented. The existing app fallback is unchanged and belongs to later P1 integration.
+
+Verification: the three standalone engine check scripts, all 40 engine unittest cases and all 38 service tests pass. Tests observe actual engine calls for all examples, changed-input results, reuse/invalidation, per-record cutoffs, malformed wire data, disconnected/inconclusive searches and backend failure propagation. CLI output is finite strict JSON and reproducible across fresh processes. No large benchmark was rerun because this increment changes orchestration/exchange on small fixtures and leaves engine algorithms unchanged.

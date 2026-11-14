@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 
 from engine import DaylightWindow, Departure, SnapshotReference
-from .prepared import PreparedRecord, PreparedScenario
+from .prepared import FixtureClockMapping, PreparedRecord, PreparedScenario
 from .validation import PlanningInputError, identity, utc
 
 
@@ -30,6 +30,7 @@ class SelectedScenario:
     missing_required: tuple[str, ...]
     missing_optional_variables: tuple[str, ...]
     assumptions: tuple[str, ...]
+    clock: FixtureClockMapping
     selection_rule: str = "Latest eligible issue time, then effective availability, then revision within each source/kind/series; no outcome scoring."
 
 
@@ -101,4 +102,4 @@ def select_scenario(scenario: PreparedScenario, as_of_utc: str, departure_utc: s
                                  scenario.evaluation_location_id, scenario.fixture)
     variables = {item.record.variable for item in records if item.record.value is not None}
     optional = tuple(item for item in ("pressure_pa", "daily_min_temp_c", "daily_max_temp_c") if item not in variables)
-    return SelectedScenario(snapshot, departure, daylight, records, tuple(exclusions), () if daylight else ("daylight",), optional, tuple(assumptions))
+    return SelectedScenario(snapshot, departure, daylight, records, tuple(exclusions), () if daylight else ("daylight",), optional, tuple(assumptions), scenario.clock)

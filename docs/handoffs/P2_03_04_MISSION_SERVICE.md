@@ -1,6 +1,8 @@
 # P2-03/04 integration handoff: mission budgets and local service
 
-Date: 2026-11-14. Baseline delivered: **P2-02 directed metric routing**. **P2-03/04 increment 1 now adds pure complete-mission evaluation and central synthetic templates**, as recorded below. No service endpoint or prepared provider is implemented.
+Date: 2026-11-14. Baseline delivered: **P2-02 directed metric routing**. **P2-03/04 increment 1 added pure complete-mission evaluation and central synthetic templates**. Increment 2 is recorded below. No HTTP service endpoint is implemented.
+
+Increment 2 update: registered synthetic providers, bounded movement reuse, per-record historical cutoff selection and an explicit draft exchange/engine-calculated CLI are now implemented under `service/`. See `P2_03_INCREMENT2_PROVIDERS_AND_EXCHANGE.md` for deliveries A/B/C and `P2_03_INCREMENT3_HTTP_SERVICE.md` for the subsequent review handoff. No HTTP endpoint or real parcel adapter is implemented. All planning examples calculate through the engine; synthetic input provenance is distinct from calculation origin. `app/`, shared v0 contracts and their existing fallback behavior remain unchanged.
 
 ## Branch and incremental delivery
 

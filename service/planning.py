@@ -5,10 +5,13 @@ from threading import Lock
 
 import scipy
 
-from engine import CATALOG, build_graph, evaluate_mission, resolve_team, routes_to, search_from_base
+from engine import (
+    CATALOG, EffectiveParticipant, MissionAssessment, RoundTripRoutes,
+    build_graph, evaluate_mission, resolve_team, routes_to, search_from_base,
+)
 from engine.graph import MODEL_VERSION
-from .prepared import resolve_location
-from .scenarios import select_scenario
+from .prepared import PreparedParcel, ResolvedLocation, resolve_location
+from .scenarios import SelectedScenario, select_scenario
 from .validation import PlanningInputError, canonical, identity
 
 
@@ -46,14 +49,14 @@ class PlannerBusyError(RuntimeError):
 
 @dataclass(frozen=True)
 class PlanEvaluation:
-    parcel: object
-    origin: object
-    destination: object
-    participants: tuple
+    parcel: PreparedParcel
+    origin: ResolvedLocation
+    destination: ResolvedLocation
+    participants: tuple[EffectiveParticipant, ...]
     context: MovementContext
-    selected_scenario: object
-    routes: object
-    mission: object
+    selected_scenario: SelectedScenario
+    routes: RoundTripRoutes
+    mission: MissionAssessment
     graph_reused: bool
     search_reused: bool
 
