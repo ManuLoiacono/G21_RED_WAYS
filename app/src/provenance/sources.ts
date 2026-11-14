@@ -1,4 +1,4 @@
-import { t, type MessageKey } from "../i18n";
+import { onLanguageChange, t, type MessageKey } from "../i18n";
 import type { Provenance } from "../mission/response";
 import { esc } from "../ui/format";
 
@@ -39,7 +39,8 @@ function text(id: string, notes: number) {
   };
 }
 
-const STATIC_SOURCES: SourceEntry[] = [
+/** Static entries in the current language (rebuilt on every language switch). */
+const staticSources = (): SourceEntry[] => [
   {
     id: "visual_terrain",
     ...text("visual_terrain", 1),
@@ -129,8 +130,26 @@ const STATIC_SOURCES: SourceEntry[] = [
   },
 ];
 
-const entries = new Map<string, SourceEntry>(STATIC_SOURCES.map((s) => [s.id, s]));
+const entries = new Map<string, SourceEntry>(staticSources().map((s) => [s.id, s]));
 const listeners: (() => void)[] = [];
+/** Retrieval data the engine reported for known entries; survives language switches. */
+const engineData = new Map<string, Partial<Provenance>>();
+/** Entries created from engine provenance (their texts are translated on the fly). */
+const engineEntries = new Set<string>();
+
+onLanguageChange(() => {
+  for (const s of staticSources()) {
+    entries.set(s.id, { ...s, provenance: { ...s.provenance, ...engineData.get(s.id) } });
+  }
+  for (const id of engineEntries) {
+    const e = entries.get(id);
+    if (!e) continue;
+    const p = e.provenance;
+    e.role = t("src.fromEngine");
+    e.title = [p.mission, p.instrument].filter(Boolean).join(" · ") || p.product || t("src.unnamed");
+  }
+  listeners.forEach((cb) => cb());
+});
 
 export function getSource(id: string): SourceEntry | undefined {
   return entries.get(id);
@@ -162,6 +181,7 @@ export function sourceIdFor(p: Provenance): string {
       (["origin", "fetched_at", "product", "url"] as const).filter((k) => p[k]).map((k) => [k, p[k]]),
     );
     known.provenance = { ...known.provenance, ...fromEngine };
+    engineData.set(known.id, { ...engineData.get(known.id), ...fromEngine });
     listeners.forEach((cb) => cb());
     return known.id;
   }
@@ -174,6 +194,7 @@ export function sourceIdFor(p: Provenance): string {
       group: (["topografica", "optica", "atmosferica", "termica"].includes(p.class ?? "") ? p.class : "supuesto") as SourceClass,
       provenance: p,
     });
+    engineEntries.add(id);
     listeners.forEach((cb) => cb());
   }
   return id;

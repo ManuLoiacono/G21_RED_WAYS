@@ -10,6 +10,12 @@
       #hud { position: absolute; top: 12px; left: 12px; z-index: 10; display: flex; flex-wrap: wrap; gap: 6px; max-width: calc(100% - 24px); font: 13px system-ui, sans-serif; }
       #hud button { background: #1b1b1f; color: #eee; border: 1px solid #444; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
       #hud button.active { border-color: #3ff0ff; color: #3ff0ff; }
+      /* Language switch: two joined buttons; the active one is the language on screen. */
+      #hud .lang-switch { display: inline-flex; }
+      #hud .lang-switch button { border-radius: 0; padding: 6px 9px; }
+      #hud .lang-switch button:first-child { border-radius: 6px 0 0 6px; }
+      #hud .lang-switch button:last-child { border-radius: 0 6px 6px 0; margin-left: -1px; }
+      #hud .lang-switch button[aria-pressed="true"] { border-color: #3ff0ff; color: #3ff0ff; background: #102a2e; position: relative; }
     </style>
   </head>
   <body>
@@ -24,7 +30,10 @@
       <button id="hiriseInfo" hidden data-source="hirise_mesh" data-i18n-aria="hud.hiriseInfo.aria" data-i18n-title="hud.hiriseInfo.title">ⓘ</button>
       <button data-source="visual_terrain" data-i18n-aria="hud.terrainInfo.aria" data-i18n-title="hud.terrainInfo.title">ⓘ</button>
       <button id="openSources" aria-haspopup="dialog" data-i18n="hud.sources">Fuentes</button>
-      <button id="toggleLanguage" data-i18n="hud.language" data-i18n-aria="hud.language.aria">English</button>
+      <span id="languageSwitch" class="lang-switch" role="group" data-i18n-aria="hud.language">
+        <button type="button" data-lang="es" lang="es" data-i18n-title="hud.language.es" data-i18n-aria="hud.language.es">ES</button>
+        <button type="button" data-lang="en" lang="en" data-i18n-title="hud.language.en" data-i18n-aria="hud.language.en">EN</button>
+      </span>
     </div>
     <aside id="missionPanel" data-i18n-aria="aside.mission"></aside>
     <aside id="resultsPanel" data-i18n-aria="aside.results" hidden></aside>

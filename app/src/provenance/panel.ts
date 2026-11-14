@@ -32,7 +32,7 @@ export function createSourcesPanel(dialog: HTMLDialogElement) {
             t("src.field.origin"),
             p.origin ? esc(tOr(`src.origin.${p.origin}`, p.origin)) : s.group === "supuesto" ? undefined : esc(t("src.notQueried")),
           )}
-          ${row(t("src.field.fetched"), p.fetched_at && esc(new Date(p.fetched_at).toLocaleString(numberLocale)))}
+          ${row(t("src.field.fetched"), p.fetched_at && esc(new Date(p.fetched_at).toLocaleString(numberLocale())))}
           ${row(t("src.field.link"), url)}
         </dl>
         ${s.notes?.length ? `<ul class="src-notes">${s.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}

@@ -14,8 +14,9 @@ export const en: Record<MessageKey, string> = {
   "hud.terrainInfo.aria": "Source of the 3D terrain",
   "hud.terrainInfo.title": "Show the terrain source",
   "hud.sources": "Sources",
-  "hud.language": "Español",
-  "hud.language.aria": "Switch language to Spanish",
+  "hud.language": "Language",
+  "hud.language.es": "Show in Spanish",
+  "hud.language.en": "Show in English",
   "aside.mission": "Plan mission",
   "aside.results": "Alternatives",
 

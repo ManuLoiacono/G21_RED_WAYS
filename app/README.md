@@ -100,7 +100,8 @@ python3 -m venv .venv && .venv/bin/pip install numpy rasterio pillow
 
 ## Idioma (español / inglés)
 
-- El botón del HUD (**English** / **Español**) cambia el idioma de toda la interfaz y recarga la página; la elección queda guardada en el navegador. También se puede forzar con `?lang=en` o `?lang=es` (útil para grabar el video).
+- El selector **ES | EN** del HUD marca el idioma en pantalla y lo cambia al instante, sin recargar: el formulario, los resultados, las fuentes y los nombres del mapa se reescriben y conservan lo que ya estaba cargado. La elección queda guardada en el navegador. También se puede forzar con `?lang=en` o `?lang=es` (útil para grabar el video).
+- Cada módulo que muestra texto se registra con `onLanguageChange` y se vuelve a dibujar; lo que escribió el usuario (por ejemplo, el nombre de una tarea) no se traduce.
 - Los textos están en `src/i18n/es.ts` y `src/i18n/en.ts`. Para agregar uno: sumar la clave en los dos archivos y usarla con `t("clave")`. Si falta en `en.ts`, `npm run typecheck` falla.
 - El código y los comentarios van siempre en inglés (ver `CLAUDE.md`, sección 8). Los valores de los contratos (`observacion_geologica`, `destino`, `observado`…) no se traducen.
 - Lo que manda el motor (motivos, detalles) se muestra tal cual llega. Las respuestas simuladas y los títulos de los puntos de prueba (`title_en`) traen los dos idiomas.

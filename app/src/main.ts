@@ -1,6 +1,6 @@
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
-import { language, setLanguage, t, translateStaticDom } from "./i18n";
+import { getLanguage, onLanguageChange, setLanguage, t, translateStaticDom, type Language, type MessageKey } from "./i18n";
 import { applyAtmosphere, applyPreset, marsShader, sunDirectionWC, type Preset } from "./look";
 import fixtureRoute from "./fixture_route.json";
 import poiFixture from "./fixtures/poi.fixture.json";
@@ -8,7 +8,9 @@ import "./style.css";
 import { createMissionPanel, type PlanResponseEvent } from "./mission/panel";
 import { createResultsPanel } from "./mission/results";
 import { RouteLayer } from "./mission/routes";
-import { parsePois } from "./mission/pois";
+import { parsePois, poiTitle } from "./mission/pois";
+import { simulatedResponse } from "./fixtures/plan_responses.fixture";
+import type { PlanResponse } from "./mission/response";
 import type { Poi } from "./mission/types";
 import { ConfigError, describeStartupError, missingTokenError } from "./ui/errors";
 import { hideLoading, showError, showLoading, showToast, updateLoading } from "./ui/status";
@@ -31,6 +33,8 @@ Cesium.Ellipsoid.default = Cesium.Ellipsoid.MARS;
 // Viewer
 // ---------------------------------------------------------------------------
 let viewer!: Cesium.Viewer;
+/** Loading message on screen (re-translated on a language switch); null once loaded. */
+let loadingKey: MessageKey | null = null;
 
 function createViewer(): Cesium.Viewer {
   const v = new Cesium.Viewer("cesiumContainer", {
@@ -69,7 +73,10 @@ function waitForInitialTiles(tileset: Cesium.Cesium3DTileset): Promise<void> {
     if (failed === 5) showToast(t("load.tilesFailed"));
   });
   return new Promise((resolve) => {
-    const slow = window.setTimeout(() => updateLoading(t("load.slow")), SLOW_LOAD_MS);
+    const slow = window.setTimeout(() => {
+      loadingKey = "load.slow";
+      updateLoading(t(loadingKey));
+    }, SLOW_LOAD_MS);
     const done = () => {
       window.clearTimeout(slow);
       resolve();
@@ -80,17 +87,30 @@ function waitForInitialTiles(tileset: Cesium.Cesium3DTileset): Promise<void> {
   });
 }
 
-/** Static HUD text and the ES/EN switch. Works even if the scene fails to start. */
+/**
+ * Static HUD text and the ES | EN switch, which highlights the language on screen.
+ * Switching translates in place (no reload); each panel re-renders its own text.
+ * Works even if the scene fails to start.
+ */
 function setUpLanguage() {
+  const buttons = document.querySelectorAll<HTMLButtonElement>("#languageSwitch button[data-lang]");
+  const markActive = () =>
+    buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === getLanguage())));
+  buttons.forEach((b) => (b.onclick = () => setLanguage(b.dataset.lang as Language)));
   translateStaticDom();
-  document.getElementById("toggleLanguage")!.onclick = () => setLanguage(language === "es" ? "en" : "es");
+  markActive();
+  onLanguageChange(() => {
+    markActive();
+    if (loadingKey) updateLoading(t(loadingKey));
+  });
 }
 
 async function main() {
-  showLoading(t("load.terrain"));
+  loadingKey = "load.terrain";
+  showLoading(t(loadingKey));
 
   const token = import.meta.env.VITE_CESIUM_ION_TOKEN?.trim();
-  if (!token) throw new ConfigError(missingTokenError());
+  if (!token) throw new ConfigError(missingTokenError);
   Cesium.Ion.defaultAccessToken = token;
 
   viewer = createViewer();
@@ -149,9 +169,11 @@ async function main() {
   const routes = new RouteLayer(viewer);
   results.onSelect((altId) => routes.select(altId));
   let lastResponseSimulated = false;
+  let lastResponse: PlanResponse | null = null;
   document.addEventListener("plan-response", (e) => {
     const { response, simulated } = (e as CustomEvent<PlanResponseEvent>).detail;
     lastResponseSimulated = simulated || response.fixture === true;
+    lastResponse = response;
     fixtureRouteEntity.show = false; // the initial test route no longer adds anything
     routes.show(response);
     results.show(response, simulated);
@@ -159,10 +181,28 @@ async function main() {
     if (window.matchMedia("(max-width: 900px)").matches) panel.setCollapsed(true);
   });
 
+  // A simulated response is our own fixture: rebuild it in the new language. Engine responses
+  // are shown as they came (their texts are the engine's).
+  onLanguageChange(() => {
+    const dest = lastResponse?.request_echo?.destination_poi;
+    if (!lastResponseSimulated || !lastResponse || !dest) return;
+    const fresh = simulatedResponse(dest);
+    if (fresh) results.replace({ ...fresh, request_echo: lastResponse.request_echo });
+  });
+
   await initialTiles;
+  loadingKey = null;
   hideLoading();
 
   const poiEntities = await addPois(pois);
+  onLanguageChange(() => {
+    for (const p of pois) {
+      const entity = poiEntities.get(p.id);
+      if (!entity) continue;
+      entity.name = poiTitle(p);
+      if (entity.label) entity.label.text = new Cesium.ConstantProperty(poiTitle(p));
+    }
+  });
   panel.onDestinationChange((id) => {
     highlightDestination(poiEntities, id);
     // Changing the destination invalidates the previous result.
@@ -222,7 +262,7 @@ async function addPois(pois: Poi[]): Promise<Map<string, Cesium.Entity>> {
     const c = sampled[i] ?? cartos[i];
     const entity = viewer.entities.add({
       id: `poi:${p.id}`,
-      name: p.title,
+      name: poiTitle(p),
       position: Cesium.Cartesian3.fromRadians(c.longitude, c.latitude, c.height ?? 0, Cesium.Ellipsoid.MARS),
       point: {
         pixelSize: p.role === "base" ? 13 : 11,
@@ -232,7 +272,7 @@ async function addPois(pois: Poi[]): Promise<Map<string, Cesium.Entity>> {
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       label: {
-        text: p.title,
+        text: poiTitle(p),
         font: "13px system-ui, sans-serif",
         fillColor: Cesium.Color.WHITE,
         outlineColor: Cesium.Color.BLACK,
@@ -258,8 +298,21 @@ function highlightDestination(entities: Map<string, Cesium.Entity>, selectedId: 
   }
 }
 
+/** Keeps --hud-bottom in sync with the HUD height, so panels start right below it at any width. */
+function trackHudHeight() {
+  const hud = document.getElementById("hud")!;
+  const update = () =>
+    document.documentElement.style.setProperty("--hud-bottom", `${Math.ceil(hud.getBoundingClientRect().bottom) + 8}px`);
+  new ResizeObserver(update).observe(hud);
+  update();
+}
+
 setUpLanguage();
+trackHudHeight();
 main().catch((err) => {
   console.error(err);
+  loadingKey = null;
   showError(describeStartupError(err, CESIUM_MARS_ASSET_ID));
+  // The error screen is re-written in the new language too.
+  onLanguageChange(() => showError(describeStartupError(err, CESIUM_MARS_ASSET_ID)));
 });

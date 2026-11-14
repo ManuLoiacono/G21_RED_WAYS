@@ -91,8 +91,9 @@
 .mp-sources ul { padding-left: 18px; margin: 4px 0; }
 .mp-json pre { max-height: 220px; overflow: auto; background: #101014; padding: 8px; border-radius: 6px; font-size: 11px; color: var(--mp-fg); }
 
-/* Results panel (P1-03): left-hand column, below the quality buttons. */
-#resultsPanel { top: 56px; left: 12px; right: auto; width: 380px; max-height: calc(100% - 68px); }
+/* Results panel (P1-03): left-hand column, below the HUD buttons.
+   --hud-bottom is the HUD's bottom edge, measured in main.ts (the HUD wraps to more rows on narrow screens). */
+#resultsPanel { top: var(--hud-bottom, 56px); left: 12px; right: auto; width: 380px; max-height: calc(100% - var(--hud-bottom, 56px) - 12px); }
 #resultsPanel[hidden] { display: none; }
 
 .rs-summary { margin: 10px 0 4px; }
@@ -133,11 +134,7 @@
 
 @media (max-width: 900px) {
   #missionPanel { top: auto; bottom: 0; right: 0; left: 0; width: auto; max-height: 50%; border-radius: 10px 10px 0 0; }
-  #resultsPanel { top: 56px; left: 8px; right: 8px; width: auto; max-height: calc(50% - 72px); }
-}
-/* Very narrow: the quality buttons take two rows. */
-@media (max-width: 420px) {
-  #resultsPanel { top: 96px; max-height: calc(50% - 112px); }
+  #resultsPanel { left: 8px; right: 8px; width: auto; max-height: calc(50% - var(--hud-bottom, 56px) - 16px); }
 }
 
 /* App status (P1-06): loading, blocking error and notices. */

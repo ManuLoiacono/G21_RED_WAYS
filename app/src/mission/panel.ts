@@ -1,10 +1,11 @@
 import { requestPlan, SERVICE_URL } from "./api";
 import { toPlanRequest } from "./request";
 import type { PlanResponse } from "./response";
-import { t } from "../i18n";
+import { onLanguageChange, t } from "../i18n";
 import { esc, fmtNumber } from "../ui/format";
 import { infoButton } from "../provenance/sources";
-import { defaultProfile, stateFromTemplate, TEMPLATES } from "./templates";
+import { defaultProfile, relabelState, stateFromTemplate, templateDescription, templateLabel, TEMPLATES } from "./templates";
+import { poiTitle } from "./pois";
 import { TEMPLATE_IDS, type MissionState, type Poi, type PlanRequest, type TemplateId } from "./types";
 
 /**
@@ -63,7 +64,6 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
   // Render
   // -------------------------------------------------------------------------
   function render() {
-    const tpl = TEMPLATES[state.template_id];
     const dests = compatible(state.template_id);
     const usesFixture = pois.some((p) => p.fixture);
     const sources = state.profile.parameter_sources;
@@ -83,12 +83,12 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
           <legend>${esc(t("mp.mission"))} ${infoButton("mission_templates", t("mp.mission.info"))}</legend>
           <label>${esc(t("mp.family"))}
             <select name="template">
-              ${TEMPLATE_IDS.map((id) => `<option value="${id}" ${id === state.template_id ? "selected" : ""}>${esc(TEMPLATES[id].label)}</option>`).join("")}
+              ${TEMPLATE_IDS.map((id) => `<option value="${id}" ${id === state.template_id ? "selected" : ""}>${esc(templateLabel(id))}</option>`).join("")}
             </select>
           </label>
-          <p class="mp-hint">${esc(tpl.description)}</p>
+          <p class="mp-hint">${esc(templateDescription(state.template_id))}</p>
           <label>${esc(t("mp.departFrom"))}
-            <input type="text" value="${esc(base.title)}" readonly />
+            <input type="text" value="${esc(poiTitle(base))}" readonly />
           </label>
           <label>${esc(t("mp.destination"))}
             <select name="destination" ${dests.length ? "" : "disabled"}>
@@ -97,7 +97,7 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
                   ? dests
                       .map(
                         (d) =>
-                          `<option value="${d.id}" ${d.id === state.destination_poi ? "selected" : ""}>${esc(d.title)}${d.hypothetical ? esc(t("mp.hypothetical")) : ""}</option>`,
+                          `<option value="${d.id}" ${d.id === state.destination_poi ? "selected" : ""}>${esc(poiTitle(d))}${d.hypothetical ? esc(t("mp.hypothetical")) : ""}</option>`,
                       )
                       .join("")
                   : `<option>${esc(t("mp.noDestination"))}</option>`
@@ -385,19 +385,26 @@ export function createMissionPanel(root: HTMLElement, pois: Poi[], parcelId: str
   root.addEventListener("submit", onSubmit);
   render();
 
+  // Language switch: re-render in place, keeping every value of the form. The last status
+  // message is dropped (it was written in the other language).
+  onLanguageChange(() => {
+    relabelState(state);
+    render();
+  });
+
   const api: MissionPanel = {
     selectDestination(poiId) {
       const poi = destinations.find((d) => d.id === poiId);
       if (!poi) return t("mp.status.notDestination");
       if (!poi.families.includes(state.template_id)) {
-        const msg = t("mp.status.familyNotAllowed", { poi: poi.title, family: TEMPLATES[state.template_id].label });
+        const msg = t("mp.status.familyNotAllowed", { poi: poiTitle(poi), family: templateLabel(state.template_id) });
         setStatus(msg, "error");
         return msg;
       }
       state.destination_poi = poiId;
       const sel = root.querySelector<HTMLSelectElement>('select[name="destination"]');
       if (sel) sel.value = poiId;
-      setStatus(t("mp.status.destination", { poi: poi.title }));
+      setStatus(t("mp.status.destination", { poi: poiTitle(poi) }));
       updatePreview();
       notifyDestination();
       return null;

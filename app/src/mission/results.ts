@@ -1,4 +1,4 @@
-import { t, tOr } from "../i18n";
+import { onLanguageChange, t, tOr } from "../i18n";
 import { esc, fmtDistance, fmtDuration, fmtMeters, fmtPercent } from "../ui/format";
 import type { Alternative, PlanResponse } from "./response";
 import { infoButton, sourceIdFor } from "../provenance/sources";
@@ -33,6 +33,8 @@ export function altColor(alt: Alternative, index: number): string {
 
 export interface ResultsPanel {
   show(response: PlanResponse, simulated: boolean): void;
+  /** Swaps the response content (same alternatives) keeping selection and collapsed state. */
+  replace(response: PlanResponse): void;
   clear(): void;
   onSelect(cb: (altId: string) => void): void;
 }
@@ -169,6 +171,7 @@ export function createResultsPanel(root: HTMLElement): ResultsPanel {
   });
 
   render();
+  onLanguageChange(() => render());
 
   return {
     show(r, sim) {
@@ -180,6 +183,11 @@ export function createResultsPanel(root: HTMLElement): ResultsPanel {
       selectedId = first?.id ?? null;
       render();
       if (selectedId) listeners.forEach((cb) => cb(selectedId!));
+    },
+    replace(r) {
+      if (!response) return;
+      response = r;
+      render();
     },
     clear() {
       response = null;

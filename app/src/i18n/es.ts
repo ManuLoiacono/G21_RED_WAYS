@@ -15,8 +15,9 @@ export const es = {
   "hud.terrainInfo.aria": "Fuente del terreno 3D",
   "hud.terrainInfo.title": "Ver fuente del terreno",
   "hud.sources": "Fuentes",
-  "hud.language": "English",
-  "hud.language.aria": "Cambiar el idioma a inglés",
+  "hud.language": "Idioma",
+  "hud.language.es": "Ver en español",
+  "hud.language.en": "Ver en inglés",
   "aside.mission": "Preparar misión",
   "aside.results": "Alternativas",
 

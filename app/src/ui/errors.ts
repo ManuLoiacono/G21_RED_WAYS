@@ -2,10 +2,10 @@ import * as Cesium from "cesium";
 import { t } from "../i18n";
 import type { AppError } from "./status";
 
-/** Configuration error detected before the viewer is created. */
+/** Configuration error detected before the viewer is created. Builds its message on demand (current language). */
 export class ConfigError extends Error {
-  constructor(public readonly appError: AppError) {
-    super(appError.title);
+  constructor(public readonly describe: () => AppError) {
+    super(describe().title);
   }
 }
 
@@ -21,7 +21,7 @@ export function missingTokenError(): AppError {
 
 /** Turns any startup error into a message with concrete steps. */
 export function describeStartupError(err: unknown, assetId: number): AppError {
-  if (err instanceof ConfigError) return err.appError;
+  if (err instanceof ConfigError) return err.describe();
   const technical = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
 
   if (err instanceof Cesium.RequestErrorEvent || (typeof err === "object" && err !== null && "statusCode" in err)) {

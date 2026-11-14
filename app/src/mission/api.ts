@@ -1,4 +1,4 @@
-import { SIMULATED_RESPONSES } from "../fixtures/plan_responses.fixture";
+import { simulatedResponse } from "../fixtures/plan_responses.fixture";
 import { t } from "../i18n";
 import { isPlanResponse, type PlanResponse } from "./response";
 import type { PlanRequest } from "./types";
@@ -37,11 +37,12 @@ export async function requestPlan(req: PlanRequest): Promise<PlanResult> {
   return { ok: true, data, simulated: false };
 }
 
-function simulatedPlan(req: PlanRequest): PlanResult {
-  const fixture = SIMULATED_RESPONSES[req.destination_poi];
+/** Simulated response for the request, in the current UI language (also used after a language switch). */
+export function simulatedPlan(req: PlanRequest): PlanResult {
+  const fixture = simulatedResponse(req.destination_poi);
   if (!fixture) return { ok: false, error: t("api.noSimulation", { url: SERVICE_URL }) };
   const data: PlanResponse = {
-    ...structuredClone(fixture),
+    ...fixture,
     request_echo: { parcel_id: req.parcel_id, origin_poi: req.origin_poi, destination_poi: req.destination_poi },
   };
   return { ok: true, data, simulated: true };

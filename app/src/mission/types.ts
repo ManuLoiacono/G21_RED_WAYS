@@ -78,7 +78,10 @@ export interface PlanRequest {
 export interface Poi {
   id: string;
   role: PoiRole;
+  /** Contract title. For display use `poiTitle(poi)`, which picks the UI language. */
   title: string;
+  /** Optional titles by language code (from `title_<lang>` properties). */
+  titles: Record<string, string>;
   hypothetical: boolean;
   families: TemplateId[];
   lonlat: [number, number];

@@ -5,7 +5,7 @@ import { numberLocale } from "../i18n";
 export const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-const nf = (digits: number) => new Intl.NumberFormat(numberLocale, { maximumFractionDigits: digits });
+const nf = (digits: number) => new Intl.NumberFormat(numberLocale(), { maximumFractionDigits: digits });
 
 /** 8450 → "2 h 21 min"; 900 → "15 min". */
 export function fmtDuration(s: number): string {
