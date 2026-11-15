@@ -152,6 +152,20 @@ class MetadataHTTPChecks(unittest.TestCase):
             with self.assertRaises(ValueError):
                 HTTPApplication(allowed_origins=(origin,))
 
+    def test_public_mode_allows_exact_https_origins_and_all_interfaces(self):
+        app = HTTPApplication(allowed_origins=("https://example.com", "http://localhost:5173"), public=True)
+        self.assertEqual(app.allowed_origins, {"https://example.com", "http://localhost:5173"})
+        for origin in ("*", "null", "https://example.com/", "https://example.com:443", "http://example.com",
+                       "https://user@example.com", "https://example.com?x=1"):
+            with self.assertRaises(ValueError):
+                HTTPApplication(allowed_origins=(origin,), public=True)
+        with self.assertRaises(ValueError):
+            LocalHTTPServer(app, host="0.0.0.0", port=0)
+        with self.assertRaises(ValueError):
+            LocalHTTPServer(app, host="10.0.0.1", port=0, public=True)
+        with LocalHTTPServer(app, host="0.0.0.0", port=0, public=True) as server:
+            self.assertEqual(server.server_address[0], "0.0.0.0")
+
 
 class PlanningHTTPChecks(unittest.TestCase):
     def test_repeated_http_calls_reuse_one_planner_and_recalculate_task_edits(self):
