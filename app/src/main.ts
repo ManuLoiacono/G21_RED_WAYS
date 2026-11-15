@@ -8,7 +8,7 @@ import { createResultsPanel } from "./mission/results";
 import { ConfigError, describeStartupError, missingTokenError } from "./ui/errors";
 import { hideLoading, showError, showLoading, showToast, updateLoading } from "./ui/status";
 import { createSourcesPanel } from "./provenance/panel";
-import { installOrbit, installWheelZoom, keepCameraAboveGround } from "./camera";
+import { installKeyboardMove, installOrbit, installWheelZoom, keepCameraAboveGround } from "./camera";
 import { loadHiriseLayer } from "./hirise";
 import { createLayersPanel } from "./ui/layers";
 import { addPanoramas, PANORAMAS, panoramaForEntity, type PanoramaLayer } from "./panoramas/panoramas";
@@ -19,7 +19,7 @@ import { addParcelOutline } from "./terrain/parcel";
 import { addThermalLayer, LEGEND_STYLE } from "./thermal/themis";
 import { createEnvironmentLayer } from "./environment/layer";
 import { esc } from "./ui/format";
-import { createMissionContext, setUpSettingsMenu } from "./ui/hud";
+import { createMissionContext, setUpInputModeMenu, setUpSettingsMenu } from "./ui/hud";
 import type { PlanResponse } from "./mission/draft";
 import { createSceneRoutes } from "./mission/sceneRoutes";
 
@@ -124,8 +124,9 @@ async function main() {
   // The camera stays above the terrain with installWheelZoom + keepCameraAboveGround.
   const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(CESIUM_MARS_ASSET_ID);
   viewer.scene.primitives.add(tileset);
-  installWheelZoom(viewer);
-  installOrbit(viewer);
+  const orbit = installOrbit(viewer);
+  installWheelZoom(viewer, { orbit, inputMode: setUpInputModeMenu() });
+  installKeyboardMove(viewer);
   keepCameraAboveGround(viewer);
   // For debugging from the browser console (available even if loading never finishes).
   Object.assign(window, { viewer, tileset, Cesium });
