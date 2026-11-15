@@ -30,9 +30,10 @@ function detectLanguage(): Language {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (isLanguage(saved)) return saved;
   } catch {
-    // Storage blocked (private window, sandbox): fall back to the browser language.
+    // Storage blocked (private window, sandbox): fall back to the default.
   }
-  return navigator.language.toLowerCase().startsWith("es") ? "es" : "en";
+  // Default is English; Spanish only when chosen (ES button, saved) or requested with ?lang=es.
+  return "en";
 }
 
 let current: Language = detectLanguage();

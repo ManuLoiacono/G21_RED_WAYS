@@ -31,7 +31,7 @@ Para trabajar con Claude Code: pedir una tarea por ID («hacé P2-02») y manten
 | [~] P1-06 | P0 | **Arranque y README:** instrucciones, mensajes de carga y error, arranque limpio | Otra persona levanta la app siguiendo el README | — |
 | [ ] P1-07 | P1 | Dibujar el **área alcanzable** con retorno | Coincide con el cálculo de P2 | P2-07 |
 | [ ] P1-08 | P1 | **Capas y modos:** selector de escenario ambiental, visibilidad hacia la base, capa THEMIS, modo a pie o con robot | Un cambio de escenario o modo produce un cambio explicable en el resultado | P2-08, P3-07, P3-08 |
-| [ ] P1-09 | P1 | **Seguimiento simulado:** marcador que avanza sobre la ruta, pausa, evento, reevaluación y decisión; etiqueta «seguimiento simulado» | Secuencia reproducible avance → evento → nueva recomendación | P2-11 |
+| [x] P1-09 | P1 | **Seguimiento simulado:** marcador que avanza sobre la ruta, pausa, evento, reevaluación y decisión; etiqueta «seguimiento simulado» | Secuencia reproducible avance → evento → nueva recomendación | P2-11 |
 | [ ] P1-10 | P1 | Foto del destino (panorama de Curiosity verificado) | La foto corresponde al punto (fuente y sol visibles en ⓘ) | P3-10 |
 | [ ] P1-11 | P2 | Modelos 3D de base y rover, pantalla de restricción dominante, chat con IA | — | P2-12 |
 
@@ -49,7 +49,7 @@ Para trabajar con Claude Code: pedir una tarea por ID («hacé P2-02») y manten
 | [~] P2-08 | P1 | **Comunicación y escenarios:** interrupción total y máxima continua de visibilidad sobre cada ruta; reglas de escenario ambiental | Un escenario puede cambiar la viabilidad sin cambiar la geometría, y se informa así | P3-08, P3-09 |
 | [ ] P2-09 | P1 | **Advertencia THEMIS** (material suelto, cualitativa) | La ruta que cruza la zona lo informa | P3-07 |
 | [ ] P2-10 | P1 | **Robot de apoyo en marcha conjunta:** segundo perfil, compatibilidad de ambos, ritmo del conjunto | Las diferencias de resultado surgen de la configuración | P2-01 |
-| [ ] P2-11 | P1 | **Reevaluación** desde una posición simulada con tiempo transcurrido y un evento (demora o bloqueo); no reiniciar la autonomía | La demora reduce el margen; la recomendación se explica | P2-04 |
+| [~] P2-11 | P1 | **Reevaluación** desde una posición simulada con tiempo transcurrido y un evento (demora o bloqueo); no reiniciar la autonomía | La demora reduce el margen; la recomendación se explica | P2-04 |
 | [ ] P2-12 | P2 | Restricción dominante y cambios admisibles, robot repetidor, explicación con IA | — | P2-05 |
 
 Historical P2-02 update (2026-11-14): directed metric routing, synthetic acceptance checks and measured build/search performance are implemented on `p2/directed-routing`; consumer review is pending, so the task remains in progress. See [the mission/service handoff](handoffs/P2_03_04_MISSION_SERVICE.md). Original P2-01 template defaults and P2-06 real-parcel integration remain pending.
@@ -129,7 +129,9 @@ The dated checklist above is historical. Current verified implementation and rev
 | P2-06 | Real HiRISE routing, verified assets and measured runtime implemented | Provisional geographic registration remains documented. |
 | P2-05 | Partial: one fastest candidate and calculated failure reasons | Distinct effort criterion and evaluated recommendations remain pending. |
 | P2-08 | Partial: historical environmental discovery, daylight and eligible A1/A2/B1 context | Geometric communication/visibility and interruption metrics remain pending. |
-| P2-07 / P2-09 / P2-11 / P2-12 | Pending | Reachability, route material warnings, simulated replanning and recommendation extensions remain outside this slice. |
+| P2-11 | Partial: delay event reevaluated from a simulated position (`POST /reevaluate`, `engine/progress.py`): continue vs return now, limits not reset | Terrain blockage events remain pending. |
+| P1-09 | Implemented: simulated tracking in the profile dock (marker at average leg pace, play/pause/speed, delay event → engine reevaluation → user decision) | Event limited to delays; positions are simulated. |
+| P2-07 / P2-09 / P2-12 | Pending | Reachability, route material warnings and recommendation extensions remain outside this slice. |
 
 See [the implementation handoff](handoffs/P2_ENVIRONMENT_DELIVERY.md) for actual tests, launch commands and limitations. No unrelated P3 or optional ML task is closed by this update.
 

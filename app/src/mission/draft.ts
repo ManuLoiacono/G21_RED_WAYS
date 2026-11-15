@@ -184,3 +184,36 @@ export interface ReachableArea {
   search_status: string;
   evaluated_cells: number;
 }
+
+/** P2-11 reevaluation from a simulated position on a calculated route (p2-progress-1). */
+export type ProgressPhase = "outbound" | "tasks" | "return";
+export interface ProgressRequest {
+  schema_version: "p2-progress-1";
+  request: PlanRequest;
+  alternative_id: string;
+  /** Return leg from another calculated alternative (default: the same one). */
+  return_alternative_id?: string;
+  progress: { phase: ProgressPhase; vertex_index: number; cell: Pair; tasks_done_s: number; delay_s: number };
+}
+export interface ProgressOption {
+  id: "continue" | "return_now";
+  assessment: Assessment;
+  search_status: string;
+  completes_tasks: boolean;
+  metrics: Metrics;
+  checks: Check[];
+  return: Leg;
+}
+export interface ProgressResponse {
+  schema_version: "p2-progress-1";
+  request_echo: PlanRequest;
+  alternative_id: string;
+  position: { cell: Pair; xy_m: Pair };
+  elapsed_at_event_s: number;
+  return_alternative_id: string;
+  planned: { reserved_total_s: number | null; mission_margin_s: number | null; assessment: Assessment; metrics: Metrics };
+  options: ProgressOption[];
+  recommendation: { option_id: "continue" | "return_now"; reason: string };
+  not_evaluated: string[];
+  scope: string;
+}

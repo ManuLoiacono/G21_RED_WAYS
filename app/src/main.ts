@@ -23,6 +23,7 @@ import { createMissionContext, setUpInputModeMenu, setUpSettingsMenu } from "./u
 import type { PlanResponse } from "./mission/draft";
 import { createSceneRoutes } from "./mission/sceneRoutes";
 import { createRouteProfile } from "./ui/routeProfile";
+import { createTracking } from "./mission/tracking";
 import { createScenePois } from "./mission/scenePois";
 import { requestRecommendations, requestArea } from "./mission/api";
 import { calculationKey } from "./mission/request";
@@ -45,6 +46,7 @@ Cesium.Ellipsoid.default = Cesium.Ellipsoid.MARS;
 let viewer!: Cesium.Viewer;
 let sceneRoutes: ReturnType<typeof createSceneRoutes> | null = null;
 let routeProfile: ReturnType<typeof createRouteProfile> | null = null;
+let tracking: ReturnType<typeof createTracking> | null = null;
 let activeResponse: PlanResponse | null = null;
 let activeAlternative: string | null = null;
 let recommendationSequence = 0;
@@ -305,6 +307,10 @@ async function main() {
   sceneRoutes.setVisible(missionVisible);
   // Elevation profile of the calculated route (bottom dock), sampled from the local HiRISE grid.
   routeProfile = createRouteProfile(viewer, await elevationGrid);
+  // Simulated tracking (marker on the route + delay event reevaluated by the engine) lives in the profile dock.
+  tracking = createTracking(viewer, routeProfile.slot, await elevationGrid,
+    { getParcel: () => panel.getParcel(), setProfileProgress: (d) => routeProfile?.setProgress(d),
+      onLegs: (outboundId, returnId) => routeProfile?.setLegs(outboundId, returnId) });
   if (activeResponse) void showSceneResponse(activeResponse);
   Object.assign(window, { missionRoutes: sceneRoutes });
   panel.onChange(() => layers.refresh());
@@ -408,9 +414,15 @@ function updateAreaState(value: ReachableArea | string, visible: boolean) {
 const context = createMissionContext(document.getElementById("hudContext")!);
 panel.onChange((request) => context.update(request));
 panel.onError((message) => results.failed(message));
-panel.onStale(() => { recommendationSequence += 1; areaSequence += 1; areaWanted = false; activeArea = null; sceneArea?.clear(); activeResponse = null; activeAlternative = null; results.clear(); sceneRoutes?.clear(); routeProfile?.clear(); });
+panel.onStale(() => { recommendationSequence += 1; areaSequence += 1; areaWanted = false; activeArea = null; sceneArea?.clear(); activeResponse = null; activeAlternative = null; results.clear(); sceneRoutes?.clear(); routeProfile?.clear(); tracking?.clear(); });
 async function showSceneResponse(response: PlanResponse) {
-  try { await sceneRoutes?.show(response, panel.getParcel(), activeAlternative); routeProfile?.show(response, panel.getParcel(), activeAlternative); }
+  const alternative = activeAlternative;
+  try {
+    await sceneRoutes?.show(response, panel.getParcel(), alternative);
+    // The scene may wait for terrain heights; skip if the result went stale or another card was picked meanwhile.
+    if (activeResponse !== response || activeAlternative !== alternative) return;
+    routeProfile?.show(response, panel.getParcel(), alternative); tracking?.load(response, alternative);
+  }
   catch (error) { console.error(error); showToast(t("nav.sceneMismatch")); }
 }
 document.addEventListener("plan-response", (event) => {

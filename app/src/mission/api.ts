@@ -1,6 +1,6 @@
 import { t } from "../i18n";
-import type { Catalogs, Health, Parcel, PlanRequest, PlanResponse, Recommendations, ReachableArea } from "./draft";
-import { isCatalogs, isDraftResponse, isHealth, isParcel, isRecommendations, isReachableArea, object } from "./validation";
+import type { Catalogs, Health, Parcel, PlanRequest, PlanResponse, ProgressRequest, ProgressResponse, Recommendations, ReachableArea } from "./draft";
+import { isCatalogs, isDraftResponse, isHealth, isParcel, isProgressResponse, isRecommendations, isReachableArea, object } from "./validation";
 
 export const SERVICE_URL = (import.meta.env.VITE_SERVICE_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
 export interface ServiceMetadata { health: Health; parcel: Parcel; catalogs: Catalogs }
@@ -49,4 +49,7 @@ export function requestRecommendations(req: PlanRequest): Promise<Result<Recomme
 }
 export function requestArea(req: PlanRequest): Promise<Result<ReachableArea>> {
   return read("/reachable-area", isReachableArea, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req) });
+}
+export function requestReevaluation(req: ProgressRequest): Promise<Result<ProgressResponse>> {
+  return read("/reevaluate", isProgressResponse, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req) });
 }
