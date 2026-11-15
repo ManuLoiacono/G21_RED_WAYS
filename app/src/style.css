@@ -709,3 +709,11 @@ button.wz-sum:hover { border-color: rgba(232, 131, 79, .6); transform: translate
 .ly-slot-control { width: 50px; justify-content: flex-end; }
 .ly-slot-control .ly-locked { margin: 0; }
 .ly-slot-extra .ly-action { margin: 0; }
+
+/* Wizard: never scroll sideways; fields shrink to the panel width. */
+.wz-body { overflow-x: hidden; }
+.wz-grid2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.wz-body label { min-width: 0; }
+.wz-body input, .wz-body select { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; text-overflow: ellipsis; }
+.wz-families { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.wz-family-text { min-width: 0; }
