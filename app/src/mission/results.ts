@@ -58,7 +58,8 @@ export function createResultsPanel(root: HTMLElement) {
           <span class="rs-badge rs-badge-lg" data-status="${esc(r.status)}">${esc(statusLabel(r.assessment))}</span>
           <small>${esc(t("nav.search"))}: ${esc(label("search", r.search_status))}</small>
         </div>
-        ${geo ? `<p class="rs-legend"><span class="sw sw-out"></span>${esc(t("nav.outbound"))}<span class="sw sw-ret"></span>${esc(t("nav.return"))}</p>` : ""}
+        ${geo ? `<p class="rs-legend"><span class="sw sw-out"></span>${esc(t("nav.outbound"))}<span class="sw sw-ret"></span>${esc(t("nav.return"))}
+          <small class="rs-smooth" title="${esc(t("rs.smoothedHint"))}">· ${esc(t("rs.smoothed"))}</small></p>` : ""}
         ${r.alternatives.length === 0 ? `<p>${esc(t("rs.noAlternatives"))}</p>` : ""}
         <ul class="rs-cards">${r.alternatives.map(card).join("")}</ul>
         <details class="rs-section" data-detail="technical"><summary>${esc(t("rs.technical"))}</summary>

@@ -2,6 +2,7 @@ import * as Cesium from "cesium";
 import { onLanguageChange, t } from "../i18n";
 import type { Parcel, PlanResponse, Pair } from "./draft";
 import { metricToScene } from "./geography";
+import { FlowMaterialProperty, lengthOf, smoothForDisplay } from "./flowMaterial";
 
 /** Owns only calculated mission entities; optical observations have their own data source. */
 export function createSceneRoutes(viewer: Cesium.Viewer) {
@@ -42,37 +43,30 @@ export function createSceneRoutes(viewer: Cesium.Viewer) {
       const leg = candidate[name];
       if (leg.status !== "found" || leg.xy_m.length === 0) continue;
       const color = Cesium.Color.fromCssColorString(name === "outbound" ? "#3ff0ff" : "#ffb347");
-      const entity = source.entities.add({ id: `route:${r.request_echo.request_id}:${name}`, name: t(`nav.${name}`),
-        properties: { request_id: r.request_echo.request_id, leg: name, cells: leg.cells, xy_m: leg.xy_m },
-        ...(leg.xy_m.length === 1 ? {
+      if (leg.xy_m.length === 1) {
+        const entity = source.entities.add({ id: `route:${r.request_echo.request_id}:${name}`, name: t(`nav.${name}`),
+          properties: { request_id: r.request_echo.request_id, leg: name, cells: leg.cells, xy_m: leg.xy_m },
           position: position(leg.xy_m[0], r.locations.origin.effective_elevation_m + a.vertical_offset_m),
           point: { pixelSize: name === "outbound" ? 24 : 14, color: color.withAlpha(.35), outlineColor: color, outlineWidth: 2,
             disableDepthTestDistance: Number.POSITIVE_INFINITY },
-        } : { polyline: { positions: leg.xy_m.map((xy) => position(xy)), width: name === "outbound" ? 8 : 3.5,
-          clampToGround: true, zIndex: name === "outbound" ? 0 : 1,
-          material: name === "outbound"
-            ? new Cesium.PolylineOutlineMaterialProperty({ color, outlineColor: Cesium.Color.BLACK.withAlpha(0.7), outlineWidth: 2 })
-            : new Cesium.PolylineDashMaterialProperty({ color, gapColor: Cesium.Color.TRANSPARENT, dashLength: 14 }),
-        } }),
-      });
-      if (leg.xy_m.length === 1) {
+        });
         entity.label = new Cesium.LabelGraphics(label(`nav.${name}`, name === "outbound" ? -55 : 50));
         labels.push({ entity, key: `nav.${name}` });
-      } else {
-        if (name === "outbound" && leg.xy_m.length >= 12) {
-          for (const fraction of [0.25, 0.5, 0.75]) {
-            const i = Math.max(2, Math.round((leg.xy_m.length - 1) * fraction));
-            source.entities.add({ id: `route:${r.request_echo.request_id}:${name}:chevron:${fraction}`,
-              polyline: { positions: leg.xy_m.slice(i - 2, i + 1).map((xy) => position(xy)), width: 14,
-                clampToGround: true, zIndex: 2, material: new Cesium.PolylineArrowMaterialProperty(color.withAlpha(0.95)) } });
-          }
-        }
-        // A short final segment carries direction without replacing any analytical vertices.
-        source.entities.add({ id: `route:${r.request_echo.request_id}:${name}:arrow`,
-          polyline: { positions: leg.xy_m.slice(-5).map((xy) => position(xy)), width: name === "outbound" ? 16 : 10,
-            clampToGround: true, zIndex: name === "outbound" ? 2 : 3,
-            material: new Cesium.PolylineArrowMaterialProperty(color) } });
+        continue;
       }
+      // Drawing only: corner-cut copy of the calculated vertices (kept unchanged in `properties`).
+      const drawn = smoothForDisplay(leg.xy_m);
+      const positions = drawn.map((xy) => position(xy));
+      const outbound = name === "outbound";
+      // Dark halo under the line so it reads on bright and dark terrain.
+      source.entities.add({ id: `route:${r.request_echo.request_id}:${name}:halo`,
+        polyline: { positions, width: outbound ? 13 : 8, clampToGround: true, zIndex: outbound ? 0 : 2,
+          material: Cesium.Color.BLACK.withAlpha(outbound ? 0.55 : 0.45) } });
+      source.entities.add({ id: `route:${r.request_echo.request_id}:${name}`, name: t(`nav.${name}`),
+        properties: { request_id: r.request_echo.request_id, leg: name, cells: leg.cells, xy_m: leg.xy_m },
+        polyline: { positions, width: outbound ? 9 : 4.5, clampToGround: true, zIndex: outbound ? 1 : 3,
+          // Animated chevrons every ~28 m (outbound) / ~22 m (return), moving in the direction of travel.
+          material: new FlowMaterialProperty(color, Math.max(3, lengthOf(drawn) / (outbound ? 28 : 22)), outbound ? 0.55 : 0.7) } });
     }
     const markers: Cesium.Entity[] = [];
     const cartos: Cesium.Cartographic[] = [];
