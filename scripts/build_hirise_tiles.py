@@ -369,7 +369,7 @@ def build(p: Parcel, out: str, offset: float, shift: tuple[float, float], jpeg_q
         "geometricError": max(root["geometricError"] * 4, 500.0),
         "root": root,
     }
-    with open(os.path.join(out, "tileset.json"), "w") as f:
+    with open(os.path.join(out, "tileset.json"), "w", encoding="utf-8") as f:
         json.dump(tileset, f, separators=(",", ":"))
     print(f"{stats['tiles']} tiles, {stats['vertices']:,} vertices, "
           f"{stats['bytes'] / 1e6:.1f} MB in {time.time() - t0:.0f} s", flush=True)
@@ -418,7 +418,7 @@ def write_elevation_grid(z: np.ndarray, x0: float, y0: float, res: float, out: s
                    "product": "DTEEC_019698_1750_019988_1750_U01", "url": DTM_URL, "kind": "observado"},
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
-    with open(os.path.join(out, "elevation.json"), "w") as f:
+    with open(os.path.join(out, "elevation.json"), "w", encoding="utf-8") as f:
         json.dump(info, f, ensure_ascii=False, indent=2)
     print(f"Elevation grid: {z.shape[1]} x {z.shape[0]}, {z_min:.1f}–{z_max:.1f} m, step {scale} m", flush=True)
     return info
@@ -478,7 +478,7 @@ def main():
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         **stats,
     }
-    with open(os.path.join(a.out, "metadata.json"), "w") as f:
+    with open(os.path.join(a.out, "metadata.json"), "w", encoding="utf-8") as f:
         json.dump(meta, f, ensure_ascii=False, indent=2)
 
 
