@@ -916,3 +916,7 @@ button.wz-sum { position: relative; }
 .rp-empty { margin: 2px 0; font-size: 12px; color: var(--ui-muted); }
 .rs-smooth { color: var(--ui-muted); cursor: help; }
 @media (max-width: 900px) { #routeProfile { left: 8px; right: 8px; bottom: 8px; } .rp-chart { height: 90px; } }
+
+/* Payload: subtle note when the carrying limit is reached. */
+.wz-limit-note { color: var(--ui-muted); font-size: 11px; font-style: italic; animation: wzFade .2s both; }
+.wz-limit-note:empty { display: none; }

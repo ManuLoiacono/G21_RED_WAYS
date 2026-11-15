@@ -334,17 +334,29 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     </article>`;
   }
 
-  /** Assigned payload above the effective carrying limit: warned, not blocked. The engine rejects it (HTTP 422 payload_exceeds_limit). */
-  function overloadText(m: Member) {
-    const limit = effective(m, "carrying_limit_kg");
-    return m.payload_kg > limit ? t("wizard.team.overload", { kg: num(limit) }) : "";
+  /**
+   * Assigned payload is kept between 0 and the member's effective carrying limit (the engine rejects
+   * a larger load with 422 payload_exceeds_limit). At the limit a subtle note is shown.
+   */
+  const payloadLimit = (m: Member) => effective(m, "carrying_limit_kg");
+  function limitText(m: Member) {
+    const limit = payloadLimit(m);
+    return m.payload_kg >= limit ? t("wizard.team.atLimit", { kg: num(limit) }) : "";
+  }
+  function clampPayload(m: Member) {
+    const limit = payloadLimit(m);
+    if (m.payload_kg > limit) {
+      m.payload_kg = limit;
+      const input = wizard.querySelector<HTMLInputElement>(`input[name="payload:${m.profile_id}"]`);
+      if (input) { input.value = String(limit); input.max = String(limit); }
+    }
   }
 
-  /** Number input with custom − / + buttons (native spinners hidden). */
-  function numField(name: string, value: number, step: number) {
+  /** Number input with custom − / + buttons (native spinners hidden). `max` caps typing and the + button. */
+  function numField(name: string, value: number, step: number, max?: number) {
     return `<span class="wz-num">
       <button type="button" class="wz-step" data-act="step" data-target="${esc(name)}" data-step="${-step}" aria-label="${esc(t("wizard.step.decrease"))}" tabindex="-1">−</button>
-      <input name="${esc(name)}" type="number" min="0" step="any" value="${esc(String(value))}" />
+      <input name="${esc(name)}" type="number" min="0" ${max === undefined ? "" : `max="${max}"`} step="any" value="${esc(String(value))}" />
       <button type="button" class="wz-step" data-act="step" data-target="${esc(name)}" data-step="${step}" aria-label="${esc(t("wizard.step.increase"))}" tabindex="-1">+</button>
     </span>`;
   }
@@ -370,8 +382,8 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     return `<li class="wz-setting" data-kind="${entry.kind}">
       <div class="wz-setting-row">
         <span class="wz-setting-name">${memberIcon(entry.kind, id)}${esc(entry.identity.name)}${edited ? `<span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.edited"))}</span>` : ""}</span>
-        <label class="wz-payload">${esc(t("nav.payload"))}${numField(`payload:${id}`, m.payload_kg, 1)}
-          <small class="wz-overload" data-derived="overload:${esc(id)}">${esc(overloadText(m))}</small></label>
+        <label class="wz-payload">${esc(t("nav.payload"))}${numField(`payload:${id}`, m.payload_kg, 1, payloadLimit(m))}
+          <small class="wz-limit-note" data-derived="limit:${esc(id)}">${esc(limitText(m))}</small></label>
         <button type="button" class="wz-params-btn" data-act="edit-params" data-member="${esc(id)}" aria-expanded="${isEditing}">${ICONS.pencil}<span>${esc(t("wizard.team.paramsBtn"))}</span></button>
       </div>
       ${isEditing ? `<div class="wz-param-grid">${fields}</div>` : ""}
@@ -513,8 +525,8 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     if (live) live.innerHTML = liveSummary(state);
     if (step === 1) {
       for (const m of members(state)) {
-        const el = wizard.querySelector(`[data-derived="overload:${m.profile_id}"]`);
-        if (el) el.textContent = overloadText(m);
+        const el = wizard.querySelector(`[data-derived="limit:${m.profile_id}"]`);
+        if (el) el.textContent = limitText(m);
       }
       // Team bar and cards hold no inputs, so they can be redrawn while typing in the settings rows.
       const fresh = document.createElement("div");
@@ -656,7 +668,12 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       if (!member) return;
       if (name.startsWith("payload:")) {
         const v = Number(el.value);
-        if (mark(el.value !== "" && Number.isFinite(v) && v >= 0)) member.payload_kg = v;
+        if (mark(el.value !== "" && Number.isFinite(v))) {
+          // Never below 0 or above the effective carrying limit: the typed value is corrected in place.
+          const clamped = Math.min(Math.max(v, 0), payloadLimit(member));
+          if (clamped !== v) el.value = String(clamped);
+          member.payload_kg = clamped;
+        }
       } else {
         const key = parameter as keyof Parameters;
         const base = catalogEntry(memberId).defaults[key];
@@ -667,6 +684,12 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
           const grade = key === "max_ascent_deg" || key === "max_descent_deg";
           const ok = v !== null && Number.isFinite(v) && (positive ? v > 0 : v >= 0) && (!grade || v < 90);
           if (mark(ok)) setOverride(member, key, v === base ? undefined : v!);
+        }
+        if (key === "carrying_limit_kg") {
+          // A lower carrying limit pulls the assigned payload down with it.
+          clampPayload(member);
+          const payloadInput = wizard.querySelector<HTMLInputElement>(`input[name="payload:${memberId}"]`);
+          if (payloadInput) payloadInput.max = String(payloadLimit(member));
         }
       }
     }
@@ -743,7 +766,8 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
         if (input) {
           const delta = Number(button.dataset.step);
           const decimals = (String(Math.abs(delta)).split(".")[1] ?? "").length;
-          const next = Math.max(0, (Number(input.value) || 0) + delta);
+          const max = input.max === "" ? Infinity : Number(input.max);
+          const next = Math.min(max, Math.max(0, (Number(input.value) || 0) + delta));
           input.value = String(Number(next.toFixed(decimals)));
           input.dispatchEvent(new Event("input", { bubbles: true }));
         }

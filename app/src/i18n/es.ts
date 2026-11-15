@@ -627,7 +627,7 @@ export const es = {
   "rs.timeline.sunsetLater": "fin de luz: {t} después del presupuesto",
   "rs.allMetrics": "Todas las métricas",
   "rs.technical": "Detalle técnico",
-  "wizard.team.overload": "Supera la capacidad de carga ({kg} kg): el motor rechaza el cálculo con esta carga.",
+  "wizard.team.atLimit": "Llegaste al límite de carga ({kg} kg).",
   "wizard.step.decrease": "Restar",
   "wizard.step.increase": "Sumar",
   "profile.title": "Perfil de altitud de la ruta",

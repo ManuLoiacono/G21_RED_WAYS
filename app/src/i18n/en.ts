@@ -624,7 +624,7 @@ export const en: Record<MessageKey, string> = {
   "rs.timeline.sunsetLater": "end of daylight: {t} after the budget",
   "rs.allMetrics": "All metrics",
   "rs.technical": "Technical details",
-  "wizard.team.overload": "Above the carrying limit ({kg} kg): the engine rejects the calculation with this load.",
+  "wizard.team.atLimit": "Carrying limit reached ({kg} kg).",
   "wizard.step.decrease": "Decrease",
   "wizard.step.increase": "Increase",
   "profile.title": "Route elevation profile",
