@@ -89,7 +89,7 @@ def prepare(out, factor=2):
               "north": math.degrees((t.f-row0*res)/R_SPHERE),
               "south": math.degrees((t.f-row1*res)/R_SPHERE)}
     manifest = {
-        "format": "gale-analytical-1", "id": "gale_hirise_019698", "version": "native2-v1" if factor == 2 else f"native{factor}-v1",
+        "format": "gale-analytical-1", "id": "gale_hirise_019698", "version": f"native{factor}-photo-v2",
         "fixture": False, "source": source_info, "reviewed_bounds_lonlat": dict(zip(("west", "south", "east", "north"), BBOX)),
         "bounds_lonlat": bounds, "reference_description": "Mars 2015 sphere; east-positive longitude, source planetocentric latitude, native equirectangular meters; east-west distortion about 0.35 percent.",
         "grid": {"shape": list(arrays["coverage"].shape), "spacing_m": [res*factor]*2,
@@ -103,10 +103,8 @@ def prepare(out, factor=2):
                         "command": f"python -m scripts.prepare_gale --factor {factor}"},
         "arrays": {"file": "terrain.npz", "sha256": hashes},
         "masks": {"covered_cells": int(arrays["coverage"].sum()), "excluded_cells": 0},
-        "location_selection": "Hypothetical engineering locations in the eastern connected terrain for explorer_01 plus support_rover under unchanged assumed limits. Preliminary center (137.385,-4.825) has 19.90 degree block slope; (137.389,-4.827) reaches only five cells with this team. Neither was snapped or reclassified as traversable; no mask, slope, edge or corridor was modified.",
-        "pois": [{"id": "base", "lonlat": [137.404, -4.825], "classification": "hypothetical", "role": "base"},
-                 {"id": "sample", "lonlat": [137.405, -4.827], "classification": "hypothetical", "role": "destination"},
-                 {"id": "control", "lonlat": [137.406, -4.826], "classification": "hypothetical", "role": "destination"}],
+        "location_selection": 'Hypothetical photo-sector locations selected inside a 7946-cell strongly connected component of the unchanged default-team directed graph. No terrain or profile changes.',
+        "pois": [{'id': 'base', 'lonlat': [137.3751012600287, -4.811074715231375], 'classification': 'hypothetical', 'role': 'base'}, {'id': 'sample', 'lonlat': [137.3700489010339, -4.8134984820464455], 'classification': 'hypothetical', 'role': 'destination'}, {'id': 'control', 'lonlat': [137.371858191755, -4.810835752305946], 'classification': 'hypothetical', 'role': 'destination'}, {'id': 'lookout', 'lonlat': [137.37267749321364, -4.814044683018855], 'classification': 'hypothetical', 'role': 'destination'}],
         "geographic_adapter": {"id": "gale-eqc-scene-v1", "projection": "spherical_equirectangular",
                                "radius_m": R_SPHERE, "central_meridian_deg": 0, "standard_parallel_deg": 0,
                                "latitude_convention": "source_latitude_direct_to_cesium_mars",

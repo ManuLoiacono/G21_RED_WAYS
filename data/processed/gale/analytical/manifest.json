@@ -1,7 +1,7 @@
 {
   "format": "gale-analytical-1",
   "id": "gale_hirise_019698",
-  "version": "native2-v1",
+  "version": "native2-photo-v2",
   "fixture": false,
   "source": {
     "url": "https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_019698_1750_ESP_019988_1750/DTEEC_019698_1750_019988_1750_U01.tif",
@@ -85,13 +85,13 @@
     "covered_cells": 2140369,
     "excluded_cells": 0
   },
-  "location_selection": "Hypothetical engineering locations in the eastern connected terrain for explorer_01 plus support_rover under unchanged assumed limits. Preliminary center (137.385,-4.825) has 19.90 degree block slope; (137.389,-4.827) reaches only five cells with this team. Neither was snapped or reclassified as traversable; no mask, slope, edge or corridor was modified.",
+  "location_selection": "Hypothetical photo-sector locations selected inside a 7946-cell strongly connected component of the unchanged default-team directed graph. No terrain or profile changes.",
   "pois": [
     {
       "id": "base",
       "lonlat": [
-        137.404,
-        -4.825
+        137.3751012600287,
+        -4.811074715231375
       ],
       "classification": "hypothetical",
       "role": "base"
@@ -99,8 +99,8 @@
     {
       "id": "sample",
       "lonlat": [
-        137.405,
-        -4.827
+        137.3700489010339,
+        -4.8134984820464455
       ],
       "classification": "hypothetical",
       "role": "destination"
@@ -108,8 +108,17 @@
     {
       "id": "control",
       "lonlat": [
-        137.406,
-        -4.826
+        137.371858191755,
+        -4.810835752305946
+      ],
+      "classification": "hypothetical",
+      "role": "destination"
+    },
+    {
+      "id": "lookout",
+      "lonlat": [
+        137.37267749321364,
+        -4.814044683018855
       ],
       "classification": "hypothetical",
       "role": "destination"
@@ -130,5 +139,5 @@
     "registration_status": "provisional_existing_p1_measurement",
     "evidence": "scripts/build_hirise_tiles.py and CLAUDE.md: 144 points, reported height residual spread 0.9 m, 2026-11-14. Raw control samples were not delivered; fresh visual review required. Panorama +71.2 m is unrelated."
   },
-  "content_id": "89841fb7875d22c00dbd9f64fb3c8ee781fc7ddbbc38a386e833eb6d0da7291a"
+  "content_id": "59f53b78a0f5369d202d5af8bcd3dc8651620b74a09a6b3bb028faee4e1cf2e1"
 }

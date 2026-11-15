@@ -22,7 +22,7 @@ export interface CatalogEntry {
 export interface MissionTemplate {
   id: string;
   name: string;
-  tasks: { id: string; duration_s: number }[];
+  tasks: { id: string; name?: string; duration_s: number }[];
   time_budget_s: number;
   reserve_s: number;
 }
@@ -75,7 +75,7 @@ export interface PlanRequest {
   origin: { type: "poi"; poi_id: string };
   destination: { type: "poi"; poi_id: string };
   team: { catalog_version: string; humans: Member[]; robots: Member[] };
-  mission: { template_id: string; template_version: string; tasks: { id: string; duration_s: number }[]; time_budget_s: number; reserve_s: number; departure_utc: string };
+  mission: { template_id: string; template_version: string; tasks: { id: string; name?: string; duration_s: number }[]; time_budget_s: number; reserve_s: number; departure_utc: string };
   criterion: "fastest" | "comparison";
   options?: { visibility?: boolean; communication?: { base_height_m?: number; receiver_height_m?: number } };
 }

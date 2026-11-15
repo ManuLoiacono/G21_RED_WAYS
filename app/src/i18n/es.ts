@@ -3,6 +3,13 @@
  * Values may contain trusted inline HTML (<strong>) and `{name}` placeholders.
  */
 export const es = {
+  "nav.poi.lookout": "Mirador del sector fotográfico",
+  "demo.duplicate": "Nombre de tarea duplicado: {name}",
+  "demo.selection": "Inicialmente se selecciona la ruta calculada más rápida. Compara ascenso, visibilidad geométrica y márgenes antes de elegir otra ruta.",
+  "demo.activity": "Duración de actividad",
+  "demo.distance": "Distancia de ida y vuelta",
+  "demo.ascent": "Ascenso acumulado",
+  "demo.daily": "Datos diarios en UTC simulado; sin pronóstico horario. El pulso ilustra el reloj simulado, no un fenómeno meteorológico.",
   "context.environment": "Contexto ambiental",
   "context.pressure": "Presión",
   "context.minimum": "Temperatura mínima diaria",
@@ -454,7 +461,7 @@ export const es = {
   "nav.syntheticMode": "Modo sintético de desarrollo",
   "nav.galeMode": "Modo de desarrollo sobre terreno Gale",
   "nav.hypothetical": "Ubicación hipotética",
-  "nav.poi.control": "Destino de control oriental",
+  "nav.poi.control": "Control del sector fotográfico",
   "nav.scenario.gale_development_missing_daylight": "Reloj de desarrollo supuesto · sin evidencia de luz diurna en Gale",
   "nav.provenance": "Procedencia del cálculo",
   "nav.locations": "Solo ubicaciones registradas por el servicio. Los panoramas son observaciones ópticas, no destinos de planificación.",

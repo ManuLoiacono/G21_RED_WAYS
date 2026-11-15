@@ -76,3 +76,23 @@ test('terrain crossing and unknown coverage are compact advisory summaries', () 
   assert.match(html, /partial/);
   assert.equal(terrainContext({ id: 'none', terrain_context: { status: 'unevaluated', warning: false } }), '');
 });
+test('duration segments reject malformed input and pasted content', () => {
+  const { validDurationPart, constrainDuration } = require('../src/mission/durationInput.ts');
+  for (const value of ['60', '-1', '1.5', 'aa', '2:3']) assert.equal(validDurationPart(value, true), false);
+  assert.equal(validDurationPart('100', false), false);
+  for (const value of ['', '00', '59']) assert.equal(validDurationPart(value, true), true);
+  const handlers = {}; constrainDuration({ addEventListener: (name, handler) => { handlers[name] = handler; } });
+  let blocked = false;
+  const target = { dataset: { duration: 'minutes' }, value: '00', selectionStart: 0, selectionEnd: 2 };
+  handlers.paste({ target, clipboardData: { getData: () => '3x' }, preventDefault: () => { blocked = true; } });
+  assert.equal(blocked, true);
+});
+test('simulation retains daily cadence and excludes expired forecasts and later observations', () => {
+  const { simulationEnvironment } = require('../src/mission/simulationEnvironment.ts');
+  const r = structuredClone(response); const alt = r.alternatives[0];
+  alt.environment = { ...r.environment, decision_records: [{ record: { kind: 'observation', evidence_kind: 'observed', variable: 'pressure_pa', units: 'Pa', value: 99999, observation_end_utc: '2099-01-01T00:00:00Z' } }] };
+  assert.doesNotMatch(simulationEnvironment(alt, r, 0), /99,999/);
+  alt.environment = r.environment;
+  assert.match(simulationEnvironment(alt, r, 0), /Daily evidence|datos diarios/i);
+  assert.doesNotMatch(simulationEnvironment(alt, r, 86400 * 5), /687.05/);
+});

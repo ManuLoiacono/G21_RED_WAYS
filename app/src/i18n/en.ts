@@ -2,6 +2,13 @@ import type { MessageKey } from "./es";
 
 /** English UI text. Same keys as `es.ts` (the compiler checks that none is missing). */
 export const en: Record<MessageKey, string> = {
+  "nav.poi.lookout": "Photo-sector lookout",
+  "demo.duplicate": "Duplicate task name: {name}",
+  "demo.selection": "The fastest calculated route is selected initially. Compare ascent, geometric visibility and limiting margins before choosing another route.",
+  "demo.activity": "Activity duration",
+  "demo.distance": "Round-trip distance",
+  "demo.ascent": "Cumulative ascent",
+  "demo.daily": "Daily evidence at simulated UTC; no hourly forecast. Pulse illustrates the simulation clock, not spatial weather.",
   "context.environment": "Environmental context",
   "context.pressure": "Pressure",
   "context.minimum": "Daily minimum temperature",
@@ -451,7 +458,7 @@ export const en: Record<MessageKey, string> = {
   "nav.syntheticMode": "Synthetic development mode",
   "nav.galeMode": "Gale terrain development mode",
   "nav.hypothetical": "Hypothetical location",
-  "nav.poi.control": "Eastern control target",
+  "nav.poi.control": "Photo-sector control",
   "nav.scenario.gale_development_missing_daylight": "Assumed development clock · no Gale daylight evidence",
   "nav.provenance": "Calculation provenance",
   "nav.locations": "Only service-registered locations. Panoramas are optical observations, not planning destinations.",

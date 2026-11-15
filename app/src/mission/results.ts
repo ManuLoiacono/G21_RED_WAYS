@@ -80,6 +80,7 @@ export function createResultsPanel(root: HTMLElement) {
           ? ` <small class="rs-same">${esc(t("rs.samePath"))}</small>` : `<span class="sw sw-ret"></span>${esc(t("nav.return"))}`}
           <small class="rs-smooth" title="${esc(t("rs.smoothedHint"))}">· ${esc(t("rs.smoothed"))}</small>
           ${r.alternatives.length > 1 ? `<span class="rs-legend-others"><span class="sw sw-other"></span>${esc(t("rs.otherAlternatives"))}</span>` : ""}</p>` : ""}
+        <p class="mp-hint">${esc(t("demo.selection"))}</p>
         ${environmentContext(selected, r.alternatives.length === 1 ? r.environment : undefined)}
         ${compareBlock(r)}
         ${r.alternatives.length === 0 ? `<p>${esc(t("rs.noAlternatives"))}</p>` : ""}
@@ -116,9 +117,7 @@ export function createResultsPanel(root: HTMLElement) {
       const n = r.alternatives.length;
       return `<p class="rs-compare-note" data-tone="${n > 1 ? "ok" : "same"}" role="status">${esc(n > 1 ? t("rs.comparedMany", { n }) : t("rs.comparedSame"))}</p>`;
     }
-    return `<button type="button" class="rs-compare" data-act="compare">
-      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M11 3l4 4-4 4M20 17H9M13 13l-4 4 4 4"/></svg>
-      <span>${esc(t("nx.compare"))}</span></button>`;
+    return "";
   }
   function metric(key: string, title: MessageKey, value: number | null) {
     return `<div><dt>${esc(plain(title))}</dt><dd data-metric="${key}" class="${value !== null && value < 0 ? "rs-neg" : ""}" title="${esc(seconds(value))}">${esc(duration(value))}</dd></div>`;
@@ -172,8 +171,10 @@ export function createResultsPanel(root: HTMLElement) {
         ? `<p class="rs-sub">${esc(statusLabel(a.assessment))} · ${esc(label("search", a.search_status))}</p>` : ""}
       ${important.length ? `<ul class="rs-checks nav-important">${important.map(check).join("")}</ul>` : ""}
       <div class="rs-kpis">
-        ${kpi("reserved_total_s", "nav.reservedTotal", m.reserved_total_s)}
-        ${kpi("mission_margin_s", "nav.missionMargin", m.mission_margin_s)}
+        ${kpi("elapsed_s", "demo.activity", m.elapsed_s)}
+        <div class="rs-kpi"><span>${esc(t("demo.distance"))}</span><strong>${meters(a.outbound.horizontal_distance_m === null || a.return.horizontal_distance_m === null ? null : a.outbound.horizontal_distance_m + a.return.horizontal_distance_m)}</strong></div>
+        <div class="rs-kpi"><span>${esc(t("demo.ascent"))}</span><strong>${meters(a.outbound.ascent_m === null || a.return.ascent_m === null ? null : a.outbound.ascent_m + a.return.ascent_m)}</strong></div>
+        ${kpi("temporal_budget_limiting_margin_s", "nav.temporalMargin", m.temporal_budget_limiting_margin_s)}
         ${kpi("daylight_reserved_return_margin_s", "rs.kpi.daylight", m.daylight_reserved_return_margin_s)}
       </div>
       ${timeline(a)}
