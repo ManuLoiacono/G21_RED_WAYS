@@ -4,6 +4,7 @@
  */
 export const es = {
   "nav.poi.lookout": "Mirador del sector fotográfico",
+  "demo.duplicate": "Nombre de tarea duplicado: {name}",
   "context.environment": "Contexto ambiental",
   "context.pressure": "Presión",
   "context.minimum": "Temperatura mínima diaria",

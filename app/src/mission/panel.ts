@@ -1,3 +1,4 @@
+import { durationFields, constrainDuration } from "./durationInput";
 import { onLanguageChange, t, tOr, type MessageKey } from "../i18n";
 import { esc } from "../ui/format";
 import { infoButton } from "../provenance/sources";
@@ -125,6 +126,8 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       if (s.team.humans.length > MAX_HUMANS || s.team.robots.length > MAX_ROBOTS) errs.push(t("wizard.team.max"));
       if (fieldsInvalid(["payload:", "override:"])) errs.push(t("mp.status.invalid"));
     } else if (i === 2) {
+      const names = s.mission.tasks.map(task => taskName(task.id).trim().replace(/\s+/g, " ").toLocaleLowerCase());
+      for (let n = 0; n < names.length; n++) if (names.indexOf(names[n]) !== n) errs.push(t("demo.duplicate", { name: taskName(s.mission.tasks[n].id) }));
       if (s.mission.tasks.length > MAX_TASKS) errs.push(t("wizard.tasks.max"));
       if (fieldsInvalid(["task-", "tname-"])) errs.push(t("mp.status.invalid"));
     } else if (i === 3) {
@@ -421,8 +424,8 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       <label>${esc(t("nav.departureUtc"))} <small>${esc(t("wizard.schedule.utc"))}</small>
         <input name="departure" type="datetime-local" step="1" value="${s.mission.departure_utc.replace("Z", "")}" /></label>
       <div class="wz-grid2">
-        <label>${esc(t("wizard.schedule.reserve"))}<input name="reserve" type="text" inputmode="numeric" placeholder="hh:mm" value="${toHhMm(s.mission.reserve_s)}" /></label>
-        <label>${esc(t("wizard.schedule.budget"))}<input name="budget" type="text" inputmode="numeric" placeholder="hh:mm" value="${toHhMm(s.mission.time_budget_s)}" /></label>
+        <label>${esc(t("wizard.schedule.reserve"))}${durationFields("reserve", s.mission.reserve_s, t("wizard.schedule.reserve"))}</label>
+        <label>${esc(t("wizard.schedule.budget"))}${durationFields("budget", s.mission.time_budget_s, t("wizard.schedule.budget"))}</label>
       </div>
       <p class="wz-derived" data-derived="available">${availableLine(s)}</p>
       <details data-adv="schedule" class="wz-adv"><summary>${esc(t("wizard.advanced"))}${advancedModifiedBadge(s.scenario.id !== d.scenario.id || s.scenario.as_of_utc !== d.scenario.as_of_utc)}</summary>
@@ -650,6 +653,19 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       if (ok) invalid.delete(name); else invalid.set(name, el.value);
       return ok;
     };
+    if (/^(reserve|budget)-(hours|minutes)$/.test(name)) {
+      const [field] = name.split("-");
+      const hours = wizard.querySelector<HTMLInputElement>(`[name="${field}-hours"]`)!;
+      const minutes = wizard.querySelector<HTMLInputElement>(`[name="${field}-minutes"]`)!;
+      if (mark(/^\d+$/.test(hours.value) && /^\d{1,2}$/.test(minutes.value) && Number(minutes.value) < 60)) {
+        invalid.delete(`${field}-hours`); invalid.delete(`${field}-minutes`);
+        const key = field === "reserve" ? "reserve_s" : "time_budget_s";
+        const value = Number(hours.value) * 3600 + Number(minutes.value) * 60 + state.mission[key] % 60;
+        if (field === "budget" && value === 0) invalid.set(name, el.value);
+        else state.mission[key] = value;
+      }
+      refreshDerived(); return;
+    }
     if (name === "parcel") { void changeParcel(Number(el.value)); return; }
     if (name === "origin" || name === "destination") { state[name].poi_id = el.value; render(); return; }
     if (name === "visibility") {
@@ -733,6 +749,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   async function calculate() {
     if (!state || busy) return;
     if (stepErrors(4, state).length) { render(); return; }
+    state.mission.tasks.forEach(task => { task.name = taskName(task.id); });
     const request = gate.submit(state);
     state.request_id = request.request_id;
     activeRequest = request;
@@ -797,10 +814,10 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       } else if (act === "add-task" && state && state.mission.tasks.length < MAX_TASKS) {
         edited();
         let n = 1;
-        while (state.mission.tasks.some((v) => v.id === `task_${n}`)) n += 1;
+        while (state.mission.tasks.some((v) => v.id === `task_${n}` || taskName(v.id).trim().replace(/\s+/g, " ").toLocaleLowerCase() === `${t("wizard.tasks.newName")} ${n}`.toLocaleLowerCase())) n += 1;
         const id = `task_${n}`;
         state.mission.tasks.push({ id, duration_s: 0 });
-        taskNames.set(id, t("wizard.tasks.newName"));
+        taskNames.set(id, `${t("wizard.tasks.newName")} ${n}`);
         render();
       } else if (act === "remove-task" && state) {
         edited();
@@ -836,6 +853,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     }
     if (e.key === "Enter" && target.tagName === "INPUT") e.preventDefault();
   });
+  constrainDuration(wizard);
   root.addEventListener("click", onClick);
 
   const api: MissionPanel = {
@@ -875,3 +893,4 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   void connect();
   return api;
 }
+

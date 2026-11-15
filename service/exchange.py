@@ -58,13 +58,17 @@ def decode_request(value):
         raise PlanningInputError("invalid_structure", "mission.tasks", "Expected sequential task occurrences.")
     if len(mission["tasks"]) > 64:
         raise PlanningInputError("task_limit", "mission.tasks", "Task count exceeds the technical limit.")
-    tasks, ids = [], set()
+    tasks, ids, names = [], set(), set()
     for index, raw in enumerate(mission["tasks"]):
         path = f"mission.tasks[{index}]"
-        fields(raw, ("id", "duration_s"), path=path)
+        fields(raw, ("id", "duration_s"), ("name",), path=path)
         task_id = text(raw["id"], f"{path}.id")
         if task_id in ids:
             raise PlanningInputError("duplicate_task", f"{path}.id", "Task occurrence IDs must be unique.")
+        name = " ".join(text(raw.get("name", task_id), f"{path}.name").split()).casefold()
+        if name in names:
+            raise PlanningInputError("duplicate_task_name", f"{path}.name", "Task displayed names must be unique.")
+        names.add(name)
         ids.add(task_id)
         tasks.append(MissionTask(task_id, number(raw["duration_s"], f"{path}.duration_s", minimum=0)))
     try:
