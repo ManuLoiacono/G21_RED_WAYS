@@ -60,6 +60,8 @@ class PlanEvaluation:
     mission: MissionAssessment
     graph_reused: bool
     search_reused: bool
+    communication: dict | None = None
+    visibility: dict | None = None
 
 
 class PreparedPlanner:
@@ -73,19 +75,21 @@ class PreparedPlanner:
         self.registry = registry
         self._graph = self._search = self._context = self._base = None
         self._lock = Lock()
+        self._visibility = self._visibility_key = None
 
     def plan(self, *, parcel_id, parcel_version, scenario_id, scenario_version, origin, destination,
-             team, tasks, time_budget_s, reserve_s, departure_utc, as_of_utc):
+             team, tasks, time_budget_s, reserve_s, departure_utc, as_of_utc, communication=None, evaluate_visibility=False):
         if not self._lock.acquire(blocking=False):
             raise PlannerBusyError("A calculation is already active on this planner instance.")
         try:
             return self._plan(parcel_id, parcel_version, scenario_id, scenario_version, origin, destination,
-                              team, tasks, time_budget_s, reserve_s, departure_utc, as_of_utc)
+                              team, tasks, time_budget_s, reserve_s, departure_utc, as_of_utc,
+                              communication, evaluate_visibility)
         finally:
             self._lock.release()
 
     def _plan(self, parcel_id, parcel_version, scenario_id, scenario_version, origin, destination,
-              team, tasks, time_budget_s, reserve_s, departure_utc, as_of_utc):
+              team, tasks, time_budget_s, reserve_s, departure_utc, as_of_utc, communication=None, evaluate_visibility=False):
         parcel = self.registry.parcel(parcel_id, parcel_version)
         scenario = self.registry.scenario(scenario_id, scenario_version, parcel)
         start = resolve_location(parcel, origin, "origin")
@@ -129,4 +133,20 @@ class PreparedPlanner:
                 selected = select_scenario(scenario, as_of_utc, departure_utc, evaluation_location=location, mission_end_utc=mission_end)
         mission = evaluate_mission(routes, tasks, members, time_budget_s=time_budget_s, reserve_s=reserve_s,
                                    departure=selected.departure, daylight=selected.daylight, snapshot=selected.snapshot)
-        return PlanEvaluation(parcel, start, end, members, context, selected, routes, mission, graph_reused, search_reused)
+        comm = visibility = None
+        if evaluate_visibility:
+            from engine.communication import communication_metrics
+            layer = self.visibility(parcel, start.cell, communication)
+            comm = communication_metrics(routes, layer.states, mission.tasks_s)
+            visibility = {"id": layer.id, **layer.metadata}
+        return PlanEvaluation(parcel, start, end, members, context, selected, routes, mission, graph_reused, search_reused, comm, visibility)
+
+    def visibility(self, parcel, base, communication=None):
+        """Called under the planner lock; retain one bounded base/terrain/height layer."""
+        from .visibility import METHOD, prepare_visibility, settings
+        key = identity({"terrain": parcel.content_id, "base": base, "heights": settings(communication), "method": METHOD})
+        if self._visibility_key != key:
+            self._visibility = self._visibility_key = None
+            self._visibility = prepare_visibility(parcel, base, communication)
+            self._visibility_key = key
+        return self._visibility

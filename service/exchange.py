@@ -29,7 +29,13 @@ def decode_request(value):
         raise PlanningInputError("missing_field", "schema_version", "An explicit draft version is required.")
     if value["schema_version"] != DRAFT_SCHEMA_VERSION:
         raise PlanningInputError("unsupported_schema_version", "schema_version", "Only p2-plan-draft-1 is supported; v0 is not silently adapted.")
-    fields(value, ("schema_version", "request_id", "revision", "parcel", "scenario", "origin", "destination", "team", "mission", "criterion"))
+    fields(value, ("schema_version", "request_id", "revision", "parcel", "scenario", "origin", "destination", "team", "mission", "criterion"), ("options",))
+    if "options" in value:
+        options = fields(value["options"], (), ("visibility", "communication"), "options")
+        if "visibility" in options and type(options["visibility"]) is not bool:
+            raise PlanningInputError("invalid_structure", "options.visibility", "Expected a boolean explicit calculation option.")
+        from .visibility import settings
+        settings(options.get("communication"))
     text(value["request_id"], "request_id")
     integer(value["revision"], "revision")
     if value["criterion"] != "fastest":
@@ -145,6 +151,10 @@ def encode_response(request: DraftRequest, result):
         "movement_reuse": {"graph": result.graph_reused, "base_search": result.search_reused},
     }
     # Normalize tuples and verify all nested fields are finite JSON before publication.
+    if result.communication is not None:
+        response["alternatives"][0]["communication"] = result.communication
+        response["visibility"] = result.visibility
+        response["not_evaluated"] = tuple(v for v in response["not_evaluated"] if v != "communication") + ("radio_performance",)
     return json.loads(canonical(response))
 
 
@@ -157,7 +167,9 @@ def plan_draft(planner, payload):
                               scenario_id=value["scenario"]["id"], scenario_version=value["scenario"]["version"],
                               origin=value["origin"], destination=value["destination"], team=value["team"], tasks=request.tasks,
                               time_budget_s=mission["time_budget_s"], reserve_s=mission["reserve_s"],
-                              departure_utc=mission["departure_utc"], as_of_utc=value["scenario"]["as_of_utc"])
+                              departure_utc=mission["departure_utc"], as_of_utc=value["scenario"]["as_of_utc"],
+                              communication=value.get("options", {}).get("communication"),
+                              evaluate_visibility=value.get("options", {}).get("visibility", False))
     except (SelectionError, MissionInputError, GridInputError) as exc:
         raise PlanningInputError(exc.code, exc.path, str(exc)) from exc
     # Backend/reconstruction/busy errors propagate; they never become a fallback plan.

@@ -77,6 +77,7 @@ export interface PlanRequest {
   team: { catalog_version: string; humans: Member[]; robots: Member[] };
   mission: { template_id: string; template_version: string; tasks: { id: string; duration_s: number }[]; time_budget_s: number; reserve_s: number; departure_utc: string };
   criterion: "fastest";
+  options?: { visibility?: boolean; communication?: { base_height_m?: number; receiver_height_m?: number } };
 }
 export interface Reason { code: string; path: string; message: string }
 export interface Leg {
@@ -127,6 +128,7 @@ export interface Alternative {
   return: Leg;
   metrics: Metrics;
   checks: Check[];
+  communication?: { status: string; visible_s?: number; occluded_s?: number; unknown_s?: number; max_without_confirmed_s?: number };
 }
 export interface PlanResponse {
   schema_version: typeof DRAFT_SCHEMA;

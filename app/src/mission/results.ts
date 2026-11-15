@@ -84,6 +84,7 @@ export function createResultsPanel(root: HTMLElement) {
         ${metric("daylight_reserved_return_margin_s", "nav.daylightReturn", m.daylight_reserved_return_margin_s)}
       </dl>
       <p class="mp-hint">${esc(t("nav.marginHint"))}</p>
+      ${a.communication ? `<details data-detail="communication:${esc(a.id)}"><summary>${esc(t("nx.visibility"))}</summary><p>${esc(t("nx.antennaHint"))}</p>${a.communication.status === "evaluated" ? `<dl class="rs-metrics">${(["visible_s", "occluded_s", "unknown_s", "max_without_confirmed_s"] as const).map((key) => metric(key, `nx.${key}`, a.communication![key] ?? null)).join("")}</dl>` : esc(t("nav.unavailableValue"))}</details>` : ""}
       ${(["outbound", "return"] as const).map((name) => `<h3>${esc(t(`nav.${name}`))}</h3><dl class="rs-metrics">${(["horizontal_distance_m", "ascent_m", "descent_m"] as const).map((key) =>
         `<div><dt>${esc(t(`nav.${key}`))}</dt><dd data-metric="${name}.${key}">${a[name][key] === null ? esc(t("nav.unavailableValue")) : `${Number(a[name][key].toFixed(2))} m`}</dd></div>`).join("")}</dl>`).join("")}
       ${renderMetricPreview(a, response!.locations, index)}

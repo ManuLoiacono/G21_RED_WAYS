@@ -99,6 +99,8 @@ class HTTPApplication:
                 "environment_mode": "historical_replay" if any(not s.fixture for s in self.registry.scenarios) else "synthetic_fixture",
                 "geographic_conversion": "available" if any(p.geographic_adapter for p in self.registry.parcels) else "unavailable",
                 "default_parcel": dict(zip(("id", "version"), self.default_parcel)),
+                "navigation_capabilities": {"visibility": "gdal-wang-edge-bounds-mars-v1", "base_height_m": 5,
+                                            "receiver_height_m": 2, "communication_is_preference": True},
                 "registered_parcels": [{"id": p.id, "version": p.version, "fixture": p.grid.fixture}
                                        for p in self.registry.parcels]}
 

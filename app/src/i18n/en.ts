@@ -2,6 +2,14 @@ import type { MessageKey } from "./es";
 
 /** English UI text. Same keys as `es.ts` (the compiler checks that none is missing). */
 export const en: Record<MessageKey, string> = {
+  "nx.visibility": "Estimated geometric visibility",
+  "nx.antennaHint": "Scenario assumption: base antenna 5 m and co-located group receiver 2 m above analytical ground by default. Configurable; not radio coverage.",
+  "nx.baseHeight": "Base antenna height (m)",
+  "nx.receiverHeight": "Group receiver height (m)",
+  "nx.visible_s": "Time with confirmed visibility",
+  "nx.occluded_s": "Time with known occlusion",
+  "nx.unknown_s": "Time with unknown visibility",
+  "nx.max_without_confirmed_s": "Longest time without confirmed visibility",
   // HUD
   "hud.place": "Gale crater · Mount Sharp",
   "hud.layers": "Layers",

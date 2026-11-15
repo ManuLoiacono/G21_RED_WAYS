@@ -55,6 +55,8 @@ const metrics = (x: unknown) => object(x) && metricKeys.every((k) => nullableNum
   list(x.participant_margins, (p) => str(p.participant_id) && str(p.kind) && num(p.max_sortie_s) && nullableNum(p.margin_s) && str(p.model_id));
 const check = (c: Obj) => str(c.rule_id) && ["passed", "failed", "missing_evidence", "not_evaluated"].includes(c.status as string) && reason(c.reason) &&
   (c.participant_id === null || str(c.participant_id)) && ["actual_s", "limit_s", "margin_s"].every((k) => nullableNum(c[k])) && strings(c.evidence_ids);
+const communication = (x: unknown) => object(x) && (x.status === "unevaluated" ||
+  x.status === "evaluated" && ["visible_s", "occluded_s", "unknown_s", "max_without_confirmed_s"].every((k) => num(x[k]) && (x[k] as number) >= 0));
 
 /** Validate all nested values read by the UI; null metrics stay unavailable. */
 export function isDraftResponse(x: unknown): x is PlanResponse {
@@ -67,7 +69,7 @@ export function isDraftResponse(x: unknown): x is PlanResponse {
     object(x.input_provenance) && typeof x.input_provenance.fixture === "boolean" && str(x.input_provenance.movement_parameters_evidence) && str(x.input_provenance.geographic_conversion) &&
     (x.input_provenance.geographic_conversion === "available" ? isGeographicAdapter(x.geographic_adapter) : x.input_provenance.geographic_conversion === "unavailable" && x.geographic_adapter === null) &&
     list(x.alternatives, (a) => str(a.id) && str(a.criterion) && assessment(a.assessment) && str(a.search_status) && a.coordinate_frame === "parcel_metric" &&
-      leg(a.outbound) && leg(a.return) && metrics(a.metrics) && list(a.checks, check)) &&
+      leg(a.outbound) && leg(a.return) && metrics(a.metrics) && list(a.checks, check) && (a.communication === undefined || communication(a.communication))) &&
     list(x.resolved_team, (p) => str(p.kind) && identity(p.identity) && parameters(p.parameters) && num(p.payload_kg)) &&
     object(e) && strings(e.missing_required) && strings(e.missing_optional_variables) && Array.isArray(e.decision_records) && e.decision_records.every(object) && object(e.clock_mapping) && object(e.snapshot) &&
     object(locations) && ["origin", "destination"].every((k) => object(locations[k]) && pair(locations[k].effective_xy_m) &&

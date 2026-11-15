@@ -1,0 +1,98 @@
+{
+  "method": "real-grid-navigation-benchmark-v1",
+  "timing_s": {
+    "startup": 1.0763760000118054,
+    "first_fastest": 1.6581060999887995,
+    "warm_fastest": 0.17716630001086742,
+    "first_visibility": 0.46467309998115525,
+    "warm_visibility": 0.1591857000021264
+  },
+  "serialized_bytes": {
+    "startup": null,
+    "first_fastest": 48444,
+    "warm_fastest": 48442,
+    "first_visibility": 49571,
+    "warm_visibility": 49571
+  },
+  "grid_cells": 2140369,
+  "directed_edges": 2834284,
+  "visibility_counts": {
+    "1": 250473,
+    "2": 1889896
+  },
+  "visibility": {
+    "base_cell": [
+      731,
+      1288
+    ],
+    "curvature": "subtract horizontal distance squared / (2 * Mars radius); no refraction",
+    "gdal_version": "3.10.3",
+    "heights": {
+      "base_height_m": 5.0,
+      "receiver_height_m": 2.0
+    },
+    "id": "7de4f6369e9e835ee5a7d7ee771d3abf43ef545655f8251eccfc33635277dad9",
+    "method": "gdal-wang-edge-bounds-mars-v1",
+    "parcel_content_id": "89841fb7875d22c00dbd9f64fb3c8ee781fc7ddbbc38a386e833eb6d0da7291a",
+    "radius_m": 3396190.0,
+    "resolution_m": [
+      2.023493589159021,
+      2.023493589159021
+    ],
+    "sampling": "GDAL Wang raster scan, edge interpolation; analytical cell centers",
+    "scope": "estimated geometric visibility; no Fresnel, link budget, range or radio coverage",
+    "uncertainty": "two scans with missing terrain filled at negative/positive 1e9 m; disagreement is unknown"
+  },
+  "communication": {
+    "max_without_confirmed_s": 0.0,
+    "method": "source-target-half-edge-v1",
+    "occluded_s": 0.0,
+    "reserve_exposure_s": 0,
+    "scope": "geometric preference only; maximum interruption evaluated, not constrained by additive search",
+    "status": "evaluated",
+    "tasks_s": 600.0,
+    "unknown_s": 0.0,
+    "visible_s": 1718.7375283296024,
+    "without_confirmed_s": 0.0
+  },
+  "baseline_metrics": {
+    "daylight_departure_margin_s": 0.4580790000036359,
+    "daylight_reserved_return_margin_s": 40531.472726670414,
+    "elapsed_s": 1718.7375283296024,
+    "estimated_return_offset_s": 89706.7375283296,
+    "mission_margin_s": 18081.262471670398,
+    "outbound_s": 539.2080915339404,
+    "participant_margins": [
+      {
+        "kind": "human",
+        "margin_s": 18081.262471670398,
+        "max_sortie_s": 21600.0,
+        "model_id": "synthetic_constant_speed_v1",
+        "participant_id": "explorer_01"
+      },
+      {
+        "kind": "robot",
+        "margin_s": 14481.262471670398,
+        "max_sortie_s": 18000.0,
+        "model_id": "synthetic_constant_speed_v1",
+        "participant_id": "support_rover"
+      }
+    ],
+    "reserve_s": 1800.0,
+    "reserved_deadline_offset_s": 91506.7375283296,
+    "reserved_total_s": 3518.7375283296024,
+    "return_s": 579.529436795662,
+    "tasks_s": 600.0,
+    "temporal_budget_limiting_constraints": [
+      "participants[1].max_sortie_s"
+    ],
+    "temporal_budget_limiting_margin_s": 14481.262471670398,
+    "temporal_budget_limiting_participant_ids": [
+      "support_rover"
+    ],
+    "time_budget_s": 21600.0,
+    "unavailable_totals_reason": null
+  },
+  "peak_process_rss_bytes": 347975680,
+  "memory_scope": "whole-process high-water RSS including native workspaces and allocator retention"
+}

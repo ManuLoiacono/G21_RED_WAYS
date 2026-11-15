@@ -3,6 +3,14 @@
  * Values may contain trusted inline HTML (<strong>) and `{name}` placeholders.
  */
 export const es = {
+  "nx.visibility": "Visibilidad geométrica estimada",
+  "nx.antennaHint": "Supuesto de escenario: antena base a 5 m y receptor del grupo a 2 m del suelo analítico por defecto. Configurables; no es cobertura de radio.",
+  "nx.baseHeight": "Altura de antena base (m)",
+  "nx.receiverHeight": "Altura del receptor del grupo (m)",
+  "nx.visible_s": "Tiempo con visibilidad confirmada",
+  "nx.occluded_s": "Tiempo con oclusión conocida",
+  "nx.unknown_s": "Tiempo con visibilidad desconocida",
+  "nx.max_without_confirmed_s": "Mayor tiempo sin visibilidad confirmada",
   // HUD
   "hud.place": "Cráter Gale · monte Sharp",
   "hud.layers": "Capas",
