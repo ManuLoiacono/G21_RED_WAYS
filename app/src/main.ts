@@ -175,6 +175,16 @@ async function main() {
   let panoLayer: PanoramaLayer | null = null;
   const layers = createLayersPanel(document.getElementById("layersPanel")!, [
     {
+      id: "visual_terrain",
+      section: "terrain",
+      dataClass: "optica",
+      name: "layers.visualTerrain",
+      origin: "Cesium Mars · ion",
+      sourceId: "visual_terrain",
+      status: () => "streaming",
+      lockedKey: "layers.locked",
+    },
+    {
       id: "hirise",
       section: "terrain",
       dataClass: "topografica",
@@ -186,16 +196,6 @@ async function main() {
         get: () => hirise.tileset.show,
         set: (on) => hirise.setVisible(on),
       },
-    },
-    {
-      id: "visual_terrain",
-      section: "terrain",
-      dataClass: "optica",
-      name: "layers.visualTerrain",
-      origin: "Cesium Mars · ion",
-      sourceId: "visual_terrain",
-      status: () => "streaming",
-      lockedKey: "layers.locked",
     },
     {
       id: "rems",
