@@ -91,6 +91,129 @@ export function installWheelZoom(viewer: Cesium.Viewer, opts: WheelZoomOptions =
 }
 
 /**
+ * Orbit (rotate the 3D view) around the terrain point under the cursor.
+ *
+ * Cesium's own tilt (middle drag / Ctrl + left drag) pivots on the globe, which is hidden here and
+ * lies 3–4 km above the Gale terrain, so it does not work in this scene. This handler picks the
+ * pivot on the rendered terrain instead:
+ * - right drag, middle drag or Ctrl + left drag: horizontal movement turns around the pivot's
+ *   vertical (heading), vertical movement tilts the view (pitch);
+ * - the tilt is limited so the camera never looks from below the pivot's horizon or straight down
+ *   past the vertical.
+ * Pinch tilt on touch devices is left to Cesium.
+ */
+export interface OrbitOptions {
+  /** Radians of rotation per pixel of drag. */
+  radiansPerPixel?: number;
+  /** Lowest allowed camera elevation above the pivot's horizon, in degrees. */
+  minElevation_deg?: number;
+  /** Highest allowed camera elevation above the pivot's horizon, in degrees. */
+  maxElevation_deg?: number;
+}
+
+const MIN_CLEARANCE_M = 30;
+const FALLBACK_PIVOT_DISTANCE_M = 1000;
+
+export function installOrbit(viewer: Cesium.Viewer, opts: OrbitOptions = {}) {
+  const radiansPerPixel = opts.radiansPerPixel ?? 0.005;
+  const minElevation = Cesium.Math.toRadians(opts.minElevation_deg ?? 3);
+  const maxElevation = Cesium.Math.toRadians(opts.maxElevation_deg ?? 89);
+  const { scene, camera, canvas } = viewer;
+  const controller = scene.screenSpaceCameraController;
+
+  // Cesium keeps only pinch tilt; mouse tilt is handled here.
+  controller.tiltEventTypes = [Cesium.CameraEventType.PINCH];
+  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+  let dragging = false;
+  let last = new Cesium.Cartesian2();
+  let frame: Cesium.Matrix4 | undefined;
+
+  const pickPivot = (screen: Cesium.Cartesian2): Cesium.Cartesian3 | undefined => {
+    const hit = scene.pickPositionSupported ? scene.pickPosition(screen) : undefined;
+    if (Cesium.defined(hit)) return hit;
+    // Sky under the cursor: use the terrain at the center of the screen.
+    const center = new Cesium.Cartesian2(canvas.clientWidth / 2, canvas.clientHeight / 2);
+    const mid = scene.pickPositionSupported ? scene.pickPosition(center) : undefined;
+    if (Cesium.defined(mid)) return mid;
+    // Terrain not rendered yet: a point ahead of the camera, so the view still turns.
+    return Cesium.Cartesian3.add(
+      camera.positionWC,
+      Cesium.Cartesian3.multiplyByScalar(camera.directionWC, FALLBACK_PIVOT_DISTANCE_M, new Cesium.Cartesian3()),
+      new Cesium.Cartesian3(),
+    );
+  };
+
+  /** Camera elevation angle above the pivot's local horizon (camera is in the pivot frame). */
+  const elevation = () => {
+    const p = camera.position;
+    const horizontal = Math.hypot(p.x, p.y);
+    return Math.atan2(p.z, horizontal);
+  };
+
+  const start = (position: Cesium.Cartesian2) => {
+    const pivot = pickPivot(position);
+    if (!pivot) return;
+    frame = Cesium.Transforms.eastNorthUpToFixedFrame(pivot);
+    camera.lookAtTransform(frame);
+    controller.enableInputs = false;
+    dragging = true;
+    last = Cesium.Cartesian2.clone(position);
+  };
+
+  const move = (position: Cesium.Cartesian2) => {
+    if (!dragging || !frame) return;
+    const dx = position.x - last.x;
+    const dy = position.y - last.y;
+    last = Cesium.Cartesian2.clone(position);
+    const turn = dx * radiansPerPixel;
+    let tilt = 0;
+    if (dy) {
+      const before = elevation();
+      const target = Cesium.Math.clamp(before + dy * radiansPerPixel, minElevation, maxElevation);
+      tilt = target - before;
+    }
+    if (turn) camera.rotateRight(turn);
+    if (Math.abs(tilt) > 1e-6) camera.rotateUp(tilt);
+    // Undo the step if it would put the camera into a hill between it and the pivot.
+    if (belowGround()) {
+      if (Math.abs(tilt) > 1e-6) camera.rotateUp(-tilt);
+      if (turn) camera.rotateRight(-turn);
+    }
+  };
+
+  const belowGround = () => {
+    const carto = scene.ellipsoid.cartesianToCartographic(camera.positionWC);
+    if (!carto) return false;
+    const ground = scene.sampleHeight(carto);
+    return ground !== undefined && carto.height < ground + MIN_CLEARANCE_M;
+  };
+
+  const end = () => {
+    if (!dragging) return;
+    dragging = false;
+    frame = undefined;
+    camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+    controller.enableInputs = true;
+  };
+
+  const handler = new Cesium.ScreenSpaceEventHandler(canvas);
+  const down = (e: { position: Cesium.Cartesian2 }) => start(e.position);
+  handler.setInputAction(down, Cesium.ScreenSpaceEventType.RIGHT_DOWN);
+  handler.setInputAction(down, Cesium.ScreenSpaceEventType.MIDDLE_DOWN);
+  handler.setInputAction(down, Cesium.ScreenSpaceEventType.LEFT_DOWN, Cesium.KeyboardEventModifier.CTRL);
+  const moveAction = (e: { endPosition: Cesium.Cartesian2 }) => move(e.endPosition);
+  handler.setInputAction(moveAction, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+  handler.setInputAction(moveAction, Cesium.ScreenSpaceEventType.MOUSE_MOVE, Cesium.KeyboardEventModifier.CTRL);
+  handler.setInputAction(end, Cesium.ScreenSpaceEventType.RIGHT_UP);
+  handler.setInputAction(end, Cesium.ScreenSpaceEventType.MIDDLE_UP);
+  handler.setInputAction(end, Cesium.ScreenSpaceEventType.LEFT_UP);
+  handler.setInputAction(end, Cesium.ScreenSpaceEventType.LEFT_UP, Cesium.KeyboardEventModifier.CTRL);
+  window.addEventListener("blur", end);
+  return handler;
+}
+
+/**
  * If a gesture (drag, tilt, pinch) leaves the camera under the terrain or closer than
  * `minClearance_m` to the ground, it lifts it. Checked when the camera changes, not every frame.
  */
@@ -101,7 +224,8 @@ export function keepCameraAboveGround(viewer: Cesium.Viewer, minClearance_m = 30
   let correcting = false;
 
   const check = () => {
-    if (correcting) return;
+    // While orbiting, the camera works in the pivot's frame; installOrbit checks the ground itself.
+    if (correcting || !Cesium.Matrix4.equals(camera.transform, Cesium.Matrix4.IDENTITY)) return;
     const carto = ellipsoid.cartesianToCartographic(camera.positionWC);
     if (!carto) return;
     const ground = scene.sampleHeight(carto);

@@ -8,7 +8,7 @@ import { createResultsPanel } from "./mission/results";
 import { ConfigError, describeStartupError, missingTokenError } from "./ui/errors";
 import { hideLoading, showError, showLoading, showToast, updateLoading } from "./ui/status";
 import { createSourcesPanel } from "./provenance/panel";
-import { installWheelZoom, keepCameraAboveGround } from "./camera";
+import { installOrbit, installWheelZoom, keepCameraAboveGround } from "./camera";
 import { loadHiriseLayer } from "./hirise";
 import { createLayersPanel } from "./ui/layers";
 import { addPanoramas, PANORAMAS, panoramaForEntity, type PanoramaLayer } from "./panoramas/panoramas";
@@ -125,6 +125,7 @@ async function main() {
   const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(CESIUM_MARS_ASSET_ID);
   viewer.scene.primitives.add(tileset);
   installWheelZoom(viewer);
+  installOrbit(viewer);
   keepCameraAboveGround(viewer);
   // For debugging from the browser console (available even if loading never finishes).
   Object.assign(window, { viewer, tileset, Cesium });
