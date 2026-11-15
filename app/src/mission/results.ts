@@ -1,3 +1,4 @@
+import { environmentContext, terrainContext } from "./context";
 import { getLanguage, onLanguageChange, t, tOr, type MessageKey } from "../i18n";
 import { esc } from "../ui/format";
 import { infoButton } from "../provenance/sources";
@@ -79,6 +80,7 @@ export function createResultsPanel(root: HTMLElement) {
           ? ` <small class="rs-same">${esc(t("rs.samePath"))}</small>` : `<span class="sw sw-ret"></span>${esc(t("nav.return"))}`}
           <small class="rs-smooth" title="${esc(t("rs.smoothedHint"))}">· ${esc(t("rs.smoothed"))}</small>
           ${r.alternatives.length > 1 ? `<span class="rs-legend-others"><span class="sw sw-other"></span>${esc(t("rs.otherAlternatives"))}</span>` : ""}</p>` : ""}
+        ${environmentContext(selected, r.alternatives.length === 1 ? r.environment : undefined)}
         ${compareBlock(r)}
         ${r.alternatives.length === 0 ? `<p>${esc(t("rs.noAlternatives"))}</p>` : ""}
         <ul class="rs-cards">${r.alternatives.map(card).join("")}</ul>
@@ -91,7 +93,6 @@ export function createResultsPanel(root: HTMLElement) {
         ${suggestionStatus ? `<p class="rs-status" role="status">${esc(suggestionStatus === "busy" ? t("mp.status.calculating") : suggestionStatus)}</p>` : ""}
         ${suggestions ? `<section class="rs-suggestions"><p class="mp-hint">${esc(t("nx.bounded", { attempted: suggestions.attempted, cap: suggestions.cap }))}</p>${suggestions.proposals.length ? suggestions.proposals.map((p, index) => `<article class="rs-card rs-proposal"><p><span class="rs-badge" data-status="${esc(p.assessment ?? "")}">${esc(statusLabel(p.assessment))}</span>${p.assessment !== "viable_model" ? ` · ${esc(t("nx.unproven"))}` : ""}</p><p>${esc(t("nx.proposedTeam"))}: ${p.team_summary.map((m) => `${esc(m.name)} (${m.payload_kg} kg)`).join(" · ")}</p><p>${esc(t("nav.departureUtc"))}: ${esc(p.proposed_request.mission.departure_utc)}</p><p>${esc(t("nx.delta", { time: seconds(p.delta.elapsed_s ?? null), ascent: p.delta.ascent_m ?? t("nav.unavailableValue"), interruption: seconds(p.delta.max_without_confirmed_s ?? null) }))}</p><button type="button" data-proposal="${index}">${esc(t("nx.apply"))}</button></article>`).join("") : `<p>${esc(t("nx.noSuggestion"))}</p>`}</section>` : ""}
         <details class="rs-section" data-detail="technical"><summary>${esc(t("rs.technical"))}</summary>
-          <p class="mp-hint">${esc(t("rs.notEvaluated"))} ${r.not_evaluated.map((v) => esc(label("scope", v))).join(" · ")}</p>
           <details data-detail="evidence"><summary>${esc(t("nav.evidence"))}</summary>
             <p>${esc(t("nav.missingRequired"))}: ${esc(evidence.missing_required.join(", ") || t("nav.none"))}</p>
             <p>${esc(t("nav.missingOptional"))}: ${esc(evidence.missing_optional_variables.join(", ") || t("nav.none"))}</p>
@@ -101,7 +102,7 @@ export function createResultsPanel(root: HTMLElement) {
           <details data-detail="reproducibility"><summary>${esc(t("nav.reproducibility"))}</summary>
             <p>${esc(t("nav.requestIdentity", { id: r.request_echo.request_id, revision: r.request_echo.revision }))}</p>
             <ul>${r.assumptions.map((v) => `<li>${esc(v)}</li>`).join("")}</ul>
-            <pre class="nav-json">${esc(JSON.stringify({ versions: r.versions, resolved_team: r.resolved_team, input_provenance: r.input_provenance }, null, 2))}</pre>
+            <pre class="nav-json">${esc(JSON.stringify({ versions: r.versions, resolved_team: r.resolved_team, input_provenance: r.input_provenance, terrain_context: selected?.terrain_context }, null, 2))}</pre>
           </details>
         </details>
       </div>`;
@@ -176,6 +177,7 @@ export function createResultsPanel(root: HTMLElement) {
         ${kpi("daylight_reserved_return_margin_s", "rs.kpi.daylight", m.daylight_reserved_return_margin_s)}
       </div>
       ${timeline(a)}
+      ${terrainContext(a)}
       ${m.unavailable_totals_reason ? `<p>${esc(label("reason", m.unavailable_totals_reason))}</p>` : ""}
       ${a.communication ? `<details class="rs-section" data-detail="communication:${esc(a.id)}"><summary>${esc(t("nx.visibility"))}</summary><p class="mp-hint">${esc(t("nx.antennaHint"))}</p>${a.communication.status === "evaluated" ? `<dl class="rs-metrics">${(["visible_s", "occluded_s", "unknown_s", "max_without_confirmed_s"] as const).map((key) => metric(key, `nx.${key}`, a.communication![key] ?? null)).join("")}</dl>` : esc(t("nav.unavailableValue"))}</details>` : ""}
       <details class="rs-section" data-detail="metrics:${esc(a.id)}"><summary>${esc(t("rs.allMetrics"))}</summary>

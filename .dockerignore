@@ -4,6 +4,7 @@
 !service/
 !data/processed/gale/analytical/
 !data/processed/gale/environment/
+!data/processed/gale/material/
 !data/processed/ml/forecasts/
 **/__pycache__
 **/tests

@@ -119,6 +119,8 @@ export interface Metrics {
   participant_margins: { participant_id: string; kind: string; max_sortie_s: number; margin_s: number | null; model_id: string }[];
 }
 export interface Alternative {
+  terrain_context?: { status: string; warning: boolean; pixel_m?: number; reason?: string;
+    categories?: Record<"looser" | "intermediate" | "firmer" | "unknown", { distance_m: number; travel_s: number }> };
   id: string;
   criterion: string;
   assessment: Assessment;

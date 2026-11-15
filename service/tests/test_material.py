@@ -59,6 +59,14 @@ class MaterialTests(unittest.TestCase):
         self.assertAlmostEqual(sum(b["travel_s"] for b in result["categories"].values()), 80)
         self.assertEqual(result["destination_tasks"], {"category": "firmer", "duration_s": 60})
         self.assertEqual(result["reserve_exposure_s"], 0)
+        missing = RouteLeg("no_path_in_domain", "Fixture unavailable leg")
+        with patch("service.material.load_material", return_value=raw):
+            partial = evaluate_material(parcel, replace(routes, return_leg=missing), 60)
+            absent = evaluate_material(parcel, replace(routes, outbound=missing, return_leg=missing), 60)
+        self.assertEqual(partial["status"], "partial")
+        self.assertAlmostEqual(sum(b["distance_m"] for b in partial["categories"].values()), distance)
+        self.assertEqual(absent["status"], "unevaluated")
+        self.assertNotIn("categories", absent)
 
     def test_package_matches_existing_display_and_does_not_change_model(self):
         from pathlib import Path
