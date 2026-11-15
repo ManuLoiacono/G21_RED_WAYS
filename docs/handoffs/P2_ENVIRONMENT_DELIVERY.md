@@ -78,9 +78,9 @@ the executable rather than hardcoding a Codex runtime version:
 $repoRoot = 'C:\Users\Usuario\Desktop\Nasa Challenge\G21_ENVIRONMENT_INTEGRATION'
 $nodeExe = (Get-Command node.exe -ErrorAction SilentlyContinue).Source
 if (-not $nodeExe) {
-  $nodeExe = Get-ChildItem 'C:\Program Files\WindowsApps' -Directory -Filter 'OpenAI.CodexPrimaryRuntime.*' |
-    Sort-Object LastWriteTimeUtc -Descending |
-    ForEach-Object { Join-Path $_.FullName 'dependencies\node\bin\node.exe' } |
+  $nodeExe = Get-AppxPackage -Name '*CodexPrimaryRuntime*' |
+    Sort-Object @{ Expression = { [version]$_.Version } } -Descending |
+    ForEach-Object { Join-Path $_.InstallLocation 'dependencies\node\bin\node.exe' } |
     Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
 }
 if (-not $nodeExe) { throw 'Install Node or set $nodeExe to the installed executable.' }
