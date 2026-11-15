@@ -365,8 +365,13 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
         return `<li class="wz-task">
           ${fromTemplate ? `<span class="wz-task-name">${esc(taskName(task.id))}</span>`
             : `<label class="wz-task-name">${esc(t("wizard.tasks.name"))}<input name="tname-${i}" type="text" value="${esc(taskNames.get(task.id) ?? "")}" /></label>`}
-          <label>${esc(t("wizard.tasks.duration"))}<input name="task-${i}" type="text" inputmode="numeric" placeholder="hh:mm" value="${esc(toHhMm(task.duration_s))}" /></label>
-          <button type="button" class="wz-mini" data-act="remove-task" data-index="${i}" aria-label="${esc(t("mp.task.remove", { n: i + 1 }))}">×</button>
+          <div class="wz-task-time">
+            <label for="wz-task-dur-${i}">${esc(t("wizard.tasks.duration"))}</label>
+            <div class="wz-task-time-row">
+              <input id="wz-task-dur-${i}" name="task-${i}" type="text" inputmode="numeric" placeholder="hh:mm" value="${esc(toHhMm(task.duration_s))}" />
+              <button type="button" class="wz-mini" data-act="remove-task" data-index="${i}" aria-label="${esc(t("mp.task.remove", { n: i + 1 }))}">×</button>
+            </div>
+          </div>
         </li>`;
       }).join("")}</ul>
       <button type="button" data-act="add-task" ${s.mission.tasks.length >= MAX_TASKS ? "disabled" : ""}>${esc(t("wizard.tasks.add"))}</button>`;

@@ -770,6 +770,13 @@ button.wz-sum:hover { border-color: rgba(232, 131, 79, .6); transform: translate
 #missionWizard .wz-chip-x button { width: 18px; height: 18px; min-width: 0; margin: 0; padding: 0; display: inline-grid; place-items: center; font-size: 14px; line-height: 1; color: var(--ui-muted); background: rgba(255, 255, 255, .08); border: none; border-radius: 50%; cursor: pointer; }
 #missionWizard .wz-chip-x button:hover { color: #fff; background: rgba(255, 138, 122, .35); }
 
-/* Task rows: remove button centred vertically in the row, compact round. */
-#missionWizard .wz-task [data-act="remove-task"] { align-self: center; width: 30px; height: 30px; padding: 0; display: inline-grid; place-items: center; font-size: 15px; line-height: 1; border-radius: 50%; }
+/* Task rows: remove button centred on the duration field (bottom-aligned row), compact round. */
+#missionWizard .wz-task [data-act="remove-task"] { flex: none; width: 30px; height: 30px; padding: 0; display: inline-grid; place-items: center; font-size: 15px; line-height: 1; border-radius: 50%; }
 #missionWizard .wz-task [data-act="remove-task"]:hover { color: #fff; background: rgba(255, 138, 122, .3); border-color: rgba(255, 138, 122, .6); }
+
+/* Task rows: duration field and remove button share one centred row; the label sits above. */
+.wz-task { grid-template-columns: minmax(0, 1fr) auto; }
+.wz-task-time { display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: var(--ui-neutral); }
+.wz-task-time-row { display: flex; align-items: center; gap: 10px; }
+.wz-task-time-row input { width: 150px; }
+@media (max-width: 900px) { .wz-task { grid-template-columns: 1fr; } .wz-task-time-row input { flex: 1; width: auto; } }
