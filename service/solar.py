@@ -47,7 +47,7 @@ def sol_instant(sol, lmst_hours=0., lon_east_deg=SOURCE_LON):
 def source_interval(sol, lon_east_deg=SOURCE_LON):
     """Conservative envelope including the original marstime 0.5.3 RAD partition.
 
-    That package's leap table stops at TAI-UTC=35 s (2 s stale in 2025).
+    Inspected 0.5.3 and pipeline-pinned 0.5.6 stop at TAI-UTC=35 s (2 s stale in 2025).
     Keep this source error explicit rather than mislabel legacy aggregates.
     """
     def legacy_boundary(value):

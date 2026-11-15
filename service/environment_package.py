@@ -20,7 +20,7 @@ def _load_environment_package(path=DEFAULT_PACKAGE):
     digest = data.pop("content_id", None)
     if identity(data) != digest:
         raise PlanningInputError("environment_identity_mismatch", "environment.content_id", "Environmental content identity does not match.")
-    if data.get("format") != FORMAT or data.get("availability_policy") != POLICY:
+    if data.get("format") != FORMAT or data.get("version") != "v2" or data.get("availability_policy") != POLICY:
         raise PlanningInputError("unsupported_environment_version", "environment", "Unsupported environmental package or reconstruction policy.")
     rows = data.get("daily_sources")
     if not isinstance(rows, list) or not 41 <= len(rows) <= 100:
@@ -54,4 +54,4 @@ def load_environment_package(path=DEFAULT_PACKAGE):
 
 def source_metadata(data):
     """Discovery exposes identities and policies, never raw future daily values."""
-    return {key: data[key] for key in ("format", "version", "content_id", "availability_policy", "policy_description", "sources", "replay_sols", "training_cutoff_utc", "last_training_sol", "limitations")}
+    return {key: data[key] for key in ("format", "version", "content_id", "availability_policy", "policy_description", "sources", "replay_sols", "training_cutoff_utc", "last_training_sol", "limitations", "applicability_bounds_lonlat")}

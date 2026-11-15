@@ -55,6 +55,9 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     preview();
   }
   function form(s: PlanRequest, m: ServiceMetadata) {
+    const scenario = m.parcel.scenarios.find((v) => v.id === s.scenario.id && v.version === s.scenario.version);
+    const coverage = scenario?.coverage;
+    const range = coverage ? `min="${esc(coverage.from_utc.replace("Z", ""))}" max="${esc(new Date(Date.parse(coverage.to_utc)-1).toISOString().replace("Z", ""))}"` : "";
     return `
       <p class="mp-note">${esc(t(m.parcel.geographic_adapter ? "nav.realTerrain" : "nav.synthetic"))} ${infoButton("navigation_draft", t("nav.provenance"))}</p>
       <fieldset><legend>${esc(t("mp.mission"))}</legend>
@@ -83,13 +86,14 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
         <label>${esc(t("nav.scenario"))}<select name="scenario">
           ${m.parcel.scenarios.map(({ id }) => `<option value="${id}" ${s.scenario.id === id ? "selected" : ""}>${esc(tOr(`nav.scenario.${id}`, id))}</option>`).join("")}
         </select></label>
-        <label>${esc(t("nav.asOfUtc"))}<input name="as-of" type="datetime-local" step="1" value="${s.scenario.as_of_utc.replace("Z", "")}" /></label>
-        <label>${esc(t("nav.departureUtc"))}<input name="departure" type="datetime-local" step="1" value="${s.mission.departure_utc.replace("Z", "")}" /></label>
+        <label>${esc(t("nav.asOfUtc"))}<input name="as-of" type="datetime-local" step="1" ${range} value="${s.scenario.as_of_utc.replace("Z", "")}" /></label>
+        <label>${esc(t("nav.departureUtc"))}<input name="departure" type="datetime-local" step="1" ${range} value="${s.mission.departure_utc.replace("Z", "")}" /></label>
         <div class="mp-grid">
           <label>${esc(t("nav.reserve"))}<input name="reserve" type="number" min="0" step="1" value="${s.mission.reserve_s}" /></label>
           <label>${esc(t("nav.budget"))}<input name="budget" type="number" min="0.001" step="1" value="${s.mission.time_budget_s}" /></label>
         </div>
-        <p class="mp-hint">${esc(t("nav.clock"))}</p>
+        <p class="mp-hint">${esc(t(scenario?.fixture === false ? "env.clock" : "nav.clock"))}</p>
+        ${coverage ? `<p class="mp-hint">${esc(t("env.coverage", { start: coverage.from_utc, end: coverage.to_utc }))}</p>` : ""}
       </fieldset>
       <p class="mp-hint">${esc(t("nav.unsupported"))}</p>
       <div class="mp-actions"><button type="button" data-act="reset">${esc(t("mp.reset"))}</button>
@@ -180,6 +184,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     } else if (el.name === "scenario") {
       state.scenario.id = el.value;
       state.scenario.version = metadata.parcel.scenarios.find((s) => s.id === el.value)!.version;
+      render();
     } else if (el.name.startsWith("member:")) {
       const id = el.name.slice(7);
       const entry = metadata.catalogs.catalog.entries.find((p) => p.identity.profile_id === id)!;

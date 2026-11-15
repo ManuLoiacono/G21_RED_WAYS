@@ -1148,11 +1148,17 @@
       "10": "B1_ma27_v1"
     }
   },
+  "applicability_bounds_lonlat": {
+    "west": 137.36002952694625,
+    "east": 137.409972778361,
+    "north": -4.800031214320459,
+    "south": -4.849974465735206
+  },
   "limitations": [
     "Historical hindcast, not operational or current Mars weather.",
     "Source rover locations/elevations are forward-filled waypoints, not a validated weather field at the hypothetical base.",
     "Daily reports are not hourly weather; RAD is silicon detector B RTG-corrected microgray/day, not human effective dose.",
     "SILSO uses modern revised daily values; original 2025 revisions are not recoverable."
   ],
-  "content_id": "12ea4a78fe3487b9f26a51d6f12919bdeae3dbfe7dd0ff0270e76243ef91f7ae"
+  "content_id": "b422bc6b7e2416c5f894105696f20d863f692d8f562edc82ffc3dcdd5baec8c8"
 }

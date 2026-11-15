@@ -96,6 +96,7 @@ class HTTPApplication:
         return {"status": "ok", "adapter_version": ADAPTER_VERSION,
                 "schema_version": DRAFT_SCHEMA_VERSION, "contract_status": "consumer_review_pending",
                 "scope": "local_terrain_development" if any(not p.grid.fixture for p in self.registry.parcels) else "local_synthetic_development",
+                "environment_mode": "historical_replay" if any(not s.fixture for s in self.registry.scenarios) else "synthetic_fixture",
                 "geographic_conversion": "available" if any(p.geographic_adapter for p in self.registry.parcels) else "unavailable",
                 "default_parcel": dict(zip(("id", "version"), self.default_parcel)),
                 "registered_parcels": [{"id": p.id, "version": p.version, "fixture": p.grid.fixture}

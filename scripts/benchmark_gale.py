@@ -56,6 +56,9 @@ def benchmark(manifest, request_file, response_file=None):
             "legs": {name: {k: v for k, v in candidate[name].items() if k not in ("cells", "xy_m")} |
                            {"vertices": len(candidate[name]["xy_m"])} for name in ("outbound", "return")},
             "metrics": candidate["metrics"],
+            "environment_identity": {"provider_metadata": response["environment"]["provider_metadata"],
+                                     "snapshot": response["environment"]["snapshot"],
+                                     "selected_models": sorted({item["record"]["model_id"] for item in response["environment"]["decision_records"] if item["record"]["model_id"]})},
             "memory_note": "OS process high-water RSS includes runtime, imports, native workspaces and allocator retention; not incremental allocation."}
 
 

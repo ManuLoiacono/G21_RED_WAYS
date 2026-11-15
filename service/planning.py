@@ -122,7 +122,10 @@ class PreparedPlanner:
             from .solar import ADAPTER, iso
             if scenario.clock.adapter_id == ADAPTER:
                 durations = (routes.outbound.duration_s, routes.return_leg.duration_s)
-                mission_end = iso(selected.departure.offset_s + math.fsum((*durations, *(task.duration_s for task in tasks), reserve_s))) if all(d is not None for d in durations) else None
+                try:
+                    mission_end = iso(selected.departure.offset_s + math.fsum((*durations, *(task.duration_s for task in tasks), reserve_s))) if all(d is not None for d in durations) else None
+                except (OverflowError, ValueError) as exc:
+                    raise PlanningInputError("mission_interval_overflow", "mission", "Mission physical interval exceeds the supported timestamp range.") from exc
                 selected = select_scenario(scenario, as_of_utc, departure_utc, evaluation_location=location, mission_end_utc=mission_end)
         mission = evaluate_mission(routes, tasks, members, time_budget_s=time_budget_s, reserve_s=reserve_s,
                                    departure=selected.departure, daylight=selected.daylight, snapshot=selected.snapshot)

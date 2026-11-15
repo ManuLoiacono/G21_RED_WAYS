@@ -100,3 +100,11 @@ include `unknown_availability`, `not_available_as_of`, `model_not_available_as_o
 and `outside_mission_target_interval`. Unknown evidence is not a successful forecast.
 Only derived geometric daylight affects environmental mission status. Weather/RAD
 remain context and do not enter graph/base-search identities.
+
+`mission_target_interval` gives `from_utc`, optional `to_utc` and scope:
+`complete_reserved_sortie` or `departure_context_only` when route duration is unavailable.
+RAD target validity preserves the original fixed-longitude legacy source partition;
+weather targets use the explicit corrected local-sol mapping at the issue rover location.
+Per-observation unknown RAD retrieval time and analytically computed solar retrieval
+are null with provenance explanations; they are never borrowed from REMS retrieval.
+Forecast applicability outside the prepared parcel is excluded explicitly.

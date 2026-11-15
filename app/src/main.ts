@@ -135,7 +135,7 @@ async function main() {
   const elevationGrid = ElevationGrid.load();
 
   // Look: low sun from the west (azimuth 280°, elevation 8°). It is an aesthetic value,
-  // not a computed solar position: the real daylight window comes from REMS/Horizons.
+  // not a computed solar position: mission daylight comes from the service's derived geometry.
   const sun = sunDirectionWC(GALE.lon, GALE.lat, 280, 8);
   tileset.customShader = marsShader(sun);
   applyAtmosphere(viewer.scene);
@@ -166,7 +166,7 @@ async function main() {
   panel.onChange(() => thermal.setShift(panel.getParcel()?.geographic_adapter?.horizontal_shift_m));
   // Environment of the chosen sol: REMS report for the departure date (historical, observed).
   const environment = createEnvironmentLayer(viewer);
-  panel.onChange((request) => environment.setDeparture(request.mission.departure_utc));
+  panel.onChange((request) => environment.setDeparture(request.mission.departure_utc, request.scenario.as_of_utc));
 
   // Top bar: mission context (center) and the "Layers" panel (left).
   let missionVisible = true;

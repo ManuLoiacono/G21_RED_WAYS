@@ -63,7 +63,7 @@ export const isDecisionRecord = (x: unknown): boolean => {
   if (!object(x) || !timestamp(x.effective_available_at_utc) || !str(x.availability_basis) || !object(x.record)) return false;
   const r = x.record;
   if (!["record_id", "kind", "variable", "units", "evidence_kind", "source_id", "source_location_id", "spatial_scope"].every((k) => str(r[k])) ||
-    !(r.value === null || num(r.value) || pair(r.value)) || !timestamp(r.fetched_at_utc)) return false;
+    !(r.value === null || num(r.value) || pair(r.value)) || !(timestamp(r.fetched_at_utc) || ["observation", "daylight"].includes(String(r.kind)) && r.fetched_at_utc === null)) return false;
   if (r.quantiles !== null) {
     if (!object(r.quantiles) || !["p10", "p50", "p90"].every((q) => object(r.quantiles) && nullableNum(r.quantiles[q]))) return false;
     const q = [r.quantiles.p10, r.quantiles.p50, r.quantiles.p90].filter(num);
@@ -75,7 +75,8 @@ export const isDecisionRecord = (x: unknown): boolean => {
       ![r.issue_sol, r.target_sol, r.lead_sols].every((n) => Number.isInteger(n) && Number(n) > 0) ||
       !object(r.provenance) || !str(r.applicability) || !str(r.interval_method)) return false;
   }
-  return !Object.hasOwn(r, "observed") && !Object.hasOwn(r, "skill_summary");
+  return list(r.input_intervals, (v) => str(v.source) && timestamp(v.start_utc) && timestamp(v.end_utc)) &&
+    !Object.hasOwn(r, "observed") && !Object.hasOwn(r, "skill_summary");
 };
 
 /** Validate all nested values read by the UI; null metrics stay unavailable. */
@@ -91,7 +92,9 @@ export function isDraftResponse(x: unknown): x is PlanResponse {
     list(x.alternatives, (a) => str(a.id) && str(a.criterion) && assessment(a.assessment) && str(a.search_status) && a.coordinate_frame === "parcel_metric" &&
       leg(a.outbound) && leg(a.return) && metrics(a.metrics) && list(a.checks, check)) &&
     list(x.resolved_team, (p) => str(p.kind) && identity(p.identity) && parameters(p.parameters) && num(p.payload_kg)) &&
-    object(e) && strings(e.missing_required) && strings(e.missing_optional_variables) && strings(e.missing_forecast_variables) && Array.isArray(e.decision_records) && e.decision_records.every(isDecisionRecord) && object(e.clock_mapping) && object(e.snapshot) &&
+    object(e) && strings(e.missing_required) && strings(e.missing_optional_variables) && strings(e.missing_forecast_variables) && Array.isArray(e.decision_records) && e.decision_records.every(isDecisionRecord) &&
+    object(e.clock_mapping) && timestamp(e.clock_mapping.utc_epoch) && num(e.clock_mapping.offset_at_epoch_s) && object(e.snapshot) && timestamp(e.snapshot.as_of_utc) &&
+    (e.daylight === null || object(e.daylight) && num(e.daylight.start_s) && num(e.daylight.end_s) && str(e.daylight.method) && str(e.daylight.evidence_kind) && str(e.daylight.evaluation_location_id)) &&
     object(locations) && ["origin", "destination"].every((k) => object(locations[k]) && pair(locations[k].effective_xy_m) &&
       pair(locations[k].requested_xy_m) && pair(locations[k].cell) && (locations[k].cell as number[]).every((n) => Number.isInteger(n) && n >= 0) &&
       num(locations[k].effective_elevation_m) && str(locations[k].adapter_id) && geographicState(locations[k].geographic_conversion) && object(locations[k].requested)) &&

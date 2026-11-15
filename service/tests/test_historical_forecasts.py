@@ -56,6 +56,11 @@ class HistoricalForecastChecks(unittest.TestCase):
         self.assertNotIn('"observed":', payload)
         self.assertNotIn('"skill_summary":', payload)
         self.assertNotIn('"baseline_persistence":', payload)
+        # Re-exporting only retrospective fields changes the archive hash, not the decision.
+        attested = import_document(changed, self.package, source_identity="different-raw-export-hash")
+        left = self.select(self.scenario(original), "2025-10-26T04:00:00Z")
+        right = self.select(self.scenario(attested), "2025-10-26T04:00:00Z")
+        self.assertEqual(left.snapshot.snapshot_id, right.snapshot.snapshot_id)
 
     def test_incomplete_sol_and_earth_daily_dependencies_do_not_appear_early(self):
         record = self.forecasts[0]
@@ -137,3 +142,10 @@ class HistoricalForecastChecks(unittest.TestCase):
             with self.assertRaises(PlanningInputError) as error:
                 load_forecasts(self.package, Path(temp))
             self.assertEqual(error.exception.code, "forecast_inventory_mismatch")
+
+    def test_forecast_reference_assumption_is_limited_to_the_prepared_parcel(self):
+        record = self.forecasts[0]
+        result = select_scenario(self.scenario([record]), "2025-10-26T04:00:00Z", "2025-10-26T04:00:00Z",
+                                 evaluation_location=(0, 0, "unrelated-location"))
+        self.assertIn("forecast_spatial_context_mismatch", {e.code for e in result.exclusions})
+        self.assertFalse(any(r.record.kind == "forecast" for r in result.decision_records))

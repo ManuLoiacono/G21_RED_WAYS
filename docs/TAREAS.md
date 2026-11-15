@@ -39,20 +39,20 @@ Para trabajar con Claude Code: pedir una tarea por ID («hacé P2-02») y manten
 
 | ID | Prio | Tarea | Criterio de cierre | Depende de |
 | --- | --- | --- | --- | --- |
-| [ ] P2-01 | P0 | **Perfiles y plantillas:** parámetros comunes, 4 plantillas editables (observación geológica, exploración topográfica, reconocimiento, medición ambiental), validador; cada parámetro con valor y fuente (Apollo/análogo o hipotético) | Una configuración incoherente se rechaza con motivo | T0-01 |
+| [~] P2-01 | P0 | **Perfiles y plantillas:** parámetros comunes, 4 plantillas editables (observación geológica, exploración topográfica, reconocimiento, medición ambiental), validador; cada parámetro con valor y fuente (Apollo/análogo o hipotético) | Una configuración incoherente se rechaza con motivo | T0-01 |
 | [~] P2-02 | P0 | **Grafo dirigido + Dijkstra:** 8 vecinos con numpy; coste por sentido (subir ≠ bajar); no crear aristas que violen restricciones; sin cortar esquinas bloqueadas; `scipy.sparse.csgraph.dijkstra` para ida y, sobre el grafo transpuesto, para vuelta | Mapa chico con resultado conocido; una barrera bloquea; subir y bajar dan costes distintos; origen sin datos devuelve motivo | T0-02 |
-| [ ] P2-03 | P0 | **Servicio local:** `POST /plan`, `GET /parcel`; la grilla se carga una vez en memoria; «calcular» no consulta APIs externas | La app recibe una respuesta según el contrato | P2-02 |
-| [ ] P2-04 | P0 | **Misión completa:** ida + tareas + vuelta + reserva vs. presupuesto; **regla de luz diurna** (fin ≤ atardecer del sol elegido → si no, `conditional` o «posponer»); distinguir «ruta incompatible», «no existe ruta en el modelo» y «búsqueda inconclusa» | Un destino alcanzable se rechaza al agregar tareas o al acercarse al atardecer; cambiar una duración mueve el margen de forma coherente | P2-02, P3-06 |
-| [ ] P2-05 | P0 | **Alternativas y motivos:** criterios tiempo y esfuerzo (y enlace en P1), eliminar duplicados, ordenar, motivos generados desde métricas | Si solo hay una alternativa distinta, devuelve una; las restricciones se evalúan antes que las preferencias | P2-04 |
-| [ ] P2-06 | P0 | **Parcela real + medición de tiempos** (integración I2) | Ruta real ida/vuelta sobre el DTM de Gale; tiempos registrados en `docs/` | P3-02 |
+| [~] P2-03 | P0 | **Servicio local:** `POST /plan`, `GET /parcel`; la grilla se carga una vez en memoria; «calcular» no consulta APIs externas | La app recibe una respuesta según el contrato | P2-02 |
+| [~] P2-04 | P0 | **Misión completa:** ida + tareas + vuelta + reserva vs. presupuesto; **regla de luz diurna** (fin ≤ atardecer del sol elegido → si no, `conditional` o «posponer»); distinguir «ruta incompatible», «no existe ruta en el modelo» y «búsqueda inconclusa» | Un destino alcanzable se rechaza al agregar tareas o al acercarse al atardecer; cambiar una duración mueve el margen de forma coherente | P2-02, P3-06 |
+| [~] P2-05 | P0 | **Alternativas y motivos:** criterios tiempo y esfuerzo (y enlace en P1), eliminar duplicados, ordenar, motivos generados desde métricas | Si solo hay una alternativa distinta, devuelve una; las restricciones se evalúan antes que las preferencias | P2-04 |
+| [~] P2-06 | P0 | **Parcela real + medición de tiempos** (integración I2) | Ruta real ida/vuelta sobre el DTM de Gale; tiempos registrados en `docs/` | P3-02 |
 | [ ] P2-07 | P1 | **Área alcanzable** (ida + tareas + vuelta + reserva ≤ presupuesto) a partir de las dos corridas de Dijkstra | Devuelve una máscara o un contorno según el contrato | P2-04 |
-| [ ] P2-08 | P1 | **Comunicación y escenarios:** interrupción total y máxima continua de visibilidad sobre cada ruta; reglas de escenario ambiental | Un escenario puede cambiar la viabilidad sin cambiar la geometría, y se informa así | P3-08, P3-09 |
+| [~] P2-08 | P1 | **Comunicación y escenarios:** interrupción total y máxima continua de visibilidad sobre cada ruta; reglas de escenario ambiental | Un escenario puede cambiar la viabilidad sin cambiar la geometría, y se informa así | P3-08, P3-09 |
 | [ ] P2-09 | P1 | **Advertencia THEMIS** (material suelto, cualitativa) | La ruta que cruza la zona lo informa | P3-07 |
 | [ ] P2-10 | P1 | **Robot de apoyo en marcha conjunta:** segundo perfil, compatibilidad de ambos, ritmo del conjunto | Las diferencias de resultado surgen de la configuración | P2-01 |
 | [ ] P2-11 | P1 | **Reevaluación** desde una posición simulada con tiempo transcurrido y un evento (demora o bloqueo); no reiniciar la autonomía | La demora reduce el margen; la recomendación se explica | P2-04 |
 | [ ] P2-12 | P2 | Restricción dominante y cambios admisibles, robot repetidor, explicación con IA | — | P2-05 |
 
-P2-02 update (2026-11-14): directed metric routing, synthetic acceptance checks and measured build/search performance are implemented on `p2/directed-routing`; consumer review is pending, so the task remains in progress. See [the mission/service handoff](handoffs/P2_03_04_MISSION_SERVICE.md). Original P2-01 template defaults and P2-06 real-parcel integration remain pending.
+Historical P2-02 update (2026-11-14): directed metric routing, synthetic acceptance checks and measured build/search performance are implemented on `p2/directed-routing`; consumer review is pending, so the task remains in progress. See [the mission/service handoff](handoffs/P2_03_04_MISSION_SERVICE.md). Original P2-01 template defaults and P2-06 real-parcel integration remain pending.
 
 ## Persona 3 — Datos y contexto (`scripts/`, `data/`)
 
@@ -117,3 +117,18 @@ Plan: `docs/ML_PREDICCION.md`. Resultados: `docs/ML_RESULTADOS.md`. Solo toca `m
 | [x] ML-09 | P1 | **DS-S** (DONKI 2013–2025) + **C1 evaluación** contra MAVEN y RAD | Tabla de aciertos, falsas alarmas y error en horas, con `n` (RAD completo; MAVEN solo ±3 días alrededor de alertas; FLR caído) |
 | [ ] ML-10 | P2 | B2 eventos, D-proxy polvo, C2 corrección de DONKI, A3 UV | Solo si ML-00 a ML-09 están cerrados |
 | [~] ML-11 | P0 | `docs/ML_RESULTADOS.md`: números finales para el video, con `n` y limitaciones | Revisado por otro integrante (A1–A2 listos; faltan RAD/DONKI y la revisión) |
+
+## P2 environment implementation update (2026-11-15)
+
+The dated checklist above is historical. Current verified implementation and review scope:
+
+| Task | Current status | Remaining scope |
+| --- | --- | --- |
+| P2-01 / P2-02 / P2-03 | Implemented and regression checked; PR review pending | Shared-v1 consumer acceptance remains separate. |
+| P2-04 | Complete physical-time sortie, budgets/reserve and actual-location geometric daylight implemented | Scientific/operational validation is not claimed. |
+| P2-06 | Real HiRISE routing, verified assets and measured runtime implemented | Provisional geographic registration remains documented. |
+| P2-05 | Partial: one fastest candidate and calculated failure reasons | Distinct effort criterion and evaluated recommendations remain pending. |
+| P2-08 | Partial: historical environmental discovery, daylight and eligible A1/A2/B1 context | Geometric communication/visibility and interruption metrics remain pending. |
+| P2-07 / P2-09 / P2-11 / P2-12 | Pending | Reachability, route material warnings, simulated replanning and recommendation extensions remain outside this slice. |
+
+See [the implementation handoff](handoffs/P2_ENVIRONMENT_DELIVERY.md) for actual tests, launch commands and limitations. No unrelated P3 or optional ML task is closed by this update.

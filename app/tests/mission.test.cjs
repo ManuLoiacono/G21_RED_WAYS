@@ -256,3 +256,44 @@ test("three Gale controls preserve source latitude and apply the registered scen
     assert.ok(Math.abs(geographic[1]+4.826) < .01, "No additional planetocentric/geodetic conversion");
   }
 });
+
+test("real replay forecast records validate, render and preserve model uncertainty", { skip: !service }, async () => {
+  browserLabels();
+  const request = structuredClone(require("../../service/examples/gale-replay.request.json"));
+  const result = await post(request);
+  const { renderEnvironment } = require("../src/mission/environment.ts");
+  const html = renderEnvironment(result.environment);
+  assert.equal(result.assessment, "viable_model");
+  assert.match(html, /Derived geometric daylight/);
+  assert.match(html, /Historical model predictions \(4\)/);
+  assert.match(html, /p10/); assert.match(html, /p90/);
+  assert.match(html, /A1_lgbm_norm_v1/); assert.match(html, /microgray\/day/);
+  assert.match(html, /Retrospective reconstruction/);
+  const invalid = structuredClone(result);
+  const forecast = invalid.environment.decision_records.find((r) => r.record.kind === "forecast").record;
+  forecast.quantiles.p10 = forecast.quantiles.p90 + 1;
+  assert.equal(isDraftResponse(invalid), false);
+  forecast.quantiles.p10 = null;
+  assert.ok(isDraftResponse(invalid));
+  assert.match(renderEnvironment(invalid.environment), /Unavailable/);
+  forecast.observed = 99999;
+  assert.equal(isDraftResponse(invalid), false);
+});
+
+test("real replay missing daylight and earlier missing forecasts remain distinct", { skip: !service }, async () => {
+  browserLabels();
+  const { renderEnvironment } = require("../src/mission/environment.ts");
+  const request = structuredClone(require("../../service/examples/gale-replay.request.json"));
+  request.scenario.id = "gale_historical_missing_daylight";
+  const missing = await post(request);
+  assert.equal(missing.assessment, "insufficient_evidence");
+  assert.match(renderEnvironment(missing.environment), /Required daylight evidence is missing/);
+  request.scenario.id = "gale_historical_replay";
+  request.scenario.as_of_utc = "2025-10-25T03:26:03Z";
+  request.mission.departure_utc = request.scenario.as_of_utc;
+  const early = await post(request);
+  assert.equal(early.assessment, "viable_model");
+  assert.equal(early.environment.missing_forecast_variables.length, 4);
+  assert.match(renderEnvironment(early.environment), /No eligible forecast/);
+  assert.equal(early.movement_reuse.base_search, true);
+});

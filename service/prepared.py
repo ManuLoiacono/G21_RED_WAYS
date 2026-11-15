@@ -93,7 +93,7 @@ class PreparedRecord:
     source_id: str
     source_location_id: str
     spatial_scope: str
-    fetched_at_utc: str
+    fetched_at_utc: str | None
     available_at_utc: str | None = None
     issued_at_utc: str | None = None
     observation_start_utc: str | None = None

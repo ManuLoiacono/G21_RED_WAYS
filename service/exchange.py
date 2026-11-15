@@ -132,6 +132,7 @@ def encode_response(request: DraftRequest, result):
                         "missing_required": selected.missing_required, "missing_optional_variables": selected.missing_optional_variables,
                         "missing_forecast_variables": selected.missing_forecast_variables,
                         "provider_metadata": selected.provider_metadata,
+                        "mission_target_interval": selected.mission_target_interval,
                         "forecast_applicability_rule": "Full departure-through-reserved-return containment in the target sol; distinct leads and targets remain separate.",
                         "effects": "Weather and RAD are context only; only geometric daylight changes environmental mission assessment."},
         "alternatives": [{"id": "fastest", "criterion": "fastest", "assessment": mission.assessment,

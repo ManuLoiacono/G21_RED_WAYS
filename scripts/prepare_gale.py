@@ -16,8 +16,11 @@ import rasterio
 from rasterio.windows import Window
 from scipy.ndimage import minimum_filter
 
-from scripts.build_hirise_tiles import DTM_URL, R_SPHERE
 from service.validation import identity
+
+# Keep analytical preparation independent of optional mesh/texture (Pillow) imports.
+DTM_URL = "https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_019698_1750_ESP_019988_1750/DTEEC_019698_1750_019988_1750_U01.tif"
+R_SPHERE = 3_396_190.0
 
 POLICY = "native-central-difference-3x3-valid-max-block-mean-elevation-v1"
 BBOX = (137.360, -4.850, 137.410, -4.800)

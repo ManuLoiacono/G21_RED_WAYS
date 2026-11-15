@@ -3,6 +3,7 @@ import { esc } from "../ui/format";
 import { infoButton } from "../provenance/sources";
 import type { Alternative, Check, PlanResponse } from "./draft";
 import { renderMetricPreview } from "./routes";
+import { renderEnvironment } from "./environment";
 
 export const ALT_COLORS = ["#3ff0ff", "#ffb347", "#c792ea", "#7ee787"];
 export const INCOMPATIBLE_COLOR = "#ff6b6b";
@@ -33,6 +34,7 @@ export function createResultsPanel(root: HTMLElement) {
         ${r.geographic_adapter ? `<button type="button" data-act="focus-route">${esc(t("nav.focusRoute"))}</button><p class="nav-legend">━ ${esc(t("nav.outbound"))} · ┄ ${esc(t("nav.return"))}</p>` : ""}
         ${r.alternatives.length === 0 ? `<p>${esc(t("rs.noAlternatives"))}</p>` : ""}
         <ul class="rs-cards">${r.alternatives.map(card).join("")}</ul>
+        ${renderEnvironment(r.environment)}
         <p class="mp-hint">${esc(t("rs.notEvaluated"))} ${r.not_evaluated.map((v) => esc(label("scope", v))).join(" · ")}</p>
         <details data-detail="evidence"><summary>${esc(t("nav.evidence"))}</summary>
           <p>${esc(t("nav.missingRequired"))}: ${esc(r.environment.missing_required.join(", ") || t("nav.none"))}</p>

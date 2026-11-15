@@ -50,4 +50,6 @@ def solar_record(scenario, departure_utc, location=None):
         record_id=f"{METHOD}:{sol}:{identity([lon, lat])[:16]}", series_id="geometric-daylight", revision=1,
         kind="daylight", variable="daylight", value=values, units="physical_second", evidence_kind="derived",
         source_id=METHOD, source_location_id=location_id, spatial_scope=f"Spherical horizontal horizon at source lon={lon:.9f}, lat={lat:.9f}; solar center altitude 0 degrees; no refraction, solar disk, elevation dip or terrain shadow.",
-        fetched_at_utc=metadata["source_retrieved_at_utc"], available_at_utc=scenario.clock.valid_from_utc, epoch_id=EPOCH_ID)
+        fetched_at_utc=None, available_at_utc=scenario.clock.valid_from_utc, epoch_id=EPOCH_ID,
+        provenance={"method_reference": metadata["method_reference"], "retrieval_state": "Computed analytically during planning; no retrieved solar observation.",
+                    "availability_basis": "Deterministic astronomical reconstruction assumed computable at replay cutoff."})

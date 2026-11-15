@@ -128,3 +128,11 @@ Al pasar el mouse sobre el terreno, abajo al centro se ven la posición, la **el
 - No usar `scene.verticalExaggeration`: con este tileset deja de cargar el terreno detallado.
 - `src/fixture_route.json` es una **ruta sintética de prueba**, no un cálculo del motor.
 - Para depurar: `viewer`, `tileset` y `Cesium` quedan accesibles desde la consola del navegador.
+# Historical environment consumer
+
+For verified Windows setup (including Node discovery), private-token handling,
+real/synthetic discovery and five exact manual cases, use the
+[environment delivery runbook](../docs/handoffs/P2_ENVIRONMENT_DELIVERY.md).
+Results distinguish derived geometric daylight, eligible historical observations and
+model hindcasts. The existing REMS layer is explicitly separate retrospective context.
+Language changes preserve calculation identity; relevant input edits clear results.

@@ -51,6 +51,7 @@ def prepare(output=DEFAULT_PACKAGE):
         "replay_sols": [4699, 4739], "sources": sources, "source_provenance": summary["sources"],
         "daily_sources": daily,
         "model_selection": selections,
+        "applicability_bounds_lonlat": json.loads((ROOT / "data/processed/gale/analytical/manifest.json").read_text(encoding="utf-8"))["bounds_lonlat"],
         "limitations": ["Historical hindcast, not operational or current Mars weather.", "Source rover locations/elevations are forward-filled waypoints, not a validated weather field at the hypothetical base.", "Daily reports are not hourly weather; RAD is silicon detector B RTG-corrected microgray/day, not human effective dose.", "SILSO uses modern revised daily values; original 2025 revisions are not recoverable."],
     }
     package["content_id"] = identity(package)

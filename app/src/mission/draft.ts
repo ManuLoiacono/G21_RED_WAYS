@@ -152,7 +152,7 @@ export interface DecisionRecord {
   record: {
     record_id: string; kind: string; variable: string; value: number | Pair | null; units: string;
     evidence_kind: string; source_id: string; source_location_id: string; spatial_scope: string;
-    fetched_at_utc: string; issued_at_utc: string | null; observation_start_utc: string | null; observation_end_utc: string | null;
+    fetched_at_utc: string | null; issued_at_utc: string | null; observation_start_utc: string | null; observation_end_utc: string | null;
     valid_from_utc: string | null; valid_to_utc: string | null;
     quantiles: { p10: number | null; p50: number | null; p90: number | null } | null;
     model_id: string | null; model_version: string | null; training_cutoff_utc: string | null; model_available_at_utc: string | null;

@@ -1,0 +1,51 @@
+{
+  "schema_version": "p2-plan-draft-1",
+  "request_id": "gale-historical-daylight",
+  "revision": 0,
+  "parcel": {
+    "id": "gale_hirise_019698",
+    "version": "native2-v1"
+  },
+  "scenario": {
+    "id": "gale_historical_missing_daylight",
+    "version": "v1",
+    "as_of_utc": "2025-10-26T00:26:28Z"
+  },
+  "origin": {
+    "type": "poi",
+    "poi_id": "base"
+  },
+  "destination": {
+    "type": "poi",
+    "poi_id": "sample"
+  },
+  "team": {
+    "catalog_version": "synthetic-team-v1",
+    "humans": [
+      {
+        "profile_id": "explorer_01",
+        "payload_kg": 0
+      }
+    ],
+    "robots": [
+      {
+        "profile_id": "support_rover",
+        "payload_kg": 0
+      }
+    ]
+  },
+  "mission": {
+    "template_id": "reconnaissance",
+    "template_version": "synthetic-mission-templates-v1",
+    "tasks": [
+      {
+        "id": "visual_reconnaissance",
+        "duration_s": 600
+      }
+    ],
+    "time_budget_s": 21600,
+    "reserve_s": 1800,
+    "departure_utc": "2025-10-26T00:26:28Z"
+  },
+  "criterion": "fastest"
+}
