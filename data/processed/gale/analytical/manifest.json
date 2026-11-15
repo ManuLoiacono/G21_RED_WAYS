@@ -1,7 +1,7 @@
 {
   "format": "gale-analytical-1",
   "id": "gale_hirise_019698",
-  "version": "native2-photo-v2",
+  "version": "native2-photo-v3",
   "fixture": false,
   "source": {
     "url": "https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_019698_1750_ESP_019988_1750/DTEEC_019698_1750_019988_1750_U01.tif",
@@ -85,13 +85,13 @@
     "covered_cells": 2140369,
     "excluded_cells": 0
   },
-  "location_selection": "Hypothetical photo-sector locations selected inside a 7946-cell strongly connected component of the unchanged default-team directed graph. No terrain or profile changes.",
+  "location_selection": "Inside the convex footprint of all 12 unchanged registered photo markers, using native cells in one unchanged-default-team strongly connected component. Exact photo cells exceed the rover 8-degree block limit. Base is 2.715 m from Navcam sol 4861; all selected points are at most 47.273 m from their nearest marker. Scene registration is inverted once for analytical selection; no distant-region fallback.",
   "pois": [
     {
       "id": "base",
       "lonlat": [
-        137.3751012600287,
-        -4.811074715231375
+        137.3817922219407,
+        -4.8137715825326515
       ],
       "classification": "hypothetical",
       "role": "base"
@@ -99,8 +99,8 @@
     {
       "id": "sample",
       "lonlat": [
-        137.3700489010339,
-        -4.8134984820464455
+        137.38175808437995,
+        -4.812986418634811
       ],
       "classification": "hypothetical",
       "role": "destination"
@@ -108,8 +108,8 @@
     {
       "id": "control",
       "lonlat": [
-        137.371858191755,
-        -4.810835752305946
+        137.38186049706226,
+        -4.813669169850323
       ],
       "classification": "hypothetical",
       "role": "destination"
@@ -117,8 +117,8 @@
     {
       "id": "lookout",
       "lonlat": [
-        137.37267749321364,
-        -4.814044683018855
+        137.38189463462305,
+        -4.813191243999465
       ],
       "classification": "hypothetical",
       "role": "destination"
@@ -139,5 +139,5 @@
     "registration_status": "provisional_existing_p1_measurement",
     "evidence": "scripts/build_hirise_tiles.py and CLAUDE.md: 144 points, reported height residual spread 0.9 m, 2026-11-14. Raw control samples were not delivered; fresh visual review required. Panorama +71.2 m is unrelated."
   },
-  "content_id": "59f53b78a0f5369d202d5af8bcd3dc8651620b74a09a6b3bb028faee4e1cf2e1"
+  "content_id": "709d524ac85a5a401a00133f0846682e82bea87c323156f0901b09f80bfcf494"
 }

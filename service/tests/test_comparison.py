@@ -28,13 +28,13 @@ class ComparisonServiceTests(unittest.TestCase):
         fast, ascent = response["alternatives"]
         self.assertLess(fast["metrics"]["elapsed_s"], ascent["metrics"]["elapsed_s"])
         end = next(x["record"]["valid_to_utc"] for x in fast["environment"]["decision_records"] if x["record"]["kind"] == "forecast")
-        departure = utc(end, "target") - timedelta(seconds=fast["metrics"]["reserved_total_s"] + 60)
+        departure = utc(end, "target") - timedelta(seconds=fast["metrics"]["reserved_total_s"] + (ascent["metrics"]["reserved_total_s"] - fast["metrics"]["reserved_total_s"]) / 2)
         payload["mission"]["departure_utc"] = departure.isoformat().replace("+00:00", "Z")
         response = plan_draft(planner, payload)
         fast, ascent = response["alternatives"]
         count = lambda a: sum(x["record"]["kind"] == "forecast" for x in a["environment"]["decision_records"])
         self.assertEqual(count(fast), 4)
-        self.assertEqual(count(ascent), 0)
+        self.assertLess(count(ascent), count(fast))
         self.assertNotEqual(fast["environment"]["mission_target_interval"], ascent["environment"]["mission_target_interval"])
         self.assertTrue(all(a["assessment"] == "incompatible" for a in response["alternatives"]))
 

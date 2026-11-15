@@ -89,7 +89,7 @@ def prepare(out, factor=2):
               "north": math.degrees((t.f-row0*res)/R_SPHERE),
               "south": math.degrees((t.f-row1*res)/R_SPHERE)}
     manifest = {
-        "format": "gale-analytical-1", "id": "gale_hirise_019698", "version": f"native{factor}-photo-v2",
+        "format": "gale-analytical-1", "id": "gale_hirise_019698", "version": f"native{factor}-photo-v3",
         "fixture": False, "source": source_info, "reviewed_bounds_lonlat": dict(zip(("west", "south", "east", "north"), BBOX)),
         "bounds_lonlat": bounds, "reference_description": "Mars 2015 sphere; east-positive longitude, source planetocentric latitude, native equirectangular meters; east-west distortion about 0.35 percent.",
         "grid": {"shape": list(arrays["coverage"].shape), "spacing_m": [res*factor]*2,
@@ -103,8 +103,8 @@ def prepare(out, factor=2):
                         "command": f"python -m scripts.prepare_gale --factor {factor}"},
         "arrays": {"file": "terrain.npz", "sha256": hashes},
         "masks": {"covered_cells": int(arrays["coverage"].sum()), "excluded_cells": 0},
-        "location_selection": 'Hypothetical photo-sector locations selected inside a 7946-cell strongly connected component of the unchanged default-team directed graph. No terrain or profile changes.',
-        "pois": [{'id': 'base', 'lonlat': [137.3751012600287, -4.811074715231375], 'classification': 'hypothetical', 'role': 'base'}, {'id': 'sample', 'lonlat': [137.3700489010339, -4.8134984820464455], 'classification': 'hypothetical', 'role': 'destination'}, {'id': 'control', 'lonlat': [137.371858191755, -4.810835752305946], 'classification': 'hypothetical', 'role': 'destination'}, {'id': 'lookout', 'lonlat': [137.37267749321364, -4.814044683018855], 'classification': 'hypothetical', 'role': 'destination'}],
+        "location_selection": 'Inside the convex footprint of all 12 unchanged registered photo markers, using native cells in one unchanged-default-team strongly connected component. Exact photo cells exceed the rover 8-degree block limit. Base is 2.715 m from Navcam sol 4861; all selected points are at most 47.273 m from their nearest marker. Scene registration is inverted once for analytical selection; no distant-region fallback.',
+        "pois": [{'id': 'base', 'lonlat': [137.3817922219407, -4.8137715825326515], 'classification': 'hypothetical', 'role': 'base'}, {'id': 'sample', 'lonlat': [137.38175808437995, -4.812986418634811], 'classification': 'hypothetical', 'role': 'destination'}, {'id': 'control', 'lonlat': [137.38186049706226, -4.813669169850323], 'classification': 'hypothetical', 'role': 'destination'}, {'id': 'lookout', 'lonlat': [137.38189463462305, -4.813191243999465], 'classification': 'hypothetical', 'role': 'destination'}],
         "geographic_adapter": {"id": "gale-eqc-scene-v1", "projection": "spherical_equirectangular",
                                "radius_m": R_SPHERE, "central_meridian_deg": 0, "standard_parallel_deg": 0,
                                "latitude_convention": "source_latitude_direct_to_cesium_mars",
