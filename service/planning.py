@@ -118,6 +118,12 @@ class PreparedPlanner:
             self._search = self._base = None
             raise PlanningInputError("stale_movement_context", "movement_context", "Search does not belong to the active graph/base.")
         routes = routes_to(search, end.cell)
+        if location is not None:
+            from .solar import ADAPTER, iso
+            if scenario.clock.adapter_id == ADAPTER:
+                durations = (routes.outbound.duration_s, routes.return_leg.duration_s)
+                mission_end = iso(selected.departure.offset_s + math.fsum((*durations, *(task.duration_s for task in tasks), reserve_s))) if all(d is not None for d in durations) else None
+                selected = select_scenario(scenario, as_of_utc, departure_utc, evaluation_location=location, mission_end_utc=mission_end)
         mission = evaluate_mission(routes, tasks, members, time_budget_s=time_budget_s, reserve_s=reserve_s,
                                    departure=selected.departure, daylight=selected.daylight, snapshot=selected.snapshot)
         return PlanEvaluation(parcel, start, end, members, context, selected, routes, mission, graph_reused, search_reused)

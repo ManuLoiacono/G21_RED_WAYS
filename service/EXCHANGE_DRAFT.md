@@ -83,3 +83,20 @@ Parcel scenarios advertise `coverage: {from_utc, to_utc}` and optional `environm
 metadata (package/source identities, policy, coverage and limitations). Discovery never
 publishes unfiltered daily source values or retrospective verification metrics.
 This remains the consumer-review-pending development draft; shared v0 is unchanged.
+
+Real historical `environment.decision_records` are allowlisted records. Forecast
+`value` is null; the explicitly named `quantiles` object carries p10/p50/p90 with
+nulls preserved. Model ID/version, variable/units, issue/target sol and lead,
+`training_cutoff_utc`, `model_available_at_utc`, reconstructed `issued_at_utc`,
+target `valid_from_utc`/`valid_to_utc`, effective availability and input intervals
+are separate fields. Provenance includes source identity/location and reconstruction
+basis. `observed`, baselines and `skill_summary` from the export are never copied.
+An actual request is [gale-replay.request.json](examples/gale-replay.request.json).
+
+`environment.provider_metadata` identifies prepared sources, policy and provider
+versions. `missing_forecast_variables` explicitly lists variables without eligible,
+applicable forecasts; historical observations do not fill that gap. Exclusion counts
+include `unknown_availability`, `not_available_as_of`, `model_not_available_as_of`
+and `outside_mission_target_interval`. Unknown evidence is not a successful forecast.
+Only derived geometric daylight affects environmental mission status. Weather/RAD
+remain context and do not enter graph/base-search identities.

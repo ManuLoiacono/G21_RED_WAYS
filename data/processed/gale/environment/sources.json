@@ -1,6 +1,6 @@
 {
   "format": "gale-environment-sources-1",
-  "version": "v1",
+  "version": "v2",
   "availability_policy": "completed-inputs-retrospective-v1",
   "policy_description": "Retrospective assumption: release after all included sol and Earth-day input intervals and frozen training inputs complete. Zero processing/publication lag is assumed, not an archival NASA timestamp. Modern source revisions remain a limitation.",
   "training_cutoff_utc": "2025-10-25T00:00:00Z",
@@ -193,6 +193,34 @@
     {
       "path": "data/processed/ml/forecasts/sol_4739.json",
       "sha256": "3ceba6ddc24de37ee72d8b235098354661ecdf6621033fa5558d1d91a9ebb3cd"
+    },
+    {
+      "path": "ml/artifacts/A1_pressure/metrics.json",
+      "sha256": "44fbee43fb9275456ee22ed263a9a7a62b173e07acb4c17654566340544dfbfe"
+    },
+    {
+      "path": "ml/artifacts/A2_temperature/metrics.json",
+      "sha256": "369bec5e3c05fce47e33e0332b1cdbff31481f6bf61a60aa1414d8de35a1c21d"
+    },
+    {
+      "path": "ml/artifacts/B1_dose/metrics.json",
+      "sha256": "7052fcf02be867a9fe8e6626114b0f4724bae4db6c3b408d152c20bf4da66786"
+    },
+    {
+      "path": "ml/requirements.txt",
+      "sha256": "41a0e0d2833f7fd720391c6e71f172ef47dddc41bbac59c8271b8b6afd0dc38f"
+    },
+    {
+      "path": "ml/datasets/build_rad_daily.py",
+      "sha256": "5ddec24f050aec1e8c066efc352133162867baf551466b623be44713faf28bec"
+    },
+    {
+      "path": "ml/models/b1_dose.py",
+      "sha256": "85724dd92bfe28129b494f47997dffd092463e560f0e3b65d4027d9aec253ac4"
+    },
+    {
+      "path": "ml/evaluation/common.py",
+      "sha256": "57980c869cfbe56d9030cc72c9544bfcaf468e75ec0099335621d93f06dd280a"
     }
   ],
   "source_provenance": {
@@ -221,7 +249,11 @@
       "pressure_pa": 686.0,
       "min_temp_c": -75.0,
       "max_temp_c": -3.0,
-      "dose_b_rtgcorr_ugy_day": 110.14210941090303
+      "dose_b_rtgcorr_ugy_day": 110.14210941090303,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025296_v03.cdf",
+        "msl_rad_obs-l2_2025297_v03.cdf"
+      ]
     },
     {
       "sol": 4699,
@@ -234,7 +266,11 @@
       "pressure_pa": 687.0,
       "min_temp_c": -74.0,
       "max_temp_c": -3.0,
-      "dose_b_rtgcorr_ugy_day": 110.62294405982608
+      "dose_b_rtgcorr_ugy_day": 110.62294405982608,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025297_v03.cdf",
+        "msl_rad_obs-l2_2025298_v04.cdf"
+      ]
     },
     {
       "sol": 4700,
@@ -247,7 +283,11 @@
       "pressure_pa": 687.0,
       "min_temp_c": -75.0,
       "max_temp_c": -3.0,
-      "dose_b_rtgcorr_ugy_day": 108.97104240866268
+      "dose_b_rtgcorr_ugy_day": 108.97104240866268,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025298_v04.cdf",
+        "msl_rad_obs-l2_2025299_v03.cdf"
+      ]
     },
     {
       "sol": 4701,
@@ -260,7 +300,11 @@
       "pressure_pa": 687.0,
       "min_temp_c": -75.0,
       "max_temp_c": 0.0,
-      "dose_b_rtgcorr_ugy_day": 110.61303082634421
+      "dose_b_rtgcorr_ugy_day": 110.61303082634421,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025299_v03.cdf",
+        "msl_rad_obs-l2_2025300_v03.cdf"
+      ]
     },
     {
       "sol": 4702,
@@ -273,7 +317,11 @@
       "pressure_pa": 686.0,
       "min_temp_c": -76.0,
       "max_temp_c": -1.0,
-      "dose_b_rtgcorr_ugy_day": 106.62083677404067
+      "dose_b_rtgcorr_ugy_day": 106.62083677404067,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025300_v03.cdf",
+        "msl_rad_obs-l2_2025301_v03.cdf"
+      ]
     },
     {
       "sol": 4703,
@@ -286,7 +334,11 @@
       "pressure_pa": 689.0,
       "min_temp_c": -76.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 107.01111330304828
+      "dose_b_rtgcorr_ugy_day": 107.01111330304828,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025301_v03.cdf",
+        "msl_rad_obs-l2_2025302_v03.cdf"
+      ]
     },
     {
       "sol": 4704,
@@ -299,7 +351,11 @@
       "pressure_pa": 690.0,
       "min_temp_c": -75.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 99.46037957834643
+      "dose_b_rtgcorr_ugy_day": 99.46037957834643,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025302_v03.cdf",
+        "msl_rad_obs-l2_2025303_v03.cdf"
+      ]
     },
     {
       "sol": 4705,
@@ -312,7 +368,11 @@
       "pressure_pa": 691.0,
       "min_temp_c": -74.0,
       "max_temp_c": -3.0,
-      "dose_b_rtgcorr_ugy_day": 100.39557647705078
+      "dose_b_rtgcorr_ugy_day": 100.39557647705078,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025303_v03.cdf",
+        "msl_rad_obs-l2_2025304_v03.cdf"
+      ]
     },
     {
       "sol": 4706,
@@ -325,7 +385,11 @@
       "pressure_pa": 690.0,
       "min_temp_c": -75.0,
       "max_temp_c": -1.0,
-      "dose_b_rtgcorr_ugy_day": 100.15621344987736
+      "dose_b_rtgcorr_ugy_day": 100.15621344987736,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025304_v03.cdf",
+        "msl_rad_obs-l2_2025305_v03.cdf"
+      ]
     },
     {
       "sol": 4707,
@@ -338,7 +402,11 @@
       "pressure_pa": 689.0,
       "min_temp_c": -75.0,
       "max_temp_c": -1.0,
-      "dose_b_rtgcorr_ugy_day": 100.22701735723587
+      "dose_b_rtgcorr_ugy_day": 100.22701735723587,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025305_v03.cdf",
+        "msl_rad_obs-l2_2025306_v03.cdf"
+      ]
     },
     {
       "sol": 4708,
@@ -351,7 +419,11 @@
       "pressure_pa": 690.0,
       "min_temp_c": -76.0,
       "max_temp_c": 0.0,
-      "dose_b_rtgcorr_ugy_day": 99.55436850155101
+      "dose_b_rtgcorr_ugy_day": 99.55436850155101,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025307_v03.cdf",
+        "msl_rad_obs-l2_2025308_v03.cdf"
+      ]
     },
     {
       "sol": 4709,
@@ -364,7 +436,11 @@
       "pressure_pa": 691.0,
       "min_temp_c": -74.0,
       "max_temp_c": -1.0,
-      "dose_b_rtgcorr_ugy_day": 102.38627633383108
+      "dose_b_rtgcorr_ugy_day": 102.38627633383108,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025308_v03.cdf",
+        "msl_rad_obs-l2_2025309_v03.cdf"
+      ]
     },
     {
       "sol": 4710,
@@ -377,7 +453,11 @@
       "pressure_pa": 692.0,
       "min_temp_c": -73.0,
       "max_temp_c": -10.0,
-      "dose_b_rtgcorr_ugy_day": 100.84387652079265
+      "dose_b_rtgcorr_ugy_day": 100.84387652079265,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025309_v03.cdf",
+        "msl_rad_obs-l2_2025310_v03.cdf"
+      ]
     },
     {
       "sol": 4711,
@@ -390,7 +470,11 @@
       "pressure_pa": 692.0,
       "min_temp_c": -74.0,
       "max_temp_c": -4.0,
-      "dose_b_rtgcorr_ugy_day": 103.45802253274357
+      "dose_b_rtgcorr_ugy_day": 103.45802253274357,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025310_v03.cdf",
+        "msl_rad_obs-l2_2025311_v03.cdf"
+      ]
     },
     {
       "sol": 4712,
@@ -403,7 +487,11 @@
       "pressure_pa": 693.0,
       "min_temp_c": -74.0,
       "max_temp_c": -9.0,
-      "dose_b_rtgcorr_ugy_day": 103.39309198716107
+      "dose_b_rtgcorr_ugy_day": 103.39309198716107,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025311_v03.cdf",
+        "msl_rad_obs-l2_2025312_v03.cdf"
+      ]
     },
     {
       "sol": 4713,
@@ -416,7 +504,11 @@
       "pressure_pa": 692.0,
       "min_temp_c": -73.0,
       "max_temp_c": -1.0,
-      "dose_b_rtgcorr_ugy_day": 102.25449335434857
+      "dose_b_rtgcorr_ugy_day": 102.25449335434857,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025312_v03.cdf",
+        "msl_rad_obs-l2_2025313_v03.cdf"
+      ]
     },
     {
       "sol": 4714,
@@ -429,7 +521,11 @@
       "pressure_pa": 692.0,
       "min_temp_c": -74.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 105.27216184706916
+      "dose_b_rtgcorr_ugy_day": 105.27216184706916,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025313_v03.cdf",
+        "msl_rad_obs-l2_2025314_v03.cdf"
+      ]
     },
     {
       "sol": 4715,
@@ -442,7 +538,11 @@
       "pressure_pa": 692.0,
       "min_temp_c": -73.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 106.05764240938075
+      "dose_b_rtgcorr_ugy_day": 106.05764240938075,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025314_v03.cdf",
+        "msl_rad_obs-l2_2025315_v03.cdf"
+      ]
     },
     {
       "sol": 4716,
@@ -455,7 +555,11 @@
       "pressure_pa": 695.0,
       "min_temp_c": -74.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 137.8372782090131
+      "dose_b_rtgcorr_ugy_day": 137.8372782090131,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025315_v03.cdf",
+        "msl_rad_obs-l2_2025316_v04.cdf"
+      ]
     },
     {
       "sol": 4717,
@@ -468,7 +572,11 @@
       "pressure_pa": 695.0,
       "min_temp_c": -74.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 113.34119070143927
+      "dose_b_rtgcorr_ugy_day": 113.34119070143927,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025316_v04.cdf",
+        "msl_rad_obs-l2_2025317_v04.cdf"
+      ]
     },
     {
       "sol": 4718,
@@ -481,7 +589,11 @@
       "pressure_pa": 695.0,
       "min_temp_c": -74.0,
       "max_temp_c": -5.0,
-      "dose_b_rtgcorr_ugy_day": 110.24129800235524
+      "dose_b_rtgcorr_ugy_day": 110.24129800235524,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025317_v04.cdf",
+        "msl_rad_obs-l2_2025318_v03.cdf"
+      ]
     },
     {
       "sol": 4719,
@@ -494,7 +606,11 @@
       "pressure_pa": 696.0,
       "min_temp_c": -74.0,
       "max_temp_c": -6.0,
-      "dose_b_rtgcorr_ugy_day": 108.74710700625465
+      "dose_b_rtgcorr_ugy_day": 108.74710700625465,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025318_v03.cdf",
+        "msl_rad_obs-l2_2025319_v03.cdf"
+      ]
     },
     {
       "sol": 4720,
@@ -507,7 +623,11 @@
       "pressure_pa": 696.0,
       "min_temp_c": -73.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 107.62002300080799
+      "dose_b_rtgcorr_ugy_day": 107.62002300080799,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025319_v03.cdf",
+        "msl_rad_obs-l2_2025320_v05.cdf"
+      ]
     },
     {
       "sol": 4721,
@@ -520,7 +640,11 @@
       "pressure_pa": 697.0,
       "min_temp_c": -73.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 107.16100756327312
+      "dose_b_rtgcorr_ugy_day": 107.16100756327312,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025320_v05.cdf",
+        "msl_rad_obs-l2_2025321_v03.cdf"
+      ]
     },
     {
       "sol": 4722,
@@ -533,7 +657,11 @@
       "pressure_pa": 699.0,
       "min_temp_c": -74.0,
       "max_temp_c": -4.0,
-      "dose_b_rtgcorr_ugy_day": 106.14794158935547
+      "dose_b_rtgcorr_ugy_day": 106.14794158935547,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025321_v03.cdf",
+        "msl_rad_obs-l2_2025322_v03.cdf"
+      ]
     },
     {
       "sol": 4723,
@@ -546,7 +674,11 @@
       "pressure_pa": 700.0,
       "min_temp_c": -73.0,
       "max_temp_c": -3.0,
-      "dose_b_rtgcorr_ugy_day": 107.22179628259995
+      "dose_b_rtgcorr_ugy_day": 107.22179628259995,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025322_v03.cdf",
+        "msl_rad_obs-l2_2025323_v03.cdf"
+      ]
     },
     {
       "sol": 4724,
@@ -559,7 +691,11 @@
       "pressure_pa": 700.0,
       "min_temp_c": -73.0,
       "max_temp_c": -3.0,
-      "dose_b_rtgcorr_ugy_day": 106.02405664780561
+      "dose_b_rtgcorr_ugy_day": 106.02405664780561,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025323_v03.cdf",
+        "msl_rad_obs-l2_2025324_v03.cdf"
+      ]
     },
     {
       "sol": 4725,
@@ -572,7 +708,11 @@
       "pressure_pa": 701.0,
       "min_temp_c": -74.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 106.83682559785389
+      "dose_b_rtgcorr_ugy_day": 106.83682559785389,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025324_v03.cdf",
+        "msl_rad_obs-l2_2025325_v03.cdf"
+      ]
     },
     {
       "sol": 4726,
@@ -585,7 +725,11 @@
       "pressure_pa": 702.0,
       "min_temp_c": -72.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 106.12969425746373
+      "dose_b_rtgcorr_ugy_day": 106.12969425746373,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025325_v03.cdf",
+        "msl_rad_obs-l2_2025326_v03.cdf"
+      ]
     },
     {
       "sol": 4727,
@@ -598,7 +742,11 @@
       "pressure_pa": 702.0,
       "min_temp_c": -72.0,
       "max_temp_c": 2.0,
-      "dose_b_rtgcorr_ugy_day": 106.04467333625345
+      "dose_b_rtgcorr_ugy_day": 106.04467333625345,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025326_v03.cdf",
+        "msl_rad_obs-l2_2025327_v03.cdf"
+      ]
     },
     {
       "sol": 4728,
@@ -611,7 +759,11 @@
       "pressure_pa": 704.0,
       "min_temp_c": -72.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 104.97717635210823
+      "dose_b_rtgcorr_ugy_day": 104.97717635210823,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025327_v03.cdf",
+        "msl_rad_obs-l2_2025328_v03.cdf"
+      ]
     },
     {
       "sol": 4729,
@@ -624,7 +776,11 @@
       "pressure_pa": 705.0,
       "min_temp_c": -72.0,
       "max_temp_c": -4.0,
-      "dose_b_rtgcorr_ugy_day": 103.59045137677874
+      "dose_b_rtgcorr_ugy_day": 103.59045137677874,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025328_v03.cdf",
+        "msl_rad_obs-l2_2025329_v03.cdf"
+      ]
     },
     {
       "sol": 4730,
@@ -637,7 +793,11 @@
       "pressure_pa": 705.0,
       "min_temp_c": -72.0,
       "max_temp_c": -5.0,
-      "dose_b_rtgcorr_ugy_day": 101.07807177166606
+      "dose_b_rtgcorr_ugy_day": 101.07807177166606,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025329_v03.cdf",
+        "msl_rad_obs-l2_2025330_v03.cdf"
+      ]
     },
     {
       "sol": 4731,
@@ -650,7 +810,11 @@
       "pressure_pa": 706.0,
       "min_temp_c": -73.0,
       "max_temp_c": -1.0,
-      "dose_b_rtgcorr_ugy_day": 99.36741413789638
+      "dose_b_rtgcorr_ugy_day": 99.36741413789638,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025330_v03.cdf",
+        "msl_rad_obs-l2_2025331_v03.cdf"
+      ]
     },
     {
       "sol": 4732,
@@ -663,7 +827,11 @@
       "pressure_pa": 706.0,
       "min_temp_c": -73.0,
       "max_temp_c": -1.0,
-      "dose_b_rtgcorr_ugy_day": 98.21245765686035
+      "dose_b_rtgcorr_ugy_day": 98.21245765686035,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025331_v03.cdf",
+        "msl_rad_obs-l2_2025332_v03.cdf"
+      ]
     },
     {
       "sol": 4733,
@@ -676,7 +844,11 @@
       "pressure_pa": 706.0,
       "min_temp_c": -72.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 102.75639405361441
+      "dose_b_rtgcorr_ugy_day": 102.75639405361441,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025332_v03.cdf",
+        "msl_rad_obs-l2_2025333_v03.cdf"
+      ]
     },
     {
       "sol": 4734,
@@ -689,7 +861,11 @@
       "pressure_pa": 708.0,
       "min_temp_c": -72.0,
       "max_temp_c": -3.0,
-      "dose_b_rtgcorr_ugy_day": 102.8130568560432
+      "dose_b_rtgcorr_ugy_day": 102.8130568560432,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025333_v03.cdf",
+        "msl_rad_obs-l2_2025334_v03.cdf"
+      ]
     },
     {
       "sol": 4735,
@@ -702,7 +878,11 @@
       "pressure_pa": 710.0,
       "min_temp_c": -71.0,
       "max_temp_c": -4.0,
-      "dose_b_rtgcorr_ugy_day": 108.44269446439522
+      "dose_b_rtgcorr_ugy_day": 108.44269446439522,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025334_v03.cdf",
+        "msl_rad_obs-l2_2025335_v04.cdf"
+      ]
     },
     {
       "sol": 4736,
@@ -715,7 +895,11 @@
       "pressure_pa": 709.0,
       "min_temp_c": -73.0,
       "max_temp_c": -3.0,
-      "dose_b_rtgcorr_ugy_day": 104.76244928696576
+      "dose_b_rtgcorr_ugy_day": 104.76244928696576,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025335_v04.cdf",
+        "msl_rad_obs-l2_2025336_v02.cdf"
+      ]
     },
     {
       "sol": 4737,
@@ -728,7 +912,11 @@
       "pressure_pa": 709.0,
       "min_temp_c": -71.0,
       "max_temp_c": -3.0,
-      "dose_b_rtgcorr_ugy_day": 103.62441496007582
+      "dose_b_rtgcorr_ugy_day": 103.62441496007582,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025336_v02.cdf",
+        "msl_rad_obs-l2_2025337_v04.cdf"
+      ]
     },
     {
       "sol": 4738,
@@ -741,7 +929,11 @@
       "pressure_pa": 710.0,
       "min_temp_c": -73.0,
       "max_temp_c": -4.0,
-      "dose_b_rtgcorr_ugy_day": 103.16116207347197
+      "dose_b_rtgcorr_ugy_day": 103.16116207347197,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025337_v04.cdf",
+        "msl_rad_obs-l2_2025338_v03.cdf"
+      ]
     },
     {
       "sol": 4739,
@@ -754,7 +946,11 @@
       "pressure_pa": 712.0,
       "min_temp_c": -73.0,
       "max_temp_c": -2.0,
-      "dose_b_rtgcorr_ugy_day": 102.39600699288505
+      "dose_b_rtgcorr_ugy_day": 102.39600699288505,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025338_v03.cdf",
+        "msl_rad_obs-l2_2025339_v03.cdf"
+      ]
     },
     {
       "sol": 4740,
@@ -767,7 +963,11 @@
       "pressure_pa": 713.0,
       "min_temp_c": -73.0,
       "max_temp_c": -5.0,
-      "dose_b_rtgcorr_ugy_day": 102.17302416633157
+      "dose_b_rtgcorr_ugy_day": 102.17302416633157,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025339_v03.cdf",
+        "msl_rad_obs-l2_2025340_v03.cdf"
+      ]
     },
     {
       "sol": 4741,
@@ -780,7 +980,11 @@
       "pressure_pa": 714.0,
       "min_temp_c": -72.0,
       "max_temp_c": 3.0,
-      "dose_b_rtgcorr_ugy_day": 102.92680131821405
+      "dose_b_rtgcorr_ugy_day": 102.92680131821405,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025340_v03.cdf",
+        "msl_rad_obs-l2_2025341_v03.cdf"
+      ]
     },
     {
       "sol": 4742,
@@ -793,7 +997,11 @@
       "pressure_pa": 716.0,
       "min_temp_c": -73.0,
       "max_temp_c": 3.0,
-      "dose_b_rtgcorr_ugy_day": 103.00672077852137
+      "dose_b_rtgcorr_ugy_day": 103.00672077852137,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025341_v03.cdf",
+        "msl_rad_obs-l2_2025342_v03.cdf"
+      ]
     },
     {
       "sol": 4743,
@@ -806,7 +1014,11 @@
       "pressure_pa": 716.0,
       "min_temp_c": -73.0,
       "max_temp_c": 2.0,
-      "dose_b_rtgcorr_ugy_day": 104.89584530101104
+      "dose_b_rtgcorr_ugy_day": 104.89584530101104,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025342_v03.cdf",
+        "msl_rad_obs-l2_2025343_v03.cdf"
+      ]
     },
     {
       "sol": 4744,
@@ -819,7 +1031,12 @@
       "pressure_pa": 717.0,
       "min_temp_c": -74.0,
       "max_temp_c": 2.0,
-      "dose_b_rtgcorr_ugy_day": 106.05276643662225
+      "dose_b_rtgcorr_ugy_day": 106.05276643662225,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025343_v03.cdf",
+        "msl_rad_obs-l2_2025344_v03.cdf",
+        "msl_rad_obs-l2_2025345_v02.cdf"
+      ]
     },
     {
       "sol": 4745,
@@ -832,7 +1049,11 @@
       "pressure_pa": 719.0,
       "min_temp_c": -74.0,
       "max_temp_c": 2.0,
-      "dose_b_rtgcorr_ugy_day": 104.75965835934593
+      "dose_b_rtgcorr_ugy_day": 104.75965835934593,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025345_v02.cdf",
+        "msl_rad_obs-l2_2025346_v03.cdf"
+      ]
     },
     {
       "sol": 4746,
@@ -845,7 +1066,11 @@
       "pressure_pa": 719.0,
       "min_temp_c": -74.0,
       "max_temp_c": 3.0,
-      "dose_b_rtgcorr_ugy_day": 104.24583452801372
+      "dose_b_rtgcorr_ugy_day": 104.24583452801372,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025346_v03.cdf",
+        "msl_rad_obs-l2_2025347_v03.cdf"
+      ]
     },
     {
       "sol": 4747,
@@ -858,7 +1083,11 @@
       "pressure_pa": 721.0,
       "min_temp_c": -74.0,
       "max_temp_c": 1.0,
-      "dose_b_rtgcorr_ugy_day": 106.23262250991095
+      "dose_b_rtgcorr_ugy_day": 106.23262250991095,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025347_v03.cdf",
+        "msl_rad_obs-l2_2025348_v03.cdf"
+      ]
     },
     {
       "sol": 4748,
@@ -871,7 +1100,11 @@
       "pressure_pa": 722.0,
       "min_temp_c": -78.0,
       "max_temp_c": -5.0,
-      "dose_b_rtgcorr_ugy_day": 105.87105821308337
+      "dose_b_rtgcorr_ugy_day": 105.87105821308337,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025348_v03.cdf",
+        "msl_rad_obs-l2_2025349_v03.cdf"
+      ]
     },
     {
       "sol": 4749,
@@ -884,14 +1117,42 @@
       "pressure_pa": 722.0,
       "min_temp_c": -74.0,
       "max_temp_c": 1.0,
-      "dose_b_rtgcorr_ugy_day": 107.85617998908548
+      "dose_b_rtgcorr_ugy_day": 107.85617998908548,
+      "rad_source_files": [
+        "msl_rad_obs-l2_2025349_v03.cdf",
+        "msl_rad_obs-l2_2025350_v03.cdf"
+      ]
     }
   ],
+  "model_selection": {
+    "pressure_pa": {
+      "1": "A1_lgbm_norm_v1",
+      "3": "A1_lgbm_norm_v1",
+      "5": "A1_lgbm_norm_v1",
+      "10": "A1_ridge_norm_a100_v1"
+    },
+    "min_temp_c": {
+      "1": "A2_lgbm_q_v1",
+      "3": "A2_lgbm_q_v1",
+      "5": "A2_lgbm_q_v1"
+    },
+    "max_temp_c": {
+      "1": "A2_ridge_a100_v1",
+      "3": "A2_ridge_a100_v1",
+      "5": "A2_ridge_a100_v1"
+    },
+    "dose_b_rtgcorr_ugy_day": {
+      "1": "B1_lgbm_v1",
+      "3": "B1_lgbm_v1",
+      "5": "B1_lgbm_v1",
+      "10": "B1_ma27_v1"
+    }
+  },
   "limitations": [
     "Historical hindcast, not operational or current Mars weather.",
     "Source rover locations/elevations are forward-filled waypoints, not a validated weather field at the hypothetical base.",
     "Daily reports are not hourly weather; RAD is silicon detector B RTG-corrected microgray/day, not human effective dose.",
     "SILSO uses modern revised daily values; original 2025 revisions are not recoverable."
   ],
-  "content_id": "0275b9cc48c5c82c590216ac2c8f95f036e28acc44f1cd8ea5b4272e9ef7e25d"
+  "content_id": "12ea4a78fe3487b9f26a51d6f12919bdeae3dbfe7dd0ff0270e76243ef91f7ae"
 }

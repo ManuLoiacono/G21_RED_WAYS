@@ -103,6 +103,18 @@ class PreparedRecord:
     reconstructed_available_at_utc: str | None = None
     availability_assumption: str | None = None
     epoch_id: str | None = None
+    quantiles: dict | None = None
+    model_id: str | None = None
+    model_version: str | None = None
+    training_cutoff_utc: str | None = None
+    model_available_at_utc: str | None = None
+    issue_sol: int | None = None
+    target_sol: int | None = None
+    lead_sols: int | None = None
+    interval_method: str | None = None
+    provenance: dict | None = None
+    applicability: str | None = None
+    input_intervals: tuple = ()
 
 
 @dataclass(frozen=True)

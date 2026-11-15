@@ -63,10 +63,53 @@ source reports are not copied as base sunlight. Geometric roots are solved in
 physical seconds with microsecond-normalized output. Engine equality tolerance
 remains 1 microsecond; a 1 millisecond reserved-return overrun fails.
 
-The inspected `marstime 0.5.3` package uses TT-UTC=67.184 s in 2025 (stale leap
+Both inspected `marstime 0.5.3` and the pipeline-pinned `0.5.6` use TT-UTC=67.184 s in 2025 (stale leap
 table), older MSD constants and older orbital coefficients. Runtime uses the
 documented NASA update without a marstime dependency. For original RAD daily
 aggregates, `source_interval` envelopes both the corrected partition and legacy
 marstime partition (fixed 137.42 east). Its later completion is preserved as an
 input gate; no existing aggregate is silently relabeled or released two seconds early.
 The discrepancy is documented rather than treated as an exact NASA publication lag.
+
+## Historical provider and decision gates
+
+`exported-hindcast-provider-v1` imports all 41 real v0 exports (574 rows) at startup,
+checks their prepared SHA-256 identities, bounds files and row counts, and maps
+`min_temp_c`/`max_temp_c` explicitly to `daily_min_temp_c`/`daily_max_temp_c`.
+The validation-selected A1/A2/B1 model IDs are frozen in the prepared metadata;
+the importer never reselects a model from final-window outcomes. Runtime requires
+only engine NumPy/SciPy and the standard library. The preparation command reads
+Parquet; it neither fits models nor imports LightGBM.
+
+Each decision record retains p10/p50/p90 (including nulls), units, model identity,
+issue/target sols, horizon, target validity, source rover position/elevation,
+interval method and applicability. An explicit allowlist removes target `observed`,
+all baselines and `skill_summary` before constructing decision records. Whole-window
+scores and future target observations never enter ranking or movement caches.
+Weather and RAD have no applied movement effects and cannot change mission status.
+
+Reconstructed issue time is the completion of included daily inputs. Effective
+availability is the maximum of that time and effective model availability. The
+latter is gated by the nominal training cutoff plus completion of all frozen
+training inputs. REMS includes the issue-sol summary and end-of-sol waypoint;
+B1 additionally includes the RAD source-sol interval, complete UTC daily CDF source
+files and SILSO's latest included UTC daily interval. Trailing windows need no
+later date than these terminal intervals. Zero compute/publication lag and modern
+revisions are explicit hindcast assumptions, not recovered archival availability.
+Unknown dependencies produce unknown availability and exclusion, preserving
+independent weather cases. Daily observations are gated independently by interval
+completion and reconstructed availability. No current-day daily summary appears early.
+
+Forecasts must contain the full mission interval from departure through estimated
+return plus reserve. A route with unavailable duration can only display departure
+context; no full-sortie applicability is asserted. Distinct target/lead series are
+retained before selecting eligible revisions. `missing_forecast_variables` and
+exclusion counts distinguish absent applicability/availability from missing daylight.
+Old valid-time-insensitive synthetic records remain unchanged as explicit fixtures.
+
+The default is the first chronological eligible target with daylight at the base,
+rounded up to a UTC second: **2025-10-26T00:26:28Z**. It was selected without outcome
+scoring. Earlier replay dates remain editable and show missing forecasts explicitly.
+B1 is the RTG-corrected silicon detector B rate in microgray/day; it is not human
+effective dose, an exposure budget or a particle-event predictor. Reference rover
+forecasts are not a validated spatial weather field or an altitude-corrected base forecast.

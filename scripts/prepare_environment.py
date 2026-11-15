@@ -27,16 +27,30 @@ def prepare(output=DEFAULT_PACKAGE):
             record[key] = None if pd.isna(value) else (value.isoformat().replace("+00:00", "Z") if key == "date_utc" else value)
         value = rad.loc[row.sol, "dose_b_rtgcorr_ugy_day"]
         record["dose_b_rtgcorr_ugy_day"] = None if pd.isna(value) else float(value)
+        files = rad.loc[row.sol, "source_files"]
+        record["rad_source_files"] = [] if pd.isna(files) else files.split(",")
         daily.append(record)
     paths = [folder / name for name in ("daily_weather.parquet", "rad_daily.parquet", "sunspots_daily.parquet", "daily_weather_summary.json", "rad_daily_summary.json")]
     sources = [{"path": p.relative_to(ROOT).as_posix(), "sha256": hashlib.sha256(p.read_bytes()).hexdigest()} for p in paths]
     sources.extend({"path": p.relative_to(ROOT).as_posix(), "sha256": hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted((folder / "forecasts").glob("sol_*.json")))
+    selections = {}
+    for family, name in (("A1", "A1_pressure"), ("A2", "A2_temperature"), ("B1", "B1_dose")):
+        path = ROOT / "ml/artifacts" / name / "metrics.json"
+        metrics = json.loads(path.read_text(encoding="utf-8"))
+        sources.append({"path": path.relative_to(ROOT).as_posix(), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+        specs = metrics["results"] if family == "A2" else {metrics["variable"]: metrics}
+        for variable, spec in specs.items():
+            selections[variable] = {lead: f"{family}_{candidate}_v1" for lead, candidate in spec["selected_by_cv"].items()}
+    for name in ("ml/requirements.txt", "ml/datasets/build_rad_daily.py", "ml/models/b1_dose.py", "ml/evaluation/common.py"):
+        path = ROOT / name
+        sources.append({"path": name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
     package = {
-        "format": FORMAT, "version": "v1", "availability_policy": POLICY,
+        "format": FORMAT, "version": "v2", "availability_policy": POLICY,
         "policy_description": "Retrospective assumption: release after all included sol and Earth-day input intervals and frozen training inputs complete. Zero processing/publication lag is assumed, not an archival NASA timestamp. Modern source revisions remain a limitation.",
         "training_cutoff_utc": "2025-10-25T00:00:00Z", "last_training_sol": int(weather[weather.before_cutoff].sol.max()),
         "replay_sols": [4699, 4739], "sources": sources, "source_provenance": summary["sources"],
         "daily_sources": daily,
+        "model_selection": selections,
         "limitations": ["Historical hindcast, not operational or current Mars weather.", "Source rover locations/elevations are forward-filled waypoints, not a validated weather field at the hypothetical base.", "Daily reports are not hourly weather; RAD is silicon detector B RTG-corrected microgray/day, not human effective dose.", "SILSO uses modern revised daily values; original 2025 revisions are not recoverable."],
     }
     package["content_id"] = identity(package)

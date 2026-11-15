@@ -10,7 +10,7 @@ DEFAULT_PACKAGE = Path(__file__).resolve().parent.parent / "data/processed/gale/
 MAX_BYTES = 1_500_000
 
 
-def load_environment_package(path=DEFAULT_PACKAGE):
+def _load_environment_package(path=DEFAULT_PACKAGE):
     path = Path(path)
     if not path.is_file():
         raise PlanningInputError("missing_environment_package", "environment", "Prepare the local package with python -m scripts.prepare_environment.")
@@ -41,6 +41,15 @@ def load_environment_package(path=DEFAULT_PACKAGE):
             raise PlanningInputError("invalid_source_identity", "environment.sources", "Source SHA-256 identity is required.")
     data["content_id"] = digest
     return data
+
+
+def load_environment_package(path=DEFAULT_PACKAGE):
+    try:
+        return _load_environment_package(path)
+    except PlanningInputError:
+        raise
+    except (KeyError, TypeError, AttributeError, ValueError) as exc:
+        raise PlanningInputError("malformed_environment_package", "environment", "Malformed environmental fields or dependencies.") from exc
 
 
 def source_metadata(data):

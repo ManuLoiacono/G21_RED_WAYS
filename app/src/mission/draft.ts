@@ -140,11 +140,26 @@ export interface PlanResponse {
   geographic_adapter: GeographicAdapter | null;
   alternatives: Alternative[];
   resolved_team: { kind: string; identity: CatalogEntry["identity"]; parameters: Parameters; payload_kg: number }[];
-  environment: { missing_required: string[]; missing_optional_variables: string[]; decision_records: Record<string, unknown>[]; clock_mapping: Record<string, unknown>; snapshot: Record<string, unknown> };
+  environment: { missing_required: string[]; missing_optional_variables: string[]; missing_forecast_variables: string[]; decision_records: DecisionRecord[]; clock_mapping: Record<string, unknown>; snapshot: Record<string, unknown>; daylight: { start_s: number; end_s: number; method: string; evidence_kind: string; evaluation_location_id: string } | null; provider_metadata: Record<string, unknown> | null; forecast_applicability_rule: string; effects: string };
   locations: { origin: ResolvedLocation; destination: ResolvedLocation };
   not_evaluated: string[];
   assumptions: string[];
   versions: Record<string, string>;
+}
+export interface DecisionRecord {
+  effective_available_at_utc: string;
+  availability_basis: string;
+  record: {
+    record_id: string; kind: string; variable: string; value: number | Pair | null; units: string;
+    evidence_kind: string; source_id: string; source_location_id: string; spatial_scope: string;
+    fetched_at_utc: string; issued_at_utc: string | null; observation_start_utc: string | null; observation_end_utc: string | null;
+    valid_from_utc: string | null; valid_to_utc: string | null;
+    quantiles: { p10: number | null; p50: number | null; p90: number | null } | null;
+    model_id: string | null; model_version: string | null; training_cutoff_utc: string | null; model_available_at_utc: string | null;
+    issue_sol: number | null; target_sol: number | null; lead_sols: number | null;
+    interval_method: string | null; provenance: Record<string, unknown> | null; applicability: string | null;
+    input_intervals: { source: string; start_utc: string; end_utc: string }[];
+  };
 }
 export interface ResolvedLocation {
   requested: Record<string, unknown>;
