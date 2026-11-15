@@ -97,12 +97,10 @@ def _leg(leg):
                                              "horizontal_distance_m", "ascent_m", "descent_m")}
 
 
-def encode_response(request: DraftRequest, result):
-    echo = loads_strict(request.canonical_json)
-    mission = result.mission
-    selected = result.selected_scenario
+def encode_metrics(mission):
+    """Mission metrics as published in each alternative (also used by progress reevaluation)."""
     solar = {check.rule_id: check for check in mission.checks if check.rule_id.startswith("daylight_")}
-    metrics = {
+    return {
         "outbound_s": mission.outbound_s, "tasks_s": mission.tasks_s, "return_s": mission.return_s,
         "elapsed_s": mission.elapsed_s, "reserve_s": mission.reserve_s, "reserved_total_s": mission.reserved_total_s,
         "time_budget_s": mission.time_budget_s, "mission_margin_s": mission.mission_margin_s,
@@ -115,6 +113,13 @@ def encode_response(request: DraftRequest, result):
         "estimated_return_offset_s": mission.estimated_return_s, "reserved_deadline_offset_s": mission.reserved_deadline_s,
         "unavailable_totals_reason": "movement_duration_unavailable" if mission.elapsed_s is None else None,
     }
+
+
+def encode_response(request: DraftRequest, result):
+    echo = loads_strict(request.canonical_json)
+    mission = result.mission
+    selected = result.selected_scenario
+    metrics = encode_metrics(mission)
     response = {
         "schema_version": DRAFT_SCHEMA_VERSION, "contract_status": "consumer_review_pending",
         "request_echo": echo, "assessment": mission.assessment, "search_status": mission.search_status,
@@ -174,6 +179,13 @@ def encode_response(request: DraftRequest, result):
 
 
 def plan_draft(planner, payload, *, internal=False):
+    request, result = run_plan(planner, payload, internal=internal)
+    # Backend/reconstruction/busy errors propagate; they never become a fallback plan.
+    return encode_response(request, result)
+
+
+def run_plan(planner, payload, *, internal=False):
+    """Validate and calculate; returns the decoded request and the unencoded PlanEvaluation."""
     request = decode_request(payload)
     value = loads_strict(request.canonical_json)
     mission = value["mission"]
@@ -188,8 +200,7 @@ def plan_draft(planner, payload, *, internal=False):
                               evaluate_visibility=value.get("options", {}).get("visibility", False), criterion=value["criterion"])
     except (SelectionError, MissionInputError, GridInputError) as exc:
         raise PlanningInputError(exc.code, exc.path, str(exc)) from exc
-    # Backend/reconstruction/busy errors propagate; they never become a fallback plan.
-    return encode_response(request, result)
+    return request, result
 
 
 def export_catalogs():

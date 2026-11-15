@@ -16,7 +16,7 @@ from .validation import PlanningInputError, loads_strict
 
 ADAPTER_VERSION = "p2-http-local-1"
 DEFAULT_ORIGINS = ("http://localhost:5173", "http://127.0.0.1:5173")
-ROUTES = {"/health": "GET", "/parcel": "GET", "/catalogs": "GET", "/plan": "POST", "/recommendations": "POST", "/reachable-area": "POST"}
+ROUTES = {"/health": "GET", "/parcel": "GET", "/catalogs": "GET", "/plan": "POST", "/recommendations": "POST", "/reachable-area": "POST", "/reevaluate": "POST"}
 # Technical resource bounds, independent of scientific/operational thresholds.
 MAX_BODY_BYTES = 65_536
 MAX_TASKS = 64
@@ -103,7 +103,8 @@ class HTTPApplication:
                                             "receiver_height_m": 2, "communication_is_preference": True,
                                             "criteria": ["fastest", "lowest_relative_effort", "best_geometric_visibility"],
                                             "comparison_request": "criterion=comparison", "recommendation_cap": 3,
-                                            "reachable_area": "p2-reachable-area-1", "area_max_cells": 2250000},
+                                            "reachable_area": "p2-reachable-area-1", "area_max_cells": 2250000,
+                                            "progress": "p2-progress-1"},
                 "registered_parcels": [{"id": p.id, "version": p.version, "fixture": p.grid.fixture}
                                        for p in self.registry.parcels]}
 
@@ -327,9 +328,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 payload = app.health()
             elif parts.path == "/catalogs":
                 payload = export_catalogs()
-            elif parts.path in ("/recommendations", "/reachable-area"):
+            elif parts.path in ("/recommendations", "/reachable-area", "/reevaluate"):
                 if parts.path == "/recommendations":
                     from .recommendations import recommendations as extension
+                elif parts.path == "/reevaluate":
+                    from .progress import reevaluate as extension
                 else:
                     from .reachability import reachable_area as extension
                 try:
