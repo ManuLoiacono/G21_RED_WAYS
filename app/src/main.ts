@@ -22,6 +22,7 @@ import { esc } from "./ui/format";
 import { createMissionContext, setUpInputModeMenu, setUpSettingsMenu } from "./ui/hud";
 import type { PlanResponse } from "./mission/draft";
 import { createSceneRoutes } from "./mission/sceneRoutes";
+import { createRouteProfile } from "./ui/routeProfile";
 import { createScenePois } from "./mission/scenePois";
 
 // ---------------------------------------------------------------------------
@@ -39,6 +40,7 @@ Cesium.Ellipsoid.default = Cesium.Ellipsoid.MARS;
 // ---------------------------------------------------------------------------
 let viewer!: Cesium.Viewer;
 let sceneRoutes: ReturnType<typeof createSceneRoutes> | null = null;
+let routeProfile: ReturnType<typeof createRouteProfile> | null = null;
 let activeResponse: PlanResponse | null = null;
 /** Loading message on screen (re-translated on a language switch); null once loaded. */
 let loadingKey: MessageKey | null = null;
@@ -279,6 +281,8 @@ async function main() {
   hideLoading();
   sceneRoutes = createSceneRoutes(viewer);
   sceneRoutes.setVisible(missionVisible);
+  // Elevation profile of the calculated route (bottom dock), sampled from the local HiRISE grid.
+  routeProfile = createRouteProfile(viewer, await elevationGrid);
   if (activeResponse) void showSceneResponse(activeResponse);
   Object.assign(window, { missionRoutes: sceneRoutes });
   panel.onChange(() => layers.refresh());
@@ -377,9 +381,9 @@ const panel = createMissionPanel(document.getElementById("missionPanel")!);
 const results = createResultsPanel(document.getElementById("resultsPanel")!);
 const context = createMissionContext(document.getElementById("hudContext")!);
 panel.onChange((request) => context.update(request));
-panel.onStale(() => { activeResponse = null; results.clear(); sceneRoutes?.clear(); });
+panel.onStale(() => { activeResponse = null; results.clear(); sceneRoutes?.clear(); routeProfile?.clear(); });
 async function showSceneResponse(response: PlanResponse) {
-  try { await sceneRoutes?.show(response, panel.getParcel()); }
+  try { await sceneRoutes?.show(response, panel.getParcel()); routeProfile?.show(response, panel.getParcel()); }
   catch (error) { console.error(error); showToast(t("nav.sceneMismatch")); }
 }
 document.addEventListener("plan-response", (event) => {

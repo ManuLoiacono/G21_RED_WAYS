@@ -65,9 +65,13 @@ export class ElevationGrid {
 
   /** Reads the grid at a scene position (degrees, as Cesium returns them). Null outside or on nodata. */
   sampleScene(lonDeg: number, latDeg: number): TerrainSample | null {
-    const { radius_m: R, scene_shift_m: shift, x0_m, y0_m, cell_m } = this.info;
-    const x = (lonDeg * Math.PI) / 180 * R - shift.east;
-    const y = (latDeg * Math.PI) / 180 * R - shift.north;
+    const { radius_m: R, scene_shift_m: shift } = this.info;
+    return this.sampleMetric((lonDeg * Math.PI) / 180 * R - shift.east, (latDeg * Math.PI) / 180 * R - shift.north);
+  }
+
+  /** Reads the grid at native DTM metric coordinates (the frame of the engine's route vertices). */
+  sampleMetric(x: number, y: number): TerrainSample | null {
+    const { x0_m, y0_m, cell_m } = this.info;
     const fc = (x - x0_m) / cell_m;
     const fr = (y0_m - y) / cell_m;
     const c = Math.floor(fc);
