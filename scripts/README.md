@@ -66,3 +66,13 @@ Recorta el mosaico THEMIS de infrarrojo nocturno MC-23 Aeolis (Mars Odyssey, 100
 ```
 
 Limitaciones: es **cualitativo** (brillo, no inercia térmica); cada píxel promedia 100 × 100 m; el registro de THEMIS contra el DTM no está medido. La app lo usa solo como advertencia, relativa a la parcela.
+
+## `build_rems_backup.py` — respaldo de REMS y posiciones de Curiosity
+
+La capa «Ambiente del sol elegido» lee en vivo, desde el navegador, los reportes diarios de REMS y `MSL_waypoints.json`. Si alguno falla, usa este respaldo (D4). Guarda solo los campos que usa la app, en filas compactas: `app/src/environment/rems_backup.json` (~440 KB, ~93 KB comprimido). La app lo carga solo si hace falta.
+
+```bash
+python3 scripts/build_rems_backup.py   # solo biblioteca estándar
+```
+
+Los faltantes se guardan como `--` y la app los muestra como «—», nunca como cero. No se guardan `wind_speed`, `abs_humidity` ni `atmo_opacity` (siempre vacíos o «Sunny»).
