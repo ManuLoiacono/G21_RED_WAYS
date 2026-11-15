@@ -3,7 +3,7 @@ import { esc } from "../ui/format";
 import { infoButton } from "../provenance/sources";
 import { loadMetadata, loadParcel, requestPlan, type ServiceMetadata } from "./api";
 import type { CatalogEntry, Member, Parameters, Parcel, PlanRequest, PlanResponse } from "./draft";
-import { baselineRequest, RequestGate } from "./request";
+import { baselineRequest, RequestGate, canApplyProposal } from "./request";
 import { KG_TO_LB, TEAM_FIXTURE } from "./teamFixture";
 import { fromHhMm, toHhMm } from "./time";
 import { familyIcon, ICONS, memberIcon } from "./icons";
@@ -17,6 +17,8 @@ import { familyIcon, ICONS, memberIcon } from "./icons";
  */
 export interface PlanResponseEvent { response: PlanResponse }
 export interface MissionPanel {
+  compare(): void;
+  applyRecommendation(proposal: PlanRequest): void;
   selectDestination(id: string): string | null;
   onChange(cb: (request: Readonly<PlanRequest>) => void): void;
   onStale(cb: () => void): void;
@@ -117,7 +119,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       if (s.mission.tasks.length > MAX_TASKS) errs.push(t("wizard.tasks.max"));
       if (fieldsInvalid(["task-", "tname-"])) errs.push(t("mp.status.invalid"));
     } else if (i === 3) {
-      if (fieldsInvalid(["departure", "as-of", "reserve", "budget"])) errs.push(t("mp.status.invalid"));
+      if (fieldsInvalid(["departure", "as-of", "reserve", "budget", "height-"])) errs.push(t("mp.status.invalid"));
     } else {
       for (const j of [0, 1, 2, 3] as Step[]) if (stepErrors(j, s).length) errs.push(t("wizard.summary.invalidStep", { step: t(`wizard.step.${STEPS[j]}`) }));
     }
@@ -350,6 +352,9 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
           ${metadata!.parcel.scenarios.map(({ id }) => `<option value="${id}" ${s.scenario.id === id ? "selected" : ""}>${esc(tOr(`nav.scenario.${id}`, id))}</option>`).join("")}
         </select></label>
         <label>${esc(t("nav.asOfUtc"))}<input name="as-of" type="datetime-local" step="1" value="${s.scenario.as_of_utc.replace("Z", "")}" /></label>
+        <label><input name="visibility" type="checkbox" ${s.options?.visibility ? "checked" : ""} />${esc(t("nx.visibility"))}</label>
+        <p class="mp-hint">${esc(t("nx.antennaHint"))}</p>
+        <div class="wz-grid2">${(["base_height_m", "receiver_height_m"] as const).map((key) => `<label>${esc(t(key === "base_height_m" ? "nx.baseHeight" : "nx.receiverHeight"))}<input name="height-${key}" type="number" min="0" step="any" value="${s.options?.communication?.[key] ?? (key === "base_height_m" ? 5 : 2)}" /></label>`).join("")}</div>
       </details>`;
   }
   function availableLine(s: PlanRequest) {
@@ -509,7 +514,14 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     };
     if (name === "parcel") { void changeParcel(Number(el.value)); return; }
     if (name === "origin" || name === "destination") { state[name].poi_id = el.value; render(); return; }
-    if (name === "scenario") {
+    if (name === "visibility") {
+      (state.options ??= {}).visibility = (el as HTMLInputElement).checked;
+    } else if (name.startsWith("height-")) {
+      const value = Number(el.value);
+      if (mark(el.value !== "" && Number.isFinite(value) && value >= 0 && value <= 100000)) {
+        ((state.options ??= {}).communication ??= {})[name.slice(7) as "base_height_m" | "receiver_height_m"] = value;
+      }
+    } else if (name === "scenario") {
       state.scenario.id = el.value;
       state.scenario.version = metadata.parcel.scenarios.find((s) => s.id === el.value)!.version;
     } else if (name === "departure" || name === "as-of") {
@@ -666,6 +678,21 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   root.addEventListener("click", onClick);
 
   const api: MissionPanel = {
+    compare() {
+      if (!state || busy) return;
+      edited(); state.criterion = "comparison"; step = 4; maxVisited = 4;
+      void calculate();
+    },
+    applyRecommendation(proposal) {
+      if (!state || busy || !canApplyProposal(state, proposal)) return;
+      if (![...proposal.team.humans, ...proposal.team.robots].every((m) => metadata?.catalogs.catalog.entries.some((e) => e.identity.profile_id === m.profile_id))) return;
+      // The service evaluates a proposal; only declared team/departure changes
+      // are applied. Other mission requirements remain the user's current input.
+      edited(); state.team = structuredClone(proposal.team);
+      state.mission.departure_utc = proposal.mission.departure_utc;
+      invalid.clear(); step = 4; maxVisited = 4; open = true;
+      void calculate();
+    },
     selectDestination(id) {
       if (!state || !metadata?.parcel.pois.some((p) => p.id === id)) return t("nav.locations");
       edited(); state.destination.poi_id = id; render(); return null;
