@@ -870,3 +870,49 @@ button.wz-sum { position: relative; }
 .rs-section > summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--ui-neutral); }
 .rs-section > summary:hover { color: var(--ui-fg); }
 .rs-timeline-bar { background: rgba(255, 255, 255, .08); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+
+/* Number fields: custom − / + buttons, native spinners hidden. */
+#missionWizard input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+#missionWizard input[type="number"]::-webkit-inner-spin-button, #missionWizard input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.wz-num { display: flex; align-items: stretch; min-width: 0; }
+.wz-num input { flex: 1; min-width: 0; text-align: center; border-radius: 0 !important; font-variant-numeric: tabular-nums; }
+#missionWizard .wz-num .wz-step { flex: none; width: 30px; padding: 0; display: grid; place-items: center; font-size: 16px; line-height: 1; color: var(--ui-fg); background: rgba(255, 255, 255, .06); border: 1px solid var(--ui-line-strong); cursor: pointer; transition: background .15s, color .15s; }
+#missionWizard .wz-num .wz-step:first-child { border-right: none; border-radius: 8px 0 0 8px; }
+#missionWizard .wz-num .wz-step:last-child { border-left: none; border-radius: 0 8px 8px 0; }
+#missionWizard .wz-num .wz-step:hover { color: #2a0e04; background: var(--wz-mars); }
+.wz-overload { min-height: 0; color: var(--ui-warn); font-size: 11.5px; line-height: 1.35; }
+.wz-overload:empty { display: none; }
+.wz-setting-row { grid-template-columns: minmax(0, 1fr) 190px auto; }
+
+/* Route elevation profile (bottom dock). */
+#routeProfile { position: absolute; z-index: 9; left: 396px; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 4px; padding: 10px 14px 8px; color: var(--ui-fg); font: var(--ui-font); background: var(--ui-bg); border: 1px solid var(--ui-line); border-radius: 12px; box-shadow: var(--ui-shadow); backdrop-filter: var(--ui-blur); -webkit-backdrop-filter: var(--ui-blur); }
+#routeProfile[hidden] { display: none; }
+#routeProfile.collapsed .rp-chart, #routeProfile.collapsed .rp-x, #routeProfile.collapsed .rp-empty { display: none; }
+.rp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; }
+.rp-head h2 { margin: 0; font-size: 13px; font-weight: 700; }
+.rp-legs { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--ui-neutral); font-variant-numeric: tabular-nums; }
+.rp-leg::before { content: ""; display: inline-block; width: 14px; height: 3px; margin-right: 6px; vertical-align: 3px; border-radius: 2px; }
+.rp-out::before { background: #3ff0ff; }
+.rp-ret::before { background: #ffb347; }
+.rp-head button { margin-left: auto; width: 28px; height: 28px; color: var(--ui-fg); background: none; border: 1px solid var(--ui-line-strong); border-radius: 6px; cursor: pointer; }
+.rp-chart { display: flex; gap: 8px; height: 120px; }
+.rp-y { display: flex; flex-direction: column; justify-content: space-between; font-size: 10.5px; color: var(--ui-muted); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.rp-plot { position: relative; flex: 1; min-width: 0; cursor: crosshair; }
+.rp-plot svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.rp-gridline { stroke: rgba(255, 255, 255, .07); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.rp-line { fill: none; stroke-width: 2.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.rp-line-out { stroke: #3ff0ff; }
+.rp-line-ret { stroke: #ffb347; stroke-dasharray: 6 4; }
+.rp-dest { stroke: rgba(255, 255, 255, .55); stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.rp-hover { stroke: #fff; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.rp-dest-label { position: absolute; top: 2px; transform: translateX(-50%); padding: 1px 7px; font-size: 10.5px; white-space: nowrap; color: var(--ui-fg); background: rgba(14, 14, 18, .85); border: 1px solid var(--ui-line-strong); border-radius: 999px; pointer-events: none; }
+.rp-tip { position: absolute; bottom: 4px; transform: translateX(-50%); padding: 2px 8px; font-size: 11px; white-space: nowrap; color: #2a0e04; background: #e8834f; border-radius: 6px; pointer-events: none; font-variant-numeric: tabular-nums; }
+.rp-tip[hidden] { display: none; }
+.rp-x { position: relative; height: 14px; margin-left: 58px; font-size: 10.5px; color: var(--ui-muted); font-variant-numeric: tabular-nums; }
+.rp-x span { position: absolute; top: 0; }
+.rp-x span:first-child { left: 0; }
+.rp-x span:nth-child(2) { transform: translateX(-50%); }
+.rp-x span:last-child { right: 0; }
+.rp-empty { margin: 2px 0; font-size: 12px; color: var(--ui-muted); }
+.rs-smooth { color: var(--ui-muted); cursor: help; }
+@media (max-width: 900px) { #routeProfile { left: 8px; right: 8px; bottom: 8px; } .rp-chart { height: 90px; } }

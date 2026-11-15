@@ -37,6 +37,8 @@ type Step = 0 | 1 | 2 | 3 | 4;
 const MAX_HUMANS = 4;
 const MAX_ROBOTS = 2;
 const MAX_TASKS = 64;
+/** Step of the − / + buttons per parameter. */
+const STEP: Record<keyof Parameters, number> = { flat_speed_m_s: 0.05, max_ascent_deg: 1, max_descent_deg: 1, carrying_limit_kg: 1, max_sortie_s: 60 };
 type StatusKey = "nav.ready" | "mp.status.calculating" | "mp.status.received" | "mp.status.stale" | "mp.status.discarded";
 
 export function createMissionPanel(root: HTMLElement): MissionPanel {
@@ -332,6 +334,21 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     </article>`;
   }
 
+  /** Assigned payload above the effective carrying limit: warned, not blocked. The engine rejects it (HTTP 422 payload_exceeds_limit). */
+  function overloadText(m: Member) {
+    const limit = effective(m, "carrying_limit_kg");
+    return m.payload_kg > limit ? t("wizard.team.overload", { kg: num(limit) }) : "";
+  }
+
+  /** Number input with custom − / + buttons (native spinners hidden). */
+  function numField(name: string, value: number, step: number) {
+    return `<span class="wz-num">
+      <button type="button" class="wz-step" data-act="step" data-target="${esc(name)}" data-step="${-step}" aria-label="${esc(t("wizard.step.decrease"))}" tabindex="-1">−</button>
+      <input name="${esc(name)}" type="number" min="0" step="any" value="${esc(String(value))}" />
+      <button type="button" class="wz-step" data-act="step" data-target="${esc(name)}" data-step="${step}" aria-label="${esc(t("wizard.step.increase"))}" tabindex="-1">+</button>
+    </span>`;
+  }
+
   /** One row per selected member: assigned payload and, on demand, the five per-mission parameters. */
   function settingsRow(m: Member) {
     const entry = catalogEntry(m.profile_id);
@@ -343,7 +360,9 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       const value = override ?? base;
       const label = `${tOr(`nav.param.${key}`, key).replace(/\s*\([^)]*\)\s*$/, "")} (${key === "max_sortie_s" ? "hh:mm" : paramUnit(key)})`;
       return `<label class="wz-param-field">${esc(label)}
-        <input name="override:${esc(id)}:${key}" ${key === "max_sortie_s" ? 'type="text" inputmode="numeric" placeholder="hh:mm"' : 'type="number" min="0" step="any"'} value="${esc(key === "max_sortie_s" ? toHhMm(value) : String(value))}" />
+        ${key === "max_sortie_s"
+          ? `<input name="override:${esc(id)}:${key}" type="text" inputmode="numeric" placeholder="hh:mm" value="${esc(toHhMm(value))}" />`
+          : numField(`override:${id}:${key}`, value, STEP[key])}
         ${override !== undefined ? `<small>${esc(t("wizard.team.catalog", { value: `${paramText(key, base)} ${paramUnit(key)}` }))}
           <button type="button" class="wz-mini" data-act="restore" data-member="${esc(id)}" data-param="${key}">${esc(t("wizard.team.restore"))}</button></small>` : ""}</label>`;
     }).join("");
@@ -351,7 +370,8 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     return `<li class="wz-setting" data-kind="${entry.kind}">
       <div class="wz-setting-row">
         <span class="wz-setting-name">${memberIcon(entry.kind, id)}${esc(entry.identity.name)}${edited ? `<span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.edited"))}</span>` : ""}</span>
-        <label class="wz-payload">${esc(t("nav.payload"))}<input name="payload:${esc(id)}" type="number" min="0" step="any" value="${m.payload_kg}" /></label>
+        <label class="wz-payload">${esc(t("nav.payload"))}${numField(`payload:${id}`, m.payload_kg, 1)}
+          <small class="wz-overload" data-derived="overload:${esc(id)}">${esc(overloadText(m))}</small></label>
         <button type="button" class="wz-params-btn" data-act="edit-params" data-member="${esc(id)}" aria-expanded="${isEditing}">${ICONS.pencil}<span>${esc(t("wizard.team.paramsBtn"))}</span></button>
       </div>
       ${isEditing ? `<div class="wz-param-grid">${fields}</div>` : ""}
@@ -492,6 +512,10 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     const live = wizard.querySelector(".wz-live");
     if (live) live.innerHTML = liveSummary(state);
     if (step === 1) {
+      for (const m of members(state)) {
+        const el = wizard.querySelector(`[data-derived="overload:${m.profile_id}"]`);
+        if (el) el.textContent = overloadText(m);
+      }
       // Team bar and cards hold no inputs, so they can be redrawn while typing in the settings rows.
       const fresh = document.createElement("div");
       fresh.innerHTML = teamStep(state);
@@ -714,6 +738,16 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       else if (act === "peek") { peekMap = !peekMap; render(); }
       else if (act === "reset" && metadata) { edited(); resetToBaseline(true); render(); }
       else if (act === "remove-member" && button?.dataset.member) toggleMember(button.dataset.member);
+      else if (act === "step" && button?.dataset.target) {
+        const input = wizard.querySelector<HTMLInputElement>(`input[name="${button.dataset.target}"]`);
+        if (input) {
+          const delta = Number(button.dataset.step);
+          const decimals = (String(Math.abs(delta)).split(".")[1] ?? "").length;
+          const next = Math.max(0, (Number(input.value) || 0) + delta);
+          input.value = String(Number(next.toFixed(decimals)));
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      }
       else if (act === "edit-params") {
         const id = button!.dataset.member!;
         if (editing.has(id)) editing.delete(id); else editing.add(id);

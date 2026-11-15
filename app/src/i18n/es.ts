@@ -627,6 +627,17 @@ export const es = {
   "rs.timeline.sunsetLater": "fin de luz: {t} después del presupuesto",
   "rs.allMetrics": "Todas las métricas",
   "rs.technical": "Detalle técnico",
+  "wizard.team.overload": "Supera la capacidad de carga ({kg} kg): el motor rechaza el cálculo con esta carga.",
+  "wizard.step.decrease": "Restar",
+  "wizard.step.increase": "Sumar",
+  "profile.title": "Perfil de altitud de la ruta",
+  "profile.show": "Mostrar perfil",
+  "profile.hide": "Ocultar perfil",
+  "profile.destination": "Destino · tareas {t}",
+  "profile.noGrid": "Perfil no disponible: la grilla de elevación HiRISE no está generada en esta máquina.",
+  "profile.noRoute": "La ruta calculada no tiene puntos dentro de la grilla de elevación.",
+  "rs.smoothed": "trazo suavizado",
+  "rs.smoothedHint": "La línea del mapa está suavizada para mostrarla (se aparta hasta ~2 m). La ruta calculada sigue la grilla de 2 m del motor; las métricas no cambian.",
 } as const;
 
 export type MessageKey = keyof typeof es;
