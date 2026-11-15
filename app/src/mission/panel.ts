@@ -22,6 +22,8 @@ export interface MissionPanel {
   onStale(cb: () => void): void;
   /** Called when the registered points should be shown (wizard open on the Mission step) or hidden. */
   onPointsPreview(cb: (visible: boolean) => void): void;
+  /** Called with true while the full-screen wizard hides the scene (steps 2–5), false otherwise. */
+  onCoverScene(cb: (covered: boolean) => void): void;
   getRequest(): PlanRequest | null;
   getParcel(): Parcel | null;
   getSlopeLimit(): number;
@@ -63,6 +65,8 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   const staleListeners: (() => void)[] = [];
   const listeners: ((request: Readonly<PlanRequest>) => void)[] = [];
   const previewListeners: ((visible: boolean) => void)[] = [];
+  const coverListeners: ((covered: boolean) => void)[] = [];
+  let lastCovered = false;
 
   const wizard = document.createElement("div");
   wizard.id = "missionWizard";
@@ -473,6 +477,8 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   function notifyPreview() {
     const visible = open && !!state && step === 0;
     previewListeners.forEach((cb) => cb(visible));
+    const covered = open && !!state && !!metadata && step !== 0 && !peekMap;
+    if (covered !== lastCovered) { lastCovered = covered; coverListeners.forEach((cb) => cb(covered)); }
   }
   function edited() {
     gate.edit();
@@ -719,6 +725,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     onChange(cb) { listeners.push(cb); if (state) cb(state); },
     onStale(cb) { staleListeners.push(cb); },
     onPointsPreview(cb) { previewListeners.push(cb); },
+    onCoverScene(cb) { coverListeners.push(cb); cb(lastCovered); },
     getRequest: () => state ? structuredClone(state) : null,
     getParcel: () => metadata ? structuredClone(metadata.parcel) : null,
     getSlopeLimit() {

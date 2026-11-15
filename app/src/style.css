@@ -760,3 +760,12 @@ button.wz-sum:hover { border-color: rgba(232, 131, 79, .6); transform: translate
   .wz-cards[data-kind="human"], .wz-cards[data-kind="robot"] { grid-template-columns: 1fr; }
   .wz-setting-row { grid-template-columns: 1fr; }
 }
+
+/* Performance: no live blur behind the full-screen wizard (the scene is hidden and paused there);
+   chip remove buttons keep their own compact style. */
+#missionWizard:not(.wz-side) { backdrop-filter: none; -webkit-backdrop-filter: none; background: radial-gradient(120% 80% at 100% 0%, rgba(232, 131, 79, .1), transparent 60%), rgba(20, 15, 17, .985); }
+.wz-team-bar { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(22, 17, 19, .98); }
+.wz-card, .wz-setting, .wz-family { contain: layout paint; }
+#missionWizard .wz-chip-x { padding: 3px 4px 3px 4px; gap: 6px; }
+#missionWizard .wz-chip-x button { width: 18px; height: 18px; min-width: 0; margin: 0; padding: 0; display: inline-grid; place-items: center; font-size: 14px; line-height: 1; color: var(--ui-muted); background: rgba(255, 255, 255, .08); border: none; border-radius: 50%; cursor: pointer; }
+#missionWizard .wz-chip-x button:hover { color: #fff; background: rgba(255, 138, 122, .35); }

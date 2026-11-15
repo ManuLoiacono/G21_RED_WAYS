@@ -288,6 +288,8 @@ async function main() {
   let pointsVisible = false;
   const refreshPoints = () => void scenePois.update(pointsVisible, panel.getParcel(), panel.getRequest());
   panel.onPointsPreview((visible) => { pointsVisible = visible; refreshPoints(); });
+  // While the full-screen wizard covers the scene, stop redrawing it: keeps wizard scrolling smooth.
+  panel.onCoverScene((covered) => { viewer.useDefaultRenderLoop = !covered; });
   panel.onChange(() => { if (pointsVisible) refreshPoints(); });
 
   // Cursor readout: position, DTM elevation and slope (highlighted above the profile's maximum).
