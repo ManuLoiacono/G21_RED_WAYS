@@ -5,6 +5,10 @@
 export const es = {
   "nav.poi.lookout": "Mirador del sector fotográfico",
   "demo.duplicate": "Nombre de tarea duplicado: {name}",
+  "demo.selection": "Inicialmente se selecciona la ruta calculada más rápida. Compara ascenso, visibilidad geométrica y márgenes antes de elegir otra ruta.",
+  "demo.activity": "Duración de actividad",
+  "demo.distance": "Distancia de ida y vuelta",
+  "demo.ascent": "Ascenso acumulado",
   "context.environment": "Contexto ambiental",
   "context.pressure": "Presión",
   "context.minimum": "Temperatura mínima diaria",

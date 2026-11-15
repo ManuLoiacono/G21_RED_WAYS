@@ -749,6 +749,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   async function calculate() {
     if (!state || busy) return;
     if (stepErrors(4, state).length) { render(); return; }
+    state.criterion = "comparison";
     state.mission.tasks.forEach(task => { task.name = taskName(task.id); });
     const request = gate.submit(state);
     state.request_id = request.request_id;

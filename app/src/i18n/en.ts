@@ -4,6 +4,10 @@ import type { MessageKey } from "./es";
 export const en: Record<MessageKey, string> = {
   "nav.poi.lookout": "Photo-sector lookout",
   "demo.duplicate": "Duplicate task name: {name}",
+  "demo.selection": "The fastest calculated route is selected initially. Compare ascent, geometric visibility and limiting margins before choosing another route.",
+  "demo.activity": "Activity duration",
+  "demo.distance": "Round-trip distance",
+  "demo.ascent": "Cumulative ascent",
   "context.environment": "Environmental context",
   "context.pressure": "Pressure",
   "context.minimum": "Daily minimum temperature",
