@@ -6,6 +6,7 @@ import type { CatalogEntry, Member, Parameters, Parcel, PlanRequest, PlanRespons
 import { baselineRequest, RequestGate } from "./request";
 import { KG_TO_LB, TEAM_FIXTURE } from "./teamFixture";
 import { fromHhMm, toHhMm } from "./time";
+import { familyIcon, ICONS, memberIcon } from "./icons";
 
 /**
  * "New mission" wizard (replaces the single "Plan mission" form). Five steps:
@@ -50,6 +51,8 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   let hasResult = false;
   let showHonesty = false;
   let peekMap = false;
+  /** Direction of the last step change, used once for the slide-in animation. */
+  let animDir: "next" | "prev" | "" = "";
   const editing = new Set<string>();
   /** Display names of user-added tasks (UI only; the engine receives generated ids). */
   const taskNames = new Map<string, string>();
@@ -155,9 +158,13 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
           return `<li><button type="button" data-goto="${i}" data-status="${status}" ${i > maxVisited ? "disabled" : ""} ${i === step ? 'aria-current="step"' : ""}>
             <span class="wz-num">${i + 1}</span><span class="wz-name">${esc(t(`wizard.step.${name}`))}</span></button></li>`;
         }).join("")}</ol>
+        <div class="wz-progress" aria-hidden="true"><span style="width:${(100 * step / (STEPS.length - 1)).toFixed(1)}%"></span></div>
         <button type="button" class="wz-close" data-act="close" aria-label="${esc(t("wizard.close"))}" title="${esc(t("wizard.close"))}">×</button>
       </header>
-      <form class="wz-body" novalidate>${[missionStep, teamStep, tasksStep, scheduleStep, summaryStep][step](s)}</form>
+      <div class="wz-main">
+        <form class="wz-body" novalidate data-anim="${animDir}">${stepHeader(step)}${[missionStep, teamStep, tasksStep, scheduleStep, summaryStep][step](s)}</form>
+        ${step >= 1 && step <= 3 ? `<aside class="wz-live" aria-live="polite">${liveSummary(s)}</aside>` : ""}
+      </div>
       <footer class="wz-foot">
         ${errs.length && step !== 4 ? `<p class="wz-errors" role="alert">${errs.map(esc).join(" · ")}</p>` : ""}
         <div class="wz-nav">
@@ -182,8 +189,45 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     }
     wizard.querySelectorAll<HTMLDetailsElement>("details[data-adv]").forEach((d) => { if (openAdvanced.has(d.dataset.adv)) d.open = true; });
     const body = wizard.querySelector(".wz-body");
-    if (body) body.scrollTop = scroll;
+    if (body && !animDir) body.scrollTop = scroll;
+    animDir = "";
     preview();
+  }
+
+  function stepHeader(i: Step) {
+    const icons = [ICONS.route, ICONS.team, ICONS.tasks, ICONS.clock, ICONS.check];
+    return `<div class="wz-step-head"><span class="wz-step-icon">${icons[i]}</span><div>
+      <p class="wz-eyebrow">${esc(t("wizard.stepOf", { n: i + 1, total: STEPS.length }))}</p>
+      <h3>${esc(t(`wizard.step.${STEPS[i]}`))}</h3><p class="wz-lead">${esc(t(`wizard.lead.${STEPS[i]}`))}</p></div></div>`;
+  }
+
+  function timeBar(s: PlanRequest) {
+    const tasks = tasksTotal(s);
+    const reserve = s.mission.reserve_s;
+    const budget = s.mission.time_budget_s;
+    const scale = Math.max(budget, tasks + reserve, 1);
+    const over = tasks + reserve > budget;
+    const pct = (v: number) => `${(100 * Math.max(v, 0) / scale).toFixed(2)}%`;
+    return `<div class="wz-bar ${over ? "over" : ""}" role="img" aria-label="${esc(t("wizard.summary.legend", { tasks: toHhMm(tasks), reserve: toHhMm(reserve), budget: toHhMm(budget) }))}">
+        <span class="seg-tasks" style="width:${pct(tasks)}"></span><span class="seg-reserve" style="width:${pct(reserve)}"></span>
+        ${over ? `<i class="seg-budget" style="left:${pct(budget)}"></i>` : `<span class="seg-free" style="width:${pct(budget - tasks - reserve)}"></span>`}</div>
+      <p class="wz-legend"><span class="dot tasks"></span>${esc(t("wizard.live.tasks"))} ${toHhMm(tasks)} <span class="dot reserve"></span>${esc(t("wizard.live.reserve"))} ${toHhMm(reserve)} <span class="dot free"></span>${esc(t("wizard.live.budget"))} ${toHhMm(budget)}</p>`;
+  }
+
+  /** Compact, always-current view of the mission while editing steps 2–4 (desktop side column). */
+  function liveSummary(s: PlanRequest) {
+    const d = distanceM(s);
+    const lim = limits(s);
+    const chips = members(s).map((m) => {
+      const e = catalogEntry(m.profile_id);
+      return `<span class="wz-chip" data-kind="${e.kind}">${memberIcon(e.kind, m.profile_id)}${esc(e.identity.name.split(" ")[0])}</span>`;
+    }).join("");
+    return `<p class="wz-eyebrow">${esc(t("wizard.live.title"))}</p>
+      <div class="wz-live-family"><span class="wz-live-icon">${familyIcon(s.mission.template_id)}</span><strong>${esc(templateLabel(s.mission.template_id))}</strong></div>
+      <p class="wz-live-route">${esc(poiName(s.origin.poi_id))} <span>→</span> ${esc(poiName(s.destination.poi_id))}${d === null ? "" : ` <small>≈ ${num(d, 0)} m</small>`}</p>
+      <div class="wz-live-team">${chips || `<span class="wz-warn">${esc(t("wizard.team.minHuman"))}</span>`}</div>
+      ${lim ? `<p class="wz-live-pace">${esc(t("wizard.live.pace", { speed: `${num(lim.pace.value)} m/s`, slope: `${num(Math.min(lim.up.value, lim.down.value))}°` }))}</p>` : ""}
+      ${timeBar(s)}`;
   }
 
   function missionStep(s: PlanRequest) {
@@ -193,7 +237,9 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       `<option value="${esc(p.id)}" ${p.id === selected ? "selected" : ""}>${esc(poiName(p.id))} · ${esc(t("wizard.hypothetical"))}</option>`).join("");
     return `
       <fieldset class="wz-families"><legend>${esc(t("mp.family"))}</legend>
-        ${m.catalogs.mission_templates.templates.map((v) => `<button type="button" class="wz-family" data-family="${esc(v.id)}" aria-pressed="${v.id === s.mission.template_id}">${esc(templateLabel(v.id))}</button>`).join("")}
+        ${m.catalogs.mission_templates.templates.map((v) => `<button type="button" class="wz-family" data-family="${esc(v.id)}" aria-pressed="${v.id === s.mission.template_id}">
+          <span class="wz-family-icon">${familyIcon(v.id)}</span><span class="wz-family-text"><strong>${esc(templateLabel(v.id))}</strong><small>${esc(tOr(`wizard.family.${v.id}`, ""))}</small></span>
+          <span class="wz-check">${ICONS.check}</span></button>`).join("")}
       </fieldset>
       <div class="wz-grid2">
         <label>${esc(t("mp.departFrom"))}<select name="origin">${poiOptions(s.origin.poi_id)}</select></label>
@@ -216,7 +262,6 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     const summary = lim ? t("wizard.team.summary", {
       speed: `${num(lim.pace.value)} m/s`, slopeUp: `${num(lim.up.value)}°`, slopeDown: `${num(lim.down.value)}°` }) : "";
     return `
-      <h3 class="wz-h">${esc(t("wizard.team.title"))}</h3>
       <p class="mp-hint">${esc(t("nav.teamHint"))}</p>
       ${lim ? `<p class="wz-derived">${esc(summary)} ${tag("assumed")}</p>` : ""}
       <div class="wz-cards">${metadata!.catalogs.catalog.entries.map((e) => card(e, s, lim, count)).join("")}</div>`;
@@ -241,6 +286,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       const hit = map[key];
       return hit && hit[0].by.includes(id) ? `<span class="wz-limit">${esc(t(hit[1]))}</span>` : "";
     };
+    const catalogMax = (key: keyof Parameters) => Math.max(...metadata!.catalogs.catalog.entries.map((e) => e.defaults[key]));
     const params = PARAMETER_KEYS.map((key) => {
       const base = entry.defaults[key];
       const override = selected?.mission_overrides?.[key];
@@ -256,15 +302,17 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
             <button type="button" class="wz-mini" data-act="restore" data-member="${esc(id)}" data-param="${key}">${esc(t("wizard.team.restore"))}</button>` : ""}
           ${limitKey(key)}</li>`;
       }
+      const meter = `<i class="wz-meter" aria-hidden="true"><b style="width:${Math.min(100, (100 * value) / Math.max(catalogMax(key), value, 1e-9)).toFixed(0)}%"></b></i>`;
       return `<li class="wz-param"><span>${esc(label)}</span><strong>${esc(paramText(key, value))}${paramUnit(key) === "°" ? "°" : paramUnit(key) ? ` ${esc(paramUnit(key))}` : ""}</strong>
-        ${override !== undefined ? `<span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.edited"))}</span>` : ""}${limitKey(key)}</li>`;
+        ${override !== undefined ? `<span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.edited"))}</span>` : ""}${meter}${limitKey(key)}</li>`;
     }).join("");
     return `<article class="wz-card" data-card="${esc(id)}" data-kind="${entry.kind}" role="checkbox" tabindex="${full ? -1 : 0}"
         aria-checked="${!!selected}" aria-disabled="${full}" ${full ? `title="${esc(t("wizard.team.max"))}"` : ""}>
-      <header><span class="wz-avatar" aria-hidden="true">${entry.kind === "human" ? "👤" : "🤖"}</span>
+      <span class="wz-check">${ICONS.check}</span>
+      <header><span class="wz-avatar">${memberIcon(entry.kind, id)}</span>
         <div><strong>${esc(entry.identity.name)}</strong><small>${esc(t(`nav.${entry.kind}`))}</small></div>
         ${selected ? `<button type="button" class="wz-mini wz-pencil" data-act="edit-params" data-member="${esc(id)}" aria-pressed="${!!isEditing}"
-          aria-label="${esc(t("wizard.team.edit"))}" title="${esc(t("wizard.team.edit"))}">✎</button>` : ""}</header>
+          aria-label="${esc(t("wizard.team.edit"))}" title="${esc(t("wizard.team.edit"))}">${ICONS.pencil}</button>` : ""}</header>
       ${personal ? `<ul class="wz-personal">${personal}</ul><p class="wz-fict">${tag("fictional")}</p>` : ""}
       <ul class="wz-params" data-selected="${!!selected}">${params}</ul>
       <p class="wz-fict">${tag("assumed")}</p>
@@ -324,25 +372,21 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     const pct = (v: number) => `${(100 * v / scale).toFixed(2)}%`;
     const errs = stepErrors(4, s);
     return `
-      <button type="button" class="wz-sum" data-goto="0"><h3>${esc(t("wizard.step.mission"))}</h3>
+      <button type="button" class="wz-sum" data-goto="0"><h3>${ICONS.route}${esc(t("wizard.step.mission"))}</h3>
         <p><strong>${esc(templateLabel(s.mission.template_id))}</strong></p>
         <p>${esc(poiName(s.origin.poi_id))} ───▶ ${esc(poiName(s.destination.poi_id))}${d === null ? "" : ` · ${esc(t("wizard.mission.distance", { m: num(d, 0) }))}`} ${tag("derived")}</p></button>
-      <button type="button" class="wz-sum" data-goto="1"><h3>${esc(t("wizard.step.team"))} (${members(s).length})</h3>
-        <p>${members(s).map((m) => `${catalogEntry(m.profile_id).kind === "human" ? "👤" : "🤖"} ${esc(catalogEntry(m.profile_id).identity.name)}`).join(" · ")}</p>
+      <button type="button" class="wz-sum" data-goto="1"><h3>${ICONS.team}${esc(t("wizard.step.team"))} (${members(s).length})</h3>
+        <p class="wz-live-team">${members(s).map((m) => `<span class="wz-chip" data-kind="${catalogEntry(m.profile_id).kind}">${memberIcon(catalogEntry(m.profile_id).kind, m.profile_id)}${esc(catalogEntry(m.profile_id).identity.name)}</span>`).join("")}</p>
         ${lim ? `<p>${esc(t("wizard.team.summary", { speed: `${num(lim.pace.value)} m/s`, slopeUp: `${num(lim.up.value)}°`, slopeDown: `${num(lim.down.value)}°` }))}
           ${members(s).length > 1 ? ` · ${esc(t("wizard.summary.limiting", { name: names([...new Set([...lim.pace.by, ...lim.up.by, ...lim.down.by])]) }))}` : ""} ${tag("assumed")}</p>` : ""}
         ${edited ? `<p><span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.edited"))}</span></p>` : ""}</button>
-      <button type="button" class="wz-sum" data-goto="2"><h3>${esc(t("wizard.step.tasks"))}</h3>
+      <button type="button" class="wz-sum" data-goto="2"><h3>${ICONS.tasks}${esc(t("wizard.step.tasks"))}</h3>
         <ul>${s.mission.tasks.map((task) => `<li><span>${esc(taskName(task.id))}</span><span>${toHhMm(task.duration_s)}</span></li>`).join("")}</ul>
         <p>${esc(t("wizard.tasks.total", { t: toHhMm(tasks) }))}</p></button>
-      <button type="button" class="wz-sum" data-goto="3"><h3>${esc(t("wizard.step.schedule"))}</h3>
+      <button type="button" class="wz-sum" data-goto="3"><h3>${ICONS.clock}${esc(t("wizard.step.schedule"))}</h3>
         <p>${esc(t("wizard.summary.departure", { t: s.mission.departure_utc.replace("T", " ").replace(/:\d\dZ$/, "") }))}</p></button>
-      <div class="wz-sum wz-time"><h3>${esc(t("wizard.summary.time"))} ${tag("derived")}</h3>
-        <div class="wz-bar ${over ? "over" : ""}" role="img" aria-label="${esc(t("wizard.summary.legend", { tasks: toHhMm(tasks), reserve: toHhMm(reserve), budget: toHhMm(budget) }))}">
-          <span class="seg-tasks" style="width:${pct(tasks)}"></span><span class="seg-reserve" style="width:${pct(reserve)}"></span>
-          ${over ? "" : `<span class="seg-free" style="width:${pct(budget - tasks - reserve)}"></span>`}
-          ${over ? `<i class="seg-budget" style="left:${pct(budget)}"></i>` : ""}</div>
-        <p>${esc(t("wizard.summary.legend", { tasks: toHhMm(tasks), reserve: toHhMm(reserve), budget: toHhMm(budget) }))}</p>
+      <div class="wz-sum wz-time"><h3>${ICONS.clock}${esc(t("wizard.summary.time"))} ${tag("derived")}</h3>
+        ${timeBar(s)}
         <p class="mp-hint">${esc(t("wizard.summary.noTravel"))}</p>
         ${over ? `<p class="wz-over">${esc(t("wizard.schedule.over"))}</p>` : ""}</div>
       ${advancedModified(s) ? `<p class="wz-derived"><span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.advancedChanged"))}</span></p>` : ""}
@@ -360,6 +404,8 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     const set = (key: string, html: string) => { const el = wizard.querySelector(`[data-derived="${key}"]`); if (el) el.innerHTML = html; };
     set("tasks-total", `${esc(t("wizard.tasks.total", { t: toHhMm(tasksTotal(state)) }))} ${tag("derived")}`);
     set("available", availableLine(state));
+    const live = wizard.querySelector(".wz-live");
+    if (live) live.innerHTML = liveSummary(state);
     const errs = stepErrors(step, state);
     const next = wizard.querySelector<HTMLButtonElement>('[data-act="next"]');
     if (next) next.disabled = errs.length > 0;
@@ -446,6 +492,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   }
   function goto(target: Step) {
     if (!state || target > maxVisited) return;
+    animDir = target > step ? "next" : target < step ? "prev" : "";
     step = target; peekMap = false; render();
   }
 
@@ -562,7 +609,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       else if (act === "close") setOpen(false);
       else if (act === "back" && step > 0) goto((step - 1) as Step);
       else if (act === "next" && state && !stepErrors(step, state).length && step < 4) {
-        step = (step + 1) as Step; maxVisited = Math.max(maxVisited, step) as Step; render();
+        animDir = "next"; step = (step + 1) as Step; maxVisited = Math.max(maxVisited, step) as Step; render();
       } else if (act === "calculate") void calculate();
       else if (act === "honesty") { showHonesty = !showHonesty; render(); }
       else if (act === "peek") { peekMap = !peekMap; render(); }

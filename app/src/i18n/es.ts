@@ -577,6 +577,21 @@ export const es = {
   "wizard.summary.time": "Tiempo",
   "wizard.summary.legend": "tareas {tasks} · reserva {reserve} · presupuesto {budget}",
   "wizard.summary.noTravel": "No incluye ida ni vuelta: se conocen al calcular.",
+  "wizard.stepOf": "Paso {n} de {total}",
+  "wizard.lead.mission": "Elegí qué vas a hacer y adónde vas.",
+  "wizard.lead.team": "Hasta 4 humanos y 2 robots. El equipo avanza junto, al ritmo del más lento.",
+  "wizard.lead.tasks": "Qué se hace en el destino y cuánto tarda cada cosa.",
+  "wizard.lead.schedule": "Cuándo salís y cuánto tiempo tiene la misión.",
+  "wizard.lead.summary": "Revisá todo antes de calcular las rutas.",
+  "wizard.family.geological_observation": "Fotografiar y observar un afloramiento en el destino.",
+  "wizard.family.topographic_exploration": "Relevar el terreno alrededor del destino.",
+  "wizard.family.reconnaissance": "Reconocimiento visual rápido del destino.",
+  "wizard.family.environmental_measurement": "Registrar el ambiente en el destino.",
+  "wizard.live.title": "Tu misión",
+  "wizard.live.tasks": "tareas",
+  "wizard.live.reserve": "reserva",
+  "wizard.live.budget": "presupuesto",
+  "wizard.live.pace": "Ritmo {speed} · pendiente máx. {slope}",
 } as const;
 
 export type MessageKey = keyof typeof es;
