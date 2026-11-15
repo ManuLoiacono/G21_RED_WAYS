@@ -22,6 +22,8 @@ export interface MissionPanel {
   selectDestination(id: string): string | null;
   onChange(cb: (request: Readonly<PlanRequest>) => void): void;
   onStale(cb: () => void): void;
+  /** Called with the readable message when a calculation fails (shown elsewhere while the wizard is closed). */
+  onError(cb: (message: string) => void): void;
   /** Called when the registered points should be shown (wizard open on the Mission step) or hidden. */
   onPointsPreview(cb: (visible: boolean) => void): void;
   /** Called with true while the full-screen wizard hides the scene (steps 2–5), false otherwise. */
@@ -67,6 +69,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   const gate = new RequestGate();
   let activeRequest: PlanRequest | null = null;
   const staleListeners: (() => void)[] = [];
+  const errorListeners: ((message: string) => void)[] = [];
   const listeners: ((request: Readonly<PlanRequest>) => void)[] = [];
   const previewListeners: ((visible: boolean) => void)[] = [];
   const coverListeners: ((covered: boolean) => void)[] = [];
@@ -740,7 +743,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     const result = await requestPlan(request);
     if (activeRequest !== request) return;
     busy = false; activeRequest = null;
-    if (!result.ok) { error = result.error; staleListeners.forEach((cb) => cb()); render(); return; }
+    if (!result.ok) { error = result.error; staleListeners.forEach((cb) => cb()); errorListeners.forEach((cb) => cb(result.error)); render(); return; }
     if (!gate.accepts(request, result.data, state)) { statusKey = "mp.status.discarded"; render(); return; }
     statusKey = "mp.status.received";
     hasResult = true;
@@ -857,6 +860,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     },
     onChange(cb) { listeners.push(cb); if (state) cb(state); },
     onStale(cb) { staleListeners.push(cb); },
+    onError(cb) { errorListeners.push(cb); },
     onPointsPreview(cb) { previewListeners.push(cb); },
     onCoverScene(cb) { coverListeners.push(cb); cb(lastCovered); },
     getRequest: () => state ? structuredClone(state) : null,

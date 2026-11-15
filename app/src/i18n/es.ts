@@ -663,6 +663,12 @@ export const es = {
   "rs.smoothed": "trazo suavizado",
   "rs.smoothedHint": "La línea del mapa está suavizada para mostrarla (se aparta hasta ~2 m). La ruta calculada sigue la grilla de 2 m del motor; las métricas no cambian.",
   "rs.samePath": "· el regreso usa el mismo camino",
+  "rs.otherAlternatives": "otras alternativas · tocá su tarjeta para verla",
+  "rs.altOnMap": "Alternativa: {name}",
+  "rs.comparing": "Comparando tiempo, ascenso y visibilidad…",
+  "rs.comparedSame": "Comparado: tiempo, ascenso y visibilidad eligen el mismo camino. No hay otra ruta distinta que mostrar.",
+  "rs.comparedMany": "Comparado: {n} caminos distintos. Los demás se ven punteados en el mapa; tocá una tarjeta para elegirla.",
+  "rs.compareFailed": "No se pudo calcular: {msg}",
 } as const;
 
 export type MessageKey = keyof typeof es;

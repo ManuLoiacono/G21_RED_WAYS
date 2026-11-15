@@ -407,6 +407,7 @@ function updateAreaState(value: ReachableArea | string, visible: boolean) {
 }
 const context = createMissionContext(document.getElementById("hudContext")!);
 panel.onChange((request) => context.update(request));
+panel.onError((message) => results.failed(message));
 panel.onStale(() => { recommendationSequence += 1; areaSequence += 1; areaWanted = false; activeArea = null; sceneArea?.clear(); activeResponse = null; activeAlternative = null; results.clear(); sceneRoutes?.clear(); routeProfile?.clear(); });
 async function showSceneResponse(response: PlanResponse) {
   try { await sceneRoutes?.show(response, panel.getParcel(), activeAlternative); routeProfile?.show(response, panel.getParcel(), activeAlternative); }
