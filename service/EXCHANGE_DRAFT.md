@@ -76,7 +76,13 @@ Missing complete movement leaves totals/margins null with `unavailable_totals_re
 
 ## Consumer decisions still pending
 
-P1/P3 must accept/revise draft fields, version migration, metric versus future geographic geometry, request revision handling, error mapping and the separate margin names before shared v1 integration. P3 must supply reviewed real reference/mask/solar conventions and historical availability/revision policy, with coverage/quality checks before fixing a real replay start. Communication remains the next navigation extension after baseline service integration. `app/` and its existing static fallback are unchanged for P1's later integration work.
+Shared-v1 acceptance remains separate. Current main already consumes the development
+draft, calculated geographic routes and request/revision protocol without static
+planning-response fallbacks. The backend now supplies explicit real solar/time and
+reconstructed historical availability conventions. Independent geographic/scientific
+validation and exact archival availability remain limitations. The owner-directed
+reconciliation preserves all main frontend files exactly; dedicated environment
+presentation and stale main copy remain for P1. Communication remains separate work.
 # Additive environmental discovery
 
 Parcel scenarios advertise `coverage: {from_utc, to_utc}` and optional `environment`
@@ -108,3 +114,9 @@ weather targets use the explicit corrected local-sol mapping at the issue rover 
 Per-observation unknown RAD retrieval time and analytically computed solar retrieval
 are null with provenance explanations; they are never borrowed from REMS retrieval.
 Forecast applicability outside the prepared parcel is excluded explicitly.
+
+Compatibility is verified using main's unchanged `api.ts`, `request.ts` and
+`validation.ts`, imported by `scripts/tests/main_frontend_compatibility.test.cjs`.
+Additional environment fields remain additive; no frontend-only fields or controls
+are required. UI duration parsing is not reinterpreted in the backend. Exact
+physical-second requests remain supported independently of main's minute editor.

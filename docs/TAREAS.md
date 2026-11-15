@@ -132,3 +132,8 @@ The dated checklist above is historical. Current verified implementation and rev
 | P2-07 / P2-09 / P2-11 / P2-12 | Pending | Reachability, route material warnings, simulated replanning and recommendation extensions remain outside this slice. |
 
 See [the implementation handoff](handoffs/P2_ENVIRONMENT_DELIVERY.md) for actual tests, launch commands and limitations. No unrelated P3 or optional ML task is closed by this update.
+
+Owner reconciliation (2026-11-15): this branch retains backend/navigation and
+preparation work only. Its entire tracked `app/` tree matches incorporated main.
+New forecast presentation, translations and seconds-aware UI formatting were removed;
+P1 owns those follow-ups. Backend capability and direct physical-second tests remain.

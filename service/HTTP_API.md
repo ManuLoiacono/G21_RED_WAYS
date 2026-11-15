@@ -167,3 +167,10 @@ for real replay), source/package/policy metadata and a chronological default ins
 in [the draft exchange](EXCHANGE_DRAFT.md) and [runtime contract](../docs/ENVIRONMENT_RUNTIME.md).
 Forecasts and observations are selected offline; no fitting or NASA download occurs
 during planning. Use [gale-replay.request.json](examples/gale-replay.request.json).
+
+The reconciled branch contributes no tracked `app/` changes relative to incorporated
+main. Existing health/parcel/catalog/request/response fields and nullability remain
+compatible. Eligible forecast/observation metadata is available in the existing raw
+evidence detail, HTTP response and CLI. Dedicated environmental UI and correction of
+main's old clock/daylight wording are deferred to P1. See the
+[backend-only delivery and launch instructions](../docs/handoffs/P2_ENVIRONMENT_DELIVERY.md).

@@ -237,7 +237,7 @@
     }
   },
   "boundary_plus_one_task_s": "incompatible",
-  "first_calculation_latency_s": 10.310883400030434,
+  "first_calculation_latency_s": 1.5538646999630146,
   "environment": {
     "clock_mapping": {
       "adapter_id": "mars24-utc-msl-lmst-v1",

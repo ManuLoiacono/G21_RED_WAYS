@@ -26,7 +26,7 @@ is synthetic and health/parcel metadata identifies it as such.
 
 The planning exchange remains `p2-plan-draft-1`, consumer review pending. Additive
 environment metadata is not shared-v1 acceptance. Shared v0 files remain unchanged.
-Forecast records will carry explicit quantiles, variable/units, model, issue/target
+Forecast records carry explicit quantiles, variable/units, model, issue/target
 sol, validity, training/model availability, availability basis, source provenance,
 and spatial limitations. Unknown availability, no eligible target coverage, missing
 required daylight, and unsupported time/location remain distinct states.
@@ -109,7 +109,24 @@ Old valid-time-insensitive synthetic records remain unchanged as explicit fixtur
 
 The default is the first chronological eligible target with daylight at the base,
 rounded up to a UTC second: **2025-10-26T00:26:28Z**. It was selected without outcome
-scoring. Earlier replay dates remain editable and show missing forecasts explicitly.
+scoring. Earlier replay dates can be requested through the unchanged date controls
+or API/CLI; responses expose missing forecast coverage in raw evidence.
 B1 is the RTG-corrected silicon detector B rate in microgray/day; it is not human
 effective dose, an exposure budget or a particle-event predictor. Reference rover
 forecasts are not a validated spatial weather field or an altitude-corrected base forecast.
+
+## Unchanged main frontend
+
+The owner-directed reconciliation preserves the complete tracked `app/` directory
+from incorporated main. The draft's additional backend environment fields are
+accepted by its existing consumer; no new request field, parser, UI control or
+time-unit reinterpretation is required. The existing evidence detail can display
+the selected records as JSON. Dedicated forecast cards and updated clock/copy are
+deferred to P1. Main's existing `hh:mm` editor remains unchanged; exact +1 physical
+second checks use direct draft requests rather than modifying its minute controls.
+
+Main's copy still describes assumed/synthetic clocks and missing daylight even when
+the backend returns derived daylight. Its browser REMS report remains date-matched
+historical context with no replay availability gate. These are explicit presentation
+limitations, not reasons to hide backend evidence or change decision eligibility.
+See [the reconciled delivery](handoffs/P2_ENVIRONMENT_DELIVERY.md).

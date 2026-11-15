@@ -24,11 +24,18 @@ npm run dev
 ```
 
 ## Estado
-En desarrollo (14/11/2026). La app muestra Gale con Cesium Mars, prepara la misión y compara alternativas. Mientras no exista el motor, usa base, destinos y respuestas **de prueba**, marcados en pantalla. Motor y datos: pendientes según `docs/TAREAS.md`. Si la app falla al arrancar, ver «Si algo falla» en [`app/README.md`](app/README.md).
-# Real Gale historical planning
+The unchanged main app displays Gale with Cesium Mars and consumes the development
+planning service. Real analytical terrain requires explicit backend configuration;
+locations and team models remain hypothetical/assumed. See the verified backend
+runbook below and [`app/README.md`](app/README.md) for frontend troubleshooting.
 
-The four-delivery environment integration adds prepared offline assets, actual-location
-geometric daylight and decision-safe A1/A2/B1 historical forecast context. Start with
+# Real Gale historical planning backend
+
+The backend integration adds prepared offline assets, actual-location geometric
+daylight and decision-safe A1/A2/B1 historical forecast context. The entire tracked
+`app/` tree is preserved exactly from incorporated main. Forecast details remain
+available through existing raw evidence, API and CLI; dedicated presentation is
+deferred to P1. Start with
 the [verified Windows runbook and acceptance cases](docs/handoffs/P2_ENVIRONMENT_DELIVERY.md).
 The [scientific/time/availability contract](docs/ENVIRONMENT_RUNTIME.md) records the
 reconstruction policy and limitations. Real mode requires explicit `--gale-package`;
