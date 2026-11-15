@@ -171,6 +171,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       </div>
       <footer class="wz-foot">
         ${errs.length && step !== 4 ? `<p class="wz-errors" role="alert">${errs.map(esc).join(" · ")}</p>` : ""}
+        ${step === 4 ? `<div class="wz-ready">${checklist(s)}</div>` : ""}
         <div class="wz-nav">
           ${step > 0 ? `<button type="button" data-act="back">${esc(t("wizard.back"))}</button>` : "<span></span>"}
           ${step < 4
@@ -404,40 +405,82 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   function summaryStep(s: PlanRequest) {
     const d = distanceM(s);
     const lim = limits(s);
+    const team = members(s);
     const names = (ids: string[]) => ids.map((id) => catalogEntry(id).identity.name).join(", ");
-    const edited = members(s).some((m) => m.mission_overrides && Object.keys(m.mission_overrides).length);
+    const edited = team.some((m) => m.mission_overrides && Object.keys(m.mission_overrides).length);
+    const shownTasks = s.mission.tasks.slice(0, 3);
+    const moreTasks = s.mission.tasks.length - shownTasks.length;
+    const editIcon = `<span class="wz-sum-edit" aria-hidden="true">${ICONS.pencil}</span>`;
+    return `
+      <button type="button" class="wz-sum-hero" data-goto="0" aria-label="${esc(t("wizard.step.mission"))}">
+        <span class="wz-sum-hero-icon">${familyIcon(s.mission.template_id)}</span>
+        <span class="wz-sum-hero-text">
+          <span class="wz-eyebrow">${esc(templateLabel(s.mission.template_id))}</span>
+          <span class="wz-sum-route">${esc(poiName(s.origin.poi_id))}<span class="wz-sum-arrow" aria-hidden="true"></span>${esc(poiName(s.destination.poi_id))}</span>
+          ${d === null ? "" : `<small>${esc(t("wizard.mission.distance", { m: num(d, 0) }))} ${tag("derived")}</small>`}
+        </span>${editIcon}
+      </button>
+      <div class="wz-sum-grid">
+        <button type="button" class="wz-sum wz-sum-tile" data-goto="1">
+          <h3>${ICONS.team}${esc(t("wizard.step.team"))} (${team.length})${editIcon}</h3>
+          <p class="wz-live-team">${team.map((m) => `<span class="wz-chip" data-kind="${catalogEntry(m.profile_id).kind}">${memberIcon(catalogEntry(m.profile_id).kind, m.profile_id)}${esc(catalogEntry(m.profile_id).identity.name)}</span>`).join("") || `<span class="wz-warn">${esc(t("wizard.team.minHuman"))}</span>`}</p>
+          ${lim ? `<p class="wz-sum-meta">${esc(t("wizard.live.pace", { speed: `${num(lim.pace.value)} m/s`, slope: `${num(Math.min(lim.up.value, lim.down.value))}°` }))} ${tag("assumed")}</p>
+            ${team.length > 1 ? `<p class="wz-sum-meta">${esc(t("wizard.summary.limiting", { name: names([...new Set([...lim.pace.by, ...lim.up.by, ...lim.down.by])]) }))}</p>` : ""}` : ""}
+          ${edited ? `<p><span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.edited"))}</span></p>` : ""}
+        </button>
+        <button type="button" class="wz-sum wz-sum-tile" data-goto="2">
+          <h3>${ICONS.tasks}${esc(t("wizard.step.tasks"))} (${s.mission.tasks.length})${editIcon}</h3>
+          <ul>${shownTasks.map((task) => `<li><span>${esc(taskName(task.id))}</span><span>${toHhMm(task.duration_s)}</span></li>`).join("")}</ul>
+          ${moreTasks > 0 ? `<p class="wz-sum-meta">${esc(t("wizard.summary.more", { n: moreTasks }))}</p>` : ""}
+          <p class="wz-sum-total"><span>${esc(t("wizard.summary.atDestination"))}</span><strong>${toHhMm(tasksTotal(s))}</strong></p>
+        </button>
+      </div>
+      <button type="button" class="wz-sum wz-sum-time" data-goto="3">
+        <h3>${ICONS.clock}${esc(t("wizard.summary.scheduleTime"))} ${tag("derived")}${editIcon}</h3>
+        <p class="wz-sum-meta">${esc(t("wizard.summary.departureBudget", {
+          t: s.mission.departure_utc.replace("T", " ").replace(/:\d\dZ$/, ""), b: toHhMm(s.mission.time_budget_s) }))}</p>
+        ${timeline(s)}
+      </button>
+      ${advancedModified(s) ? `<p class="wz-derived"><span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.advancedChanged"))}</span></p>` : ""}
+      <div class="wz-sum-links">
+        <details class="mp-json"><summary>${esc(t("mp.json"))}</summary><pre></pre></details>
+        <button type="button" class="wz-link" data-act="reset">${esc(t("mp.reset"))}</button>
+      </div>`;
+  }
+
+  /** Budget timeline from departure (00:00) to the budget: tasks, reserve and the time left for travel. */
+  function timeline(s: PlanRequest) {
     const tasks = tasksTotal(s);
     const reserve = s.mission.reserve_s;
     const budget = s.mission.time_budget_s;
     const scale = Math.max(budget, tasks + reserve, 1);
-    const over = tasks + reserve > budget;
-    const pct = (v: number) => `${(100 * v / scale).toFixed(2)}%`;
-    const errs = stepErrors(4, s);
-    return `
-      <button type="button" class="wz-sum" data-goto="0"><h3>${ICONS.route}${esc(t("wizard.step.mission"))}</h3>
-        <p><strong>${esc(templateLabel(s.mission.template_id))}</strong></p>
-        <p>${esc(poiName(s.origin.poi_id))} ───▶ ${esc(poiName(s.destination.poi_id))}${d === null ? "" : ` · ${esc(t("wizard.mission.distance", { m: num(d, 0) }))}`} ${tag("derived")}</p></button>
-      <button type="button" class="wz-sum" data-goto="1"><h3>${ICONS.team}${esc(t("wizard.step.team"))} (${members(s).length})</h3>
-        <p class="wz-live-team">${members(s).map((m) => `<span class="wz-chip" data-kind="${catalogEntry(m.profile_id).kind}">${memberIcon(catalogEntry(m.profile_id).kind, m.profile_id)}${esc(catalogEntry(m.profile_id).identity.name)}</span>`).join("")}</p>
-        ${lim ? `<p>${esc(t("wizard.team.summary", { speed: `${num(lim.pace.value)} m/s`, slopeUp: `${num(lim.up.value)}°`, slopeDown: `${num(lim.down.value)}°` }))}
-          ${members(s).length > 1 ? ` · ${esc(t("wizard.summary.limiting", { name: names([...new Set([...lim.pace.by, ...lim.up.by, ...lim.down.by])]) }))}` : ""} ${tag("assumed")}</p>` : ""}
-        ${edited ? `<p><span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.edited"))}</span></p>` : ""}</button>
-      <button type="button" class="wz-sum" data-goto="2"><h3>${ICONS.tasks}${esc(t("wizard.step.tasks"))}</h3>
-        <ul>${s.mission.tasks.map((task) => `<li><span>${esc(taskName(task.id))}</span><span>${toHhMm(task.duration_s)}</span></li>`).join("")}</ul>
-        <p>${esc(t("wizard.tasks.total", { t: toHhMm(tasks) }))}</p></button>
-      <button type="button" class="wz-sum" data-goto="3"><h3>${ICONS.clock}${esc(t("wizard.step.schedule"))}</h3>
-        <p>${esc(t("wizard.summary.departure", { t: s.mission.departure_utc.replace("T", " ").replace(/:\d\dZ$/, "") }))}</p></button>
-      <div class="wz-sum wz-time"><h3>${ICONS.clock}${esc(t("wizard.summary.time"))} ${tag("derived")}</h3>
-        ${timeBar(s)}
-        <p class="mp-hint">${esc(t("wizard.summary.noTravel"))}</p>
-        ${over ? `<p class="wz-over">${esc(t("wizard.schedule.over"))}</p>` : ""}</div>
-      ${advancedModified(s) ? `<p class="wz-derived"><span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.advancedChanged"))}</span></p>` : ""}
-      ${errs.length ? `<p class="wz-errors" role="alert">${errs.map(esc).join(" · ")}</p>` : ""}
-      <p class="mp-status" role="status" aria-live="polite" data-kind="${error ? "error" : "info"}">${esc(error || t(statusKey))}</p>
-      <details data-adv="summary" class="wz-adv"><summary>${esc(t("wizard.advanced"))}</summary>
-        <button type="button" data-act="reset">${esc(t("mp.reset"))}</button>
-        <details class="mp-json"><summary>${esc(t("mp.json"))}</summary><pre></pre></details>
-      </details>`;
+    const free = budget - tasks - reserve;
+    const pct = (v: number) => 100 * Math.max(v, 0) / scale;
+    const seg = (cls: string, v: number, label: string) =>
+      `<span class="${cls}" style="width:${pct(v).toFixed(2)}%" title="${esc(label)}">${pct(v) >= 14 ? `<em>${esc(label)}</em>` : ""}</span>`;
+    return `<div class="wz-timeline ${free < 0 ? "over" : ""}">
+        <div class="wz-timeline-bar" role="img" aria-label="${esc(t("wizard.summary.legend", { tasks: toHhMm(tasks), reserve: toHhMm(reserve), budget: toHhMm(budget) }))}">
+          ${seg("seg-tasks", tasks, `${t("wizard.live.tasks")} ${toHhMm(tasks)}`)}
+          ${seg("seg-reserve", reserve, `${t("wizard.live.reserve")} ${toHhMm(reserve)}`)}
+          ${free > 0 ? seg("seg-free", free, t("wizard.summary.free", { t: toHhMm(free) })) : ""}
+          ${free < 0 ? `<i class="seg-budget" style="left:${pct(budget).toFixed(2)}%"></i>` : ""}
+        </div>
+        <div class="wz-timeline-axis"><span>00:00</span><span>${toHhMm(budget)}</span></div>
+        <p class="wz-legend"><span class="dot tasks"></span>${esc(t("wizard.live.tasks"))} ${toHhMm(tasks)}
+          <span class="dot reserve"></span>${esc(t("wizard.live.reserve"))} ${toHhMm(reserve)}
+          <span class="dot free"></span>${esc(free >= 0 ? t("wizard.summary.free", { t: toHhMm(free) }) : t("wizard.schedule.over"))}</p>
+      </div>`;
+  }
+
+  /** Per-step check list shown next to the Calculate button. */
+  function checklist(s: PlanRequest) {
+    return `<ul class="wz-checklist">${([0, 1, 2, 3] as Step[]).map((i) => {
+      const errs = stepErrors(i, s);
+      return errs.length
+        ? `<li data-ok="false"><button type="button" data-goto="${i}">✗ ${esc(t(`wizard.step.${STEPS[i]}`))}: ${esc(errs[0])}</button></li>`
+        : `<li data-ok="true">✓ ${esc(t(`wizard.step.${STEPS[i]}`))}</li>`;
+    }).join("")}</ul>
+    <p class="mp-status" role="status" aria-live="polite" data-kind="${error ? "error" : "info"}">${esc(error || t(statusKey))}</p>`;
   }
 
   /** Updates derived lines and step validity without re-rendering inputs (keeps focus while typing). */

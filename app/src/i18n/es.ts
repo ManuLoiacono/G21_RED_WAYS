@@ -615,6 +615,11 @@ export const es = {
   "wizard.stat.max_descent_deg": "Bajada",
   "wizard.stat.carrying_limit_kg": "Carga",
   "wizard.stat.max_sortie_s": "Disponib.",
+  "wizard.summary.more": "+{n} más",
+  "wizard.summary.atDestination": "Total en destino",
+  "wizard.summary.scheduleTime": "Horario y tiempo",
+  "wizard.summary.departureBudget": "Salida {t} UTC · presupuesto {b}",
+  "wizard.summary.free": "ida y vuelta: se calcula · hasta {t}",
 } as const;
 
 export type MessageKey = keyof typeof es;

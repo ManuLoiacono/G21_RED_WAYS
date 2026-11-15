@@ -612,4 +612,9 @@ export const en: Record<MessageKey, string> = {
   "wizard.stat.max_descent_deg": "Downhill",
   "wizard.stat.carrying_limit_kg": "Load",
   "wizard.stat.max_sortie_s": "Avail.",
+  "wizard.summary.more": "+{n} more",
+  "wizard.summary.atDestination": "Total at destination",
+  "wizard.summary.scheduleTime": "Schedule and time",
+  "wizard.summary.departureBudget": "Departure {t} UTC · budget {b}",
+  "wizard.summary.free": "outbound and return: calculated · up to {t}",
 };
