@@ -258,66 +258,99 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
 
   function teamStep(s: PlanRequest) {
     const lim = limits(s);
-    const count = members(s).length;
-    const summary = lim ? t("wizard.team.summary", {
-      speed: `${num(lim.pace.value)} m/s`, slopeUp: `${num(lim.up.value)}°`, slopeDown: `${num(lim.down.value)}°` }) : "";
+    const team = members(s);
+    const entries = metadata!.catalogs.catalog.entries;
+    const limitedBy = lim && team.length > 1 ? [...new Set([...lim.pace.by, ...lim.up.by, ...lim.down.by])] : [];
+    const chips = team.map((m) => {
+      const e = catalogEntry(m.profile_id);
+      return `<span class="wz-chip wz-chip-x" data-kind="${e.kind}">${memberIcon(e.kind, m.profile_id)}${esc(e.identity.name)}
+        <button type="button" data-act="remove-member" data-member="${esc(m.profile_id)}" aria-label="${esc(t("wizard.team.remove", { name: e.identity.name }))}" title="${esc(t("wizard.team.remove", { name: e.identity.name }))}">×</button></span>`;
+    }).join("");
+    const section = (kind: "human" | "robot") => {
+      const list = entries.filter((e) => e.kind === kind);
+      const chosen = kind === "human" ? s.team.humans.length : s.team.robots.length;
+      const max = kind === "human" ? MAX_HUMANS : MAX_ROBOTS;
+      return `<section class="wz-team-section" data-kind="${kind}">
+        <h4>${esc(t(kind === "human" ? "wizard.team.humans" : "wizard.team.robots", { n: chosen, max }))}
+          <span class="wz-team-tags">${tag("assumed")}${tag("fictional")}</span></h4>
+        <div class="wz-cards" data-kind="${kind}">${list.map((e) => card(e, s, lim, team.length)).join("")}</div></section>`;
+    };
     return `
-      <p class="mp-hint">${esc(t("nav.teamHint"))}</p>
-      ${lim ? `<p class="wz-derived">${esc(summary)} ${tag("assumed")}</p>` : ""}
-      <div class="wz-cards">${metadata!.catalogs.catalog.entries.map((e) => card(e, s, lim, count)).join("")}</div>`;
+      <div class="wz-team-bar">
+        <div class="wz-team-bar-head"><strong>${esc(t("wizard.team.selected", { n: team.length }))}</strong>
+          ${lim ? `<span class="wz-team-limits">${esc(t("wizard.team.summary", { speed: `${num(lim.pace.value)} m/s`, slopeUp: `${num(lim.up.value)}°`, slopeDown: `${num(lim.down.value)}°` }))}
+            ${limitedBy.length ? ` · ${esc(t("wizard.summary.limiting", { name: limitedBy.map((id) => catalogEntry(id).identity.name).join(", ") }))}` : ""}</span>` : ""}</div>
+        <div class="wz-live-team">${chips || `<span class="wz-warn">${esc(t("wizard.team.minHuman"))}</span>`}</div>
+      </div>
+      ${section("human")}
+      ${section("robot")}
+      ${team.length ? `<section class="wz-team-section wz-team-settings"><h4>${esc(t("wizard.team.settings"))}</h4>
+        <ul class="wz-settings">${team.map((m) => settingsRow(m)).join("")}</ul></section>` : ""}`;
   }
 
+  /** Compact, selection-only card: avatar, name, one fictional line and the five parameters. */
   function card(entry: CatalogEntry, s: PlanRequest, lim: ReturnType<typeof limits>, count: number) {
     const id = entry.identity.profile_id;
     const group = entry.kind === "human" ? s.team.humans : s.team.robots;
     const selected = group.find((p) => p.profile_id === id);
     const full = !selected && group.length >= (entry.kind === "human" ? MAX_HUMANS : MAX_ROBOTS);
-    const isEditing = selected && editing.has(id);
     const fx = TEAM_FIXTURE[id];
     const personal = !fx ? "" : fx.kind === "human"
-      ? `<li>${esc(t("wizard.person.age", { v: fx.age_years }))}</li><li>${esc(t("wizard.person.height", { v: num(fx.height_m) }))}</li>
-         <li>${esc(t("wizard.person.mass", { kg: fx.mass_kg, lb: Math.round(fx.mass_kg * KG_TO_LB) }))}</li>`
-      : `<li>${esc(t("wizard.robot.mass", { kg: fx.mass_kg, lb: Math.round(fx.mass_kg * KG_TO_LB) }))}</li>
-         <li>${esc(t("wizard.robot.size", { l: num(fx.length_m), w: num(fx.width_m) }))}</li><li>${esc(t(`wizard.robot.drive.${fx.drive}`))}</li>`;
-    const limitKey = (key: keyof Parameters) => {
-      if (!lim || count < 2 || !selected) return "";
+      ? [t("wizard.person.age", { v: fx.age_years }), t("wizard.person.height", { v: num(fx.height_m) }), t("wizard.person.mass", { kg: fx.mass_kg, lb: Math.round(fx.mass_kg * KG_TO_LB) })].join(" · ")
+      : [t("wizard.robot.mass", { kg: fx.mass_kg, lb: Math.round(fx.mass_kg * KG_TO_LB) }), t("wizard.robot.size", { l: num(fx.length_m), w: num(fx.width_m) }), t(`wizard.robot.drive.${fx.drive}`)].join(" · ");
+    const limiting = (key: keyof Parameters) => {
+      if (!lim || count < 2 || !selected) return null;
       const map: Partial<Record<keyof Parameters, [typeof lim.pace, MessageKey]>> = {
         flat_speed_m_s: [lim.pace, "wizard.team.limits.pace"], max_ascent_deg: [lim.up, "wizard.team.limits.up"], max_descent_deg: [lim.down, "wizard.team.limits.down"] };
       const hit = map[key];
-      return hit && hit[0].by.includes(id) ? `<span class="wz-limit">${esc(t(hit[1]))}</span>` : "";
+      return hit && hit[0].by.includes(id) ? t(hit[1]) : null;
     };
     const catalogMax = (key: keyof Parameters) => Math.max(...metadata!.catalogs.catalog.entries.map((e) => e.defaults[key]));
-    const params = PARAMETER_KEYS.map((key) => {
-      const base = entry.defaults[key];
+    const stats = PARAMETER_KEYS.map((key) => {
       const override = selected?.mission_overrides?.[key];
-      const value = override ?? base;
-      const name = `override:${id}:${key}`;
-      // Catalog labels carry the unit in parentheses; values here show their own unit (or hh:mm).
-      const label = tOr(`nav.param.${key}`, key).replace(/\s*\([^)]*\)\s*$/, "") + (isEditing ? ` (${key === "max_sortie_s" ? "hh:mm" : paramUnit(key)})` : "");
-      if (isEditing) {
-        const inputValue = key === "max_sortie_s" ? toHhMm(value) : String(value);
-        return `<li class="wz-param"><label>${esc(label)}
-            <input name="${esc(name)}" ${key === "max_sortie_s" ? 'type="text" inputmode="numeric" placeholder="hh:mm"' : 'type="number" min="0" step="any"'} value="${esc(inputValue)}" /></label>
-          ${override !== undefined ? `<small>${esc(t("wizard.team.catalog", { value: `${paramText(key, base)} ${paramUnit(key)}` }))}</small>
-            <button type="button" class="wz-mini" data-act="restore" data-member="${esc(id)}" data-param="${key}">${esc(t("wizard.team.restore"))}</button>` : ""}
-          ${limitKey(key)}</li>`;
-      }
-      const meter = `<i class="wz-meter" aria-hidden="true"><b style="width:${Math.min(100, (100 * value) / Math.max(catalogMax(key), value, 1e-9)).toFixed(0)}%"></b></i>`;
-      return `<li class="wz-param"><span>${esc(label)}</span><strong>${esc(paramText(key, value))}${paramUnit(key) === "°" ? "°" : paramUnit(key) ? ` ${esc(paramUnit(key))}` : ""}</strong>
-        ${override !== undefined ? `<span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.edited"))}</span>` : ""}${meter}${limitKey(key)}</li>`;
+      const value = override ?? entry.defaults[key];
+      const unit = paramUnit(key);
+      const shown = `${paramText(key, value)}${unit === "°" ? "°" : unit ? ` ${unit}` : ""}`;
+      const lim = limiting(key);
+      const full = tOr(`nav.param.${key}`, key).replace(/\s*\([^)]*\)\s*$/, "");
+      return `<li class="wz-stat ${lim ? "is-limit" : ""} ${override !== undefined ? "is-edited" : ""}" title="${esc(full + (lim ? ` · ${lim}` : ""))}">
+        <span>${esc(t(`wizard.stat.${key}`))}</span><strong>${esc(shown)}</strong>
+        <i class="wz-meter" aria-hidden="true"><b style="width:${Math.min(100, (100 * value) / Math.max(catalogMax(key), value, 1e-9)).toFixed(0)}%"></b></i></li>`;
     }).join("");
     return `<article class="wz-card" data-card="${esc(id)}" data-kind="${entry.kind}" role="checkbox" tabindex="${full ? -1 : 0}"
         aria-checked="${!!selected}" aria-disabled="${full}" ${full ? `title="${esc(t("wizard.team.max"))}"` : ""}>
       <span class="wz-check">${ICONS.check}</span>
       <header><span class="wz-avatar">${memberIcon(entry.kind, id)}</span>
-        <div><strong>${esc(entry.identity.name)}</strong><small>${esc(t(`nav.${entry.kind}`))}</small></div>
-        ${selected ? `<button type="button" class="wz-mini wz-pencil" data-act="edit-params" data-member="${esc(id)}" aria-pressed="${!!isEditing}"
-          aria-label="${esc(t("wizard.team.edit"))}" title="${esc(t("wizard.team.edit"))}">${ICONS.pencil}</button>` : ""}</header>
-      ${personal ? `<ul class="wz-personal">${personal}</ul><p class="wz-fict">${tag("fictional")}</p>` : ""}
-      <ul class="wz-params" data-selected="${!!selected}">${params}</ul>
-      <p class="wz-fict">${tag("assumed")}</p>
-      ${selected ? `<label class="wz-payload">${esc(t("nav.payload"))}<input name="payload:${esc(id)}" type="number" min="0" step="any" value="${selected.payload_kg}" /></label>` : ""}
+        <div><strong>${esc(entry.identity.name)}</strong><small>${esc(t(`nav.${entry.kind}`))}</small></div></header>
+      ${personal ? `<p class="wz-personal-line">${esc(personal)}</p>` : ""}
+      <ul class="wz-stats" data-selected="${!!selected}">${stats}</ul>
     </article>`;
+  }
+
+  /** One row per selected member: assigned payload and, on demand, the five per-mission parameters. */
+  function settingsRow(m: Member) {
+    const entry = catalogEntry(m.profile_id);
+    const id = m.profile_id;
+    const isEditing = editing.has(id);
+    const fields = PARAMETER_KEYS.map((key) => {
+      const base = entry.defaults[key];
+      const override = m.mission_overrides?.[key];
+      const value = override ?? base;
+      const label = `${tOr(`nav.param.${key}`, key).replace(/\s*\([^)]*\)\s*$/, "")} (${key === "max_sortie_s" ? "hh:mm" : paramUnit(key)})`;
+      return `<label class="wz-param-field">${esc(label)}
+        <input name="override:${esc(id)}:${key}" ${key === "max_sortie_s" ? 'type="text" inputmode="numeric" placeholder="hh:mm"' : 'type="number" min="0" step="any"'} value="${esc(key === "max_sortie_s" ? toHhMm(value) : String(value))}" />
+        ${override !== undefined ? `<small>${esc(t("wizard.team.catalog", { value: `${paramText(key, base)} ${paramUnit(key)}` }))}
+          <button type="button" class="wz-mini" data-act="restore" data-member="${esc(id)}" data-param="${key}">${esc(t("wizard.team.restore"))}</button></small>` : ""}</label>`;
+    }).join("");
+    const edited = m.mission_overrides && Object.keys(m.mission_overrides).length;
+    return `<li class="wz-setting" data-kind="${entry.kind}">
+      <div class="wz-setting-row">
+        <span class="wz-setting-name">${memberIcon(entry.kind, id)}${esc(entry.identity.name)}${edited ? `<span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.edited"))}</span>` : ""}</span>
+        <label class="wz-payload">${esc(t("nav.payload"))}<input name="payload:${esc(id)}" type="number" min="0" step="any" value="${m.payload_kg}" /></label>
+        <button type="button" class="wz-params-btn" data-act="edit-params" data-member="${esc(id)}" aria-expanded="${isEditing}">${ICONS.pencil}<span>${esc(t("wizard.team.paramsBtn"))}</span></button>
+      </div>
+      ${isEditing ? `<div class="wz-param-grid">${fields}</div>` : ""}
+    </li>`;
   }
 
   function tasksStep(s: PlanRequest) {
@@ -406,6 +439,18 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     set("available", availableLine(state));
     const live = wizard.querySelector(".wz-live");
     if (live) live.innerHTML = liveSummary(state);
+    if (step === 1) {
+      // Team bar and cards hold no inputs, so they can be redrawn while typing in the settings rows.
+      const fresh = document.createElement("div");
+      fresh.innerHTML = teamStep(state);
+      const swap = (selector: string) => {
+        const now = wizard.querySelectorAll(selector);
+        const next = fresh.querySelectorAll(selector);
+        now.forEach((el, i) => { if (next[i]) el.replaceWith(next[i]); });
+      };
+      swap(".wz-team-bar");
+      swap(".wz-cards");
+    }
     const errs = stepErrors(step, state);
     const next = wizard.querySelector<HTMLButtonElement>('[data-act="next"]');
     if (next) next.disabled = errs.length > 0;
@@ -614,6 +659,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       else if (act === "honesty") { showHonesty = !showHonesty; render(); }
       else if (act === "peek") { peekMap = !peekMap; render(); }
       else if (act === "reset" && metadata) { edited(); resetToBaseline(true); render(); }
+      else if (act === "remove-member" && button?.dataset.member) toggleMember(button.dataset.member);
       else if (act === "edit-params") {
         const id = button!.dataset.member!;
         if (editing.has(id)) editing.delete(id); else editing.add(id);

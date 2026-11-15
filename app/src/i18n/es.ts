@@ -604,6 +604,17 @@ export const es = {
   "wizard.live.reserve": "reserva",
   "wizard.live.budget": "presupuesto",
   "wizard.live.pace": "Ritmo {speed} · pendiente máx. {slope}",
+  "wizard.team.selected": "Equipo seleccionado ({n})",
+  "wizard.team.humans": "Humanos · {n} de {max}",
+  "wizard.team.robots": "Robots · {n} de {max}",
+  "wizard.team.settings": "Ajustes de los seleccionados",
+  "wizard.team.remove": "Quitar a {name}",
+  "wizard.team.paramsBtn": "Parámetros",
+  "wizard.stat.flat_speed_m_s": "Velocidad",
+  "wizard.stat.max_ascent_deg": "Subida",
+  "wizard.stat.max_descent_deg": "Bajada",
+  "wizard.stat.carrying_limit_kg": "Carga",
+  "wizard.stat.max_sortie_s": "Disponib.",
 } as const;
 
 export type MessageKey = keyof typeof es;
