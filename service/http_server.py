@@ -81,11 +81,29 @@ def local_origin(value):
     return value
 
 
+def public_origin(value):
+    """Public mode: also allow one exact HTTPS origin (scheme and host, no path or port)."""
+    try:
+        parts = urlsplit(value)
+        valid = (parts.scheme == "https" and bool(parts.hostname) and parts.port is None
+                 and parts.username is None and parts.password is None and not parts.path
+                 and not parts.query and not parts.fragment and value == f"https://{parts.hostname}")
+    except ValueError:
+        valid = False
+    if valid:
+        return value
+    try:
+        return local_origin(value)
+    except ValueError:
+        raise ValueError("Origin must be exactly https://HOST, http://localhost:PORT or http://127.0.0.1:PORT.") from None
+
+
 class HTTPApplication:
     """One application owns one immutable registry and one reusable planner."""
 
-    def __init__(self, *, allowed_origins=DEFAULT_ORIGINS, registry=None, default_parcel=None):
-        self.allowed_origins = frozenset(local_origin(item) for item in allowed_origins)
+    def __init__(self, *, allowed_origins=DEFAULT_ORIGINS, registry=None, default_parcel=None, public=False):
+        check = public_origin if public else local_origin
+        self.allowed_origins = frozenset(check(item) for item in allowed_origins)
         self.registry = fixture_registry() if registry is None else registry
         first = self.registry.parcels[0]
         self.default_parcel = (first.id, first.version) if default_parcel is None else default_parcel
@@ -174,12 +192,17 @@ class LocalHTTPServer(ThreadingHTTPServer):
     daemon_threads = False
     request_queue_size = 16
 
-    def __init__(self, application, host="127.0.0.1", port=8000):
-        if host not in ("127.0.0.1", "localhost"):
-            raise ValueError("Only IPv4 loopback binding is supported.")
+    def __init__(self, application, host="127.0.0.1", port=8000, *, public=False):
+        # Public mode (for a hosted container behind an HTTPS ingress) binds all IPv4 interfaces.
+        if public and host == "0.0.0.0":
+            bind = "0.0.0.0"
+        elif host in ("127.0.0.1", "localhost"):
+            bind = "127.0.0.1"
+        else:
+            raise ValueError("Only IPv4 loopback binding is supported (0.0.0.0 requires public mode).")
         self.application = application
         self._connections = BoundedSemaphore(16)
-        super().__init__(("127.0.0.1", port), RequestHandler)
+        super().__init__((bind, port), RequestHandler)
 
     def process_request(self, request, client_address):
         if not self._connections.acquire(blocking=False):
@@ -358,7 +381,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--host", choices=("127.0.0.1", "localhost"), default="127.0.0.1")
+    parser.add_argument("--host", choices=("127.0.0.1", "localhost", "0.0.0.0"), default="127.0.0.1",
+                        help="0.0.0.0 enables public mode for a hosted container (HTTPS origins allowed).")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--allow-origin", action="append", help="Repeat to replace the default browser origins.")
     parser.add_argument("--gale-package", help="Explicit trusted manifest path; register this exact Gale package and make it the UI default.")
@@ -368,6 +392,7 @@ def main(argv=None):
         parser.error("Port must be between 1 and 65535.")
     if args.environment_package and not args.gale_package:
         parser.error("--environment-package requires --gale-package.")
+    public = args.host == "0.0.0.0"
     try:
         registry = None
         default_parcel = None
@@ -377,12 +402,12 @@ def main(argv=None):
             real = registry.parcels[-1]
             default_parcel = (real.id, real.version)
         app = HTTPApplication(allowed_origins=DEFAULT_ORIGINS if args.allow_origin is None else args.allow_origin,
-                              registry=registry, default_parcel=default_parcel)
+                              registry=registry, default_parcel=default_parcel, public=public)
     except ValueError as exc:
         parser.error(str(exc))
     logging.basicConfig(level=logging.INFO)
-    with LocalHTTPServer(app, args.host, args.port) as server:
-        print(f"P2 draft service at http://127.0.0.1:{server.server_port}; schema={DRAFT_SCHEMA_VERSION}; scope={app.health()['scope']}", flush=True)
+    with LocalHTTPServer(app, args.host, args.port, public=public) as server:
+        print(f"P2 draft service at http://{server.server_address[0]}:{server.server_port}; schema={DRAFT_SCHEMA_VERSION}; scope={app.health()['scope']}", flush=True)
         try:
             server.serve_forever()
         except KeyboardInterrupt:

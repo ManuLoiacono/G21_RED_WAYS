@@ -1,0 +1,95 @@
+# Deploys main to Azure on every push: planning service (Container Apps) and app (static website).
+# Auth is OIDC (federated credential, no stored secret); see deploy/azure/README.md.
+# The HiRISE mesh is not rebuilt here: it stays in the static website from the manual deploy.
+name: Deploy to Azure
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-azure
+  cancel-in-progress: false
+
+env:
+  # Identifiers, not secrets. Filled in by deploy/azure/setup-github-oidc.ps1.
+  AZURE_CLIENT_ID: "8dbbab8a-415a-4f20-bb42-4e73ee87f75c"
+  AZURE_TENANT_ID: "837d44fb-e3b0-414c-afbe-f55c723830aa"
+  AZURE_SUBSCRIPTION_ID: "98479b0d-5ab9-4553-affb-f66ff9dc205f"
+  STORAGE: redwaysg21
+  RESOURCE_GROUP: redways-rg
+  CONTAINER_APP: redways-service
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Fetch build inputs (terrain package, Cesium token)
+        run: |
+          az storage blob download --account-name "$STORAGE" --container-name build-inputs --name terrain.npz \
+            --file data/processed/gale/analytical/terrain.npz --auth-mode key --only-show-errors -o none
+          az storage blob download --account-name "$STORAGE" --container-name build-inputs --name app.env \
+            --file app/.env --auth-mode key --only-show-errors -o none
+
+      - name: Build and push service image
+        run: |
+          image="$STORAGE.azurecr.io/redways-service:${GITHUB_SHA::12}"
+          az acr login --name "$STORAGE"
+          docker build -f service/Dockerfile -t "$image" -t "$STORAGE.azurecr.io/redways-service:latest" .
+          docker push "$image"
+          docker push "$STORAGE.azurecr.io/redways-service:latest"
+          echo "IMAGE=$image" >> "$GITHUB_ENV"
+
+      - name: Roll out service
+        run: |
+          az extension add --name containerapp --upgrade --only-show-errors
+          az containerapp update --name "$CONTAINER_APP" --resource-group "$RESOURCE_GROUP" \
+            --image "$IMAGE" --only-show-errors -o none
+          fqdn=$(az containerapp show --name "$CONTAINER_APP" --resource-group "$RESOURCE_GROUP" \
+            --query properties.configuration.ingress.fqdn -o tsv)
+          echo "SERVICE_URL=https://$fqdn" >> "$GITHUB_ENV"
+
+      - name: Wait for service health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS -m 10 "$SERVICE_URL/health" > /dev/null; then echo "healthy"; exit 0; fi
+            sleep 10
+          done
+          echo "Service did not become healthy" >&2; exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Build app
+        working-directory: app
+        env:
+          VITE_SERVICE_URL: ${{ env.SERVICE_URL }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload app
+        run: |
+          az storage blob upload-batch --account-name "$STORAGE" --auth-mode key --destination '$web' \
+            --source app/dist --overwrite --only-show-errors -o none
+          web=$(az storage account show --name "$STORAGE" --resource-group "$RESOURCE_GROUP" \
+            --query primaryEndpoints.web -o tsv)
+          echo "Deployed: $web (service $SERVICE_URL)" >> "$GITHUB_STEP_SUMMARY"
