@@ -40,6 +40,17 @@ export const es = {
   // Layers panel
   "layers.title": "Capas",
   "layers.hide": "Ocultar capas",
+  "layers.section.terrain": "Terreno",
+  "layers.section.analysis": "Análisis",
+  "layers.section.observations": "Observaciones de las misiones",
+  "layers.details.show": "Ver detalle: {layer}",
+  "layers.details.hide": "Ocultar detalle: {layer}",
+  "layers.parcel.pending": "Disponible con el terreno real",
+  "layers.panoramas.pending": "Cargando…",
+  "layers.mission.pending": "Calculá una misión para verla",
+  "layers.rems.summary": "Sol {sol} · {min} a {max} °C · {pa} Pa",
+  "layers.rems.unavailable": "Reportes de REMS no disponibles",
+  "layers.rems.noReport": "Sin reporte de REMS para la fecha de salida",
   "layers.show": "Mostrar capas",
   "layers.toggle": "Mostrar u ocultar: {layer}",
   "layers.source": "Fuente de {layer}",
@@ -83,7 +94,7 @@ export const es = {
   "layers.status.loaded": "Archivo local",
   "layers.status.streaming": "En línea",
   "layers.status.fixture": "Datos de prueba",
-  "layers.status.missing": "No generada",
+  "layers.status.missing": "No disponible en esta máquina",
   "layers.status.pending": "Sin conectar",
 
   // Cursor readout

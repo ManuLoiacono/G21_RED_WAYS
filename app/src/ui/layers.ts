@@ -2,10 +2,11 @@ import { onLanguageChange, t, type MessageKey } from "../i18n";
 import { esc } from "./format";
 
 /**
- * "Layers" panel: one row per kind of data shown on the scene (the challenge asks for several
- * kinds of NASA data layered together). Each row has a switch (if the layer can be hidden), an ⓘ
- * that opens its source in the "Sources" panel, and a short status. The detailed provenance
- * stays behind the ⓘ (D8): the row only says whether the layer is there and where it comes from.
+ * "Layers" panel: the kinds of data shown on the scene (the challenge asks for several kinds of
+ * NASA data layered together), grouped in three sections (terrain, analysis, mission observations).
+ * Each row is one line: name, optional action, switch and ⓘ. Mission/instrument and the rest of
+ * the provenance stay behind the ⓘ (D8). The status is shown only when there is something to say
+ * (loading, not available, test data). Details (REMS card, THEMIS scale) expand on demand.
  */
 
 /**
@@ -17,8 +18,17 @@ import { esc } from "./format";
  */
 export type LayerStatus = "loaded" | "streaming" | "fixture" | "missing" | "pending";
 
+export type LayerSection = "terrain" | "analysis" | "observations";
+const SECTIONS: LayerSection[] = ["terrain", "analysis", "observations"];
+
 export interface LayerDef {
   id: string;
+  /** Section of the panel the row belongs to. */
+  section: LayerSection;
+  /** Optional one-line summary under the name (plain text, escaped here). */
+  summary?: () => string;
+  /** Text shown while the layer is `pending` (defaults to a generic "not connected"). */
+  pendingKey?: MessageKey;
   /** Contract data class, for the colored tag (`topografica`, `optica`, …), or `mission`. */
   dataClass: "topografica" | "optica" | "atmosferica" | "termica" | "mission";
   name: MessageKey;
@@ -32,7 +42,7 @@ export interface LayerDef {
   action?: { label: MessageKey; run: () => void };
   /** Shown instead of a switch when the layer cannot be hidden. */
   lockedKey?: MessageKey;
-  /** Legend HTML shown under the row while the layer is on screen (already escaped). */
+  /** Details HTML (already escaped), expandable from the row while the layer is on screen. */
   legend?: () => string;
 }
 
@@ -46,6 +56,8 @@ export interface LayersPanel {
 
 export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): LayersPanel {
   let open = !window.matchMedia("(max-width: 900px)").matches;
+  /** Rows whose details are expanded. */
+  const expanded = new Set<string>();
   const toggleListeners: ((open: boolean) => void)[] = [];
 
   function row(layer: LayerDef): string {
@@ -66,21 +78,32 @@ export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): Layers
       ? `<button type="button" class="ly-action" data-action="${layer.id}">${esc(t(layer.action.label))}</button>`
       : "";
     const active = status !== "missing" && status !== "pending" && (!layer.visibility || on);
-    const legend = active && layer.legend ? `<div class="ly-legend">${layer.legend()}</div>` : "";
+    const canExpand = active && Boolean(layer.legend);
+    const isOpen = canExpand && expanded.has(layer.id);
+    const toggleDetails = canExpand
+      ? `<button type="button" class="ly-more" data-details="${layer.id}" aria-expanded="${isOpen}"
+           aria-label="${esc(t(isOpen ? "layers.details.hide" : "layers.details.show", { layer: t(layer.name) }))}"
+           title="${esc(t(isOpen ? "layers.details.hide" : "layers.details.show", { layer: t(layer.name) }))}">⌄</button>`
+      : "";
+    // Status only when it tells something: loading / not available / test data.
+    const statusText =
+      status === "pending" ? t(layer.pendingKey ?? "layers.status.pending")
+      : status === "missing" ? t("layers.status.missing")
+      : status === "fixture" ? t("layers.status.fixture")
+      : "";
+    const summary = active && layer.summary ? layer.summary() : "";
+    const sub = summary || statusText;
     return `
-      <li class="ly-row" data-status="${status}" data-active="${active}">
+      <li class="ly-row" data-status="${status}" data-active="${active}" data-class="${layer.dataClass}">
         <div class="ly-main">
           <span class="ly-name">${esc(t(layer.name))}</span>
-          ${info}
+          ${toggleDetails}
           ${action}
           ${control}
+          ${info}
         </div>
-        <div class="ly-meta">
-          <span class="ly-class" data-class="${layer.dataClass}">${esc(t(`layers.class.${layer.dataClass}` as MessageKey))}</span>
-          <span class="ly-origin" title="${esc(layer.origin)}">${esc(layer.origin)}</span>
-          <span class="ly-status">${esc(t(`layers.status.${status}` as MessageKey))}</span>
-        </div>
-        ${legend}
+        ${sub ? `<div class="ly-sub ${summary ? "ly-summary" : "ly-state"}">${esc(sub)}</div>` : ""}
+        ${isOpen ? `<div class="ly-legend">${layer.legend!()}</div>` : ""}
       </li>`;
   }
 
@@ -99,7 +122,12 @@ export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): Layers
         <h2>${esc(t("layers.title"))}</h2>
         <button type="button" data-act="close" aria-label="${esc(t("layers.hide"))}" title="${esc(t("layers.hide"))}">‹</button>
       </div>
-      <ul class="ly-list">${layers.map(row).join("")}</ul>`;
+      ${SECTIONS.map((section) => {
+        const items = layers.filter((l) => l.section === section);
+        return items.length ? `<section class="ly-section" data-section="${section}">
+          <h3>${esc(t(`layers.section.${section}`))}</h3>
+          <ul class="ly-list">${items.map(row).join("")}</ul></section>` : "";
+      }).join("")}`;
   }
 
   root.addEventListener("click", (e) => {
@@ -112,6 +140,14 @@ export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): Layers
     if (target.closest('[data-act="open"]')) {
       api.setOpen(true);
       root.querySelector<HTMLButtonElement>('[data-act="close"]')?.focus();
+      return;
+    }
+    const more = target.closest<HTMLButtonElement>(".ly-more");
+    if (more) {
+      const id = more.dataset.details!;
+      if (expanded.has(id)) expanded.delete(id); else expanded.add(id);
+      render();
+      root.querySelector<HTMLButtonElement>(`.ly-more[data-details="${id}"]`)?.focus();
       return;
     }
     const act = target.closest<HTMLButtonElement>(".ly-action");

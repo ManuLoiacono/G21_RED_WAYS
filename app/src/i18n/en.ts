@@ -39,6 +39,17 @@ export const en: Record<MessageKey, string> = {
   // Layers panel
   "layers.title": "Layers",
   "layers.hide": "Hide layers",
+  "layers.section.terrain": "Terrain",
+  "layers.section.analysis": "Analysis",
+  "layers.section.observations": "Mission observations",
+  "layers.details.show": "Show details: {layer}",
+  "layers.details.hide": "Hide details: {layer}",
+  "layers.parcel.pending": "Available with the real terrain",
+  "layers.panoramas.pending": "Loading…",
+  "layers.mission.pending": "Calculate a mission to see it",
+  "layers.rems.summary": "Sol {sol} · {min} to {max} °C · {pa} Pa",
+  "layers.rems.unavailable": "REMS reports unavailable",
+  "layers.rems.noReport": "No REMS report for the departure date",
   "layers.show": "Show layers",
   "layers.toggle": "Show or hide: {layer}",
   "layers.source": "Source of {layer}",
@@ -82,7 +93,7 @@ export const en: Record<MessageKey, string> = {
   "layers.status.loaded": "Local file",
   "layers.status.streaming": "Online",
   "layers.status.fixture": "Test data",
-  "layers.status.missing": "Not built",
+  "layers.status.missing": "Not available on this machine",
   "layers.status.pending": "Not connected",
 
   // Cursor readout

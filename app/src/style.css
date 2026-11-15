@@ -670,3 +670,31 @@ button.wz-sum:hover { border-color: rgba(232, 131, 79, .6); transform: translate
 .wz-nav button:not(.mp-primary):hover, .wz-body button:not(.wz-family):not(.wz-sum):not(.wz-pencil):hover, .wz-mini:hover { background: rgba(255, 255, 255, .12); border-color: rgba(232, 131, 79, .6); }
 .wz-mini { padding: 3px 10px; font-size: 12px; }
 .wz-pencil { color: var(--ui-fg); background: rgba(255, 255, 255, .06); border: 1px solid var(--ui-line-strong); cursor: pointer; }
+
+/* Layers panel: sections, one-line rows, expandable details. */
+.ly-section { padding: 2px 0 4px; }
+.ly-section + .ly-section { border-top: 1px solid var(--ui-line); }
+.ly-section h3 { display: flex; align-items: center; gap: 7px; margin: 0; padding: 9px 12px 3px; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--section-color, var(--ui-muted)); }
+.ly-section h3::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--section-color, var(--ui-muted)); box-shadow: 0 0 8px var(--section-color, transparent); }
+.ly-section[data-section="terrain"] { --section-color: #e0a36f; }
+.ly-section[data-section="analysis"] { --section-color: #ff9e7a; }
+.ly-section[data-section="observations"] { --section-color: #9ecbff; }
+.ly-section .ly-list { padding: 0; }
+.ly-section .ly-row { position: relative; padding: 7px 10px 7px 16px; border-bottom: none; }
+.ly-section .ly-row::before { content: ""; position: absolute; left: 8px; top: 9px; bottom: 9px; width: 2px; border-radius: 2px; background: var(--section-color); opacity: .25; transition: opacity .15s; }
+.ly-section .ly-row[data-active="true"]::before { opacity: .9; }
+.ly-section .ly-row:hover { background: rgba(255, 255, 255, .035); }
+.ly-main { gap: 8px; }
+.ly-name { font-size: 13px; }
+.ly-sub { margin-top: 2px; font-size: 11.5px; color: var(--ui-muted); }
+.ly-summary { color: var(--ui-neutral); font-variant-numeric: tabular-nums; }
+.ly-state { font-style: italic; }
+.ly-row[data-status="missing"] .ly-state { color: var(--ui-warn); font-style: normal; }
+.ly-more { flex: none; width: 22px; height: 22px; padding: 0; display: inline-grid; place-items: center; font-size: 13px; line-height: 1; color: var(--ui-muted); background: transparent; border: 1px solid var(--ui-line); border-radius: 6px; cursor: pointer; transition: transform .2s, color .15s, border-color .15s; }
+.ly-more:hover { color: var(--ui-fg); border-color: var(--ui-line-strong); }
+.ly-more[aria-expanded="true"] { transform: rotate(180deg); color: var(--section-color, var(--ui-fg)); border-color: var(--section-color, var(--ui-line-strong)); }
+.ly-section .ly-legend { margin-top: 8px; padding: 8px 10px; border-radius: 8px; background: rgba(0, 0, 0, .25); border: 1px solid var(--ui-line); animation: lyFade .2s both; }
+.ly-section .ly-action { margin-left: 0; margin-right: 0; }
+.ly-section .info-btn { flex: none; }
+@keyframes lyFade { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ly-section .ly-legend { animation: none; } .ly-more { transition: none; } }

@@ -176,6 +176,7 @@ async function main() {
   const layers = createLayersPanel(document.getElementById("layersPanel")!, [
     {
       id: "hirise",
+      section: "terrain",
       dataClass: "topografica",
       name: "layers.hirise",
       origin: "MRO · HiRISE",
@@ -188,6 +189,7 @@ async function main() {
     },
     {
       id: "visual_terrain",
+      section: "terrain",
       dataClass: "optica",
       name: "layers.visualTerrain",
       origin: "Cesium Mars · ion",
@@ -197,6 +199,8 @@ async function main() {
     },
     {
       id: "rems",
+      section: "observations",
+      summary: () => environment.summary(),
       dataClass: "atmosferica",
       name: "layers.rems",
       origin: "MSL · REMS",
@@ -207,6 +211,7 @@ async function main() {
     },
     {
       id: "themis",
+      section: "analysis",
       dataClass: "termica",
       name: "layers.themis",
       origin: "Mars Odyssey · THEMIS",
@@ -220,6 +225,8 @@ async function main() {
     },
     {
       id: "parcel",
+      section: "terrain",
+      pendingKey: "layers.parcel.pending",
       dataClass: "mission",
       name: "layers.parcel",
       origin: "HiRISE · analytical bounds",
@@ -231,6 +238,8 @@ async function main() {
     },
     {
       id: "panoramas",
+      section: "observations",
+      pendingKey: "layers.panoramas.pending",
       dataClass: "optica",
       name: "layers.panoramas",
       origin: "MSL · Mastcam · Navcam",
@@ -241,6 +250,8 @@ async function main() {
     },
     {
       id: "mission",
+      section: "analysis",
+      pendingKey: "layers.mission.pending",
       dataClass: "mission",
       name: "layers.mission",
       origin: "Marswalk",
