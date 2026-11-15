@@ -97,10 +97,10 @@ export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): Layers
       <li class="ly-row" data-status="${status}" data-active="${active}" data-class="${layer.dataClass}">
         <div class="ly-main">
           <span class="ly-name">${esc(t(layer.name))}</span>
-          ${toggleDetails}
-          ${action}
-          ${control}
-          ${info}
+          <!-- Fixed columns so each kind of control lines up across rows: extra · ⓘ · switch/BASE. -->
+          <span class="ly-slot ly-slot-extra">${toggleDetails}${action}</span>
+          <span class="ly-slot ly-slot-info">${info}</span>
+          <span class="ly-slot ly-slot-control">${control}</span>
         </div>
         ${sub ? `<div class="ly-sub ${summary ? "ly-summary" : "ly-state"}">${esc(sub)}</div>` : ""}
         ${isOpen ? `<div class="ly-legend">${layer.legend!()}</div>` : ""}

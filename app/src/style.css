@@ -698,3 +698,11 @@ button.wz-sum:hover { border-color: rgba(232, 131, 79, .6); transform: translate
 .ly-section .info-btn { flex: none; }
 @keyframes lyFade { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .ly-section .ly-legend { animation: none; } .ly-more { transition: none; } }
+
+/* Layers rows: fixed right-hand columns (extra · info · switch/BASE) so controls align across rows. */
+.ly-main .ly-slot { flex: none; display: inline-flex; align-items: center; }
+.ly-slot-extra { width: 48px; justify-content: flex-end; gap: 4px; }
+.ly-slot-info { width: 24px; justify-content: center; }
+.ly-slot-control { width: 50px; justify-content: flex-end; }
+.ly-slot-control .ly-locked { margin: 0; }
+.ly-slot-extra .ly-action { margin: 0; }
