@@ -47,6 +47,9 @@
 .hud-brand { display: flex; align-items: center; gap: 10px; flex: none; }
 .hud-brand strong { display: block; font-size: 14px; letter-spacing: 0.24em; font-weight: 700; }
 .hud-brand span { display: block; font-size: 11px; color: var(--ui-muted); letter-spacing: 0.04em; }
+.hud-brand .hud-title span { display: inline; font-size: inherit; letter-spacing: inherit; }
+.hud-brand .hud-title-red { color: var(--ui-mars); }
+.hud-brand .hud-title-ways { color: var(--ui-fg); }
 .hud-mark { width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #f3a06f, var(--ui-mars) 60%, #7a3218); box-shadow: 0 0 8px rgba(224, 122, 74, 0.6); }
 
 .hud-context { flex: 1 1 auto; min-width: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; }

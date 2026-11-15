@@ -254,7 +254,7 @@ async function main() {
       pendingKey: "layers.mission.pending",
       dataClass: "mission",
       name: "layers.mission",
-      origin: "Marswalk",
+      origin: "RedWays",
       sourceId: "navigation_draft",
       status: () => activeResponse?.geographic_adapter ? "loaded" : "pending",
       visibility: {

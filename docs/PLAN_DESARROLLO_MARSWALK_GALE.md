@@ -1,4 +1,4 @@
-# Plan de desarrollo — Marswalk en Gale
+# Plan de desarrollo — RedWays en Gale
 
 Documento operativo para un equipo de tres personas. Versión 1.1 — 14 de noviembre de 2026 (madrugada). Los cambios respecto de la 1.0 están al final, en la sección 17.
 
