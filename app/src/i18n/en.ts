@@ -660,4 +660,10 @@ export const en: Record<MessageKey, string> = {
   "rs.smoothed": "smoothed line",
   "rs.smoothedHint": "The map line is smoothed for display (up to ~2 m away). The calculated route follows the engine's 2 m grid; metrics are unchanged.",
   "rs.samePath": "· the return uses the same path",
+  "rs.otherAlternatives": "other alternatives · tap its card to view it",
+  "rs.altOnMap": "Alternative: {name}",
+  "rs.comparing": "Comparing time, ascent and visibility…",
+  "rs.comparedSame": "Compared: time, ascent and visibility pick the same path. There is no different route to show.",
+  "rs.comparedMany": "Compared: {n} different paths. The others are dashed on the map; tap a card to select it.",
+  "rs.compareFailed": "Could not calculate: {msg}",
 };

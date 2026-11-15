@@ -939,3 +939,27 @@ button.wz-sum { position: relative; }
 .rp-line { stroke-width: 2; }
 @media (max-width: 900px) { .rp-chart { height: 56px; } }
 #routeProfile { box-sizing: border-box; }
+
+/* Other (non-selected) alternatives: dashed light line on the map, same swatch in the legend. */
+.rs-legend .sw-other { width: 18px; height: 0; border-top: 3px dashed #e8e4f4; background: none; opacity: .85; }
+.rs-legend-others { display: inline-flex; align-items: center; gap: 6px; flex-basis: 100%; color: var(--muted, #b8b2c8); font-size: 11px; }
+
+.rs-legend-others { display: flex; width: 100%; margin-top: 2px; }
+.rs-legend { flex-wrap: wrap; }
+.rs-legend-others .sw-other { margin-left: 0; }
+
+/* Compare: prominent action above the cards, then a one-line outcome. */
+#resultsPanel .rs-compare { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin: 0 0 10px;
+  padding: 9px 12px; border-radius: 10px; border: 1px solid rgba(63, 240, 255, .45); background: rgba(63, 240, 255, .08);
+  color: #bff9ff; font-weight: 600; font-size: 13px; cursor: pointer; }
+#resultsPanel .rs-compare:hover { background: rgba(63, 240, 255, .16); border-color: rgba(63, 240, 255, .7); }
+#resultsPanel .rs-compare svg { width: 16px; height: 16px; flex: none; }
+.rs-compare-note { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 8px 10px; border-radius: 10px;
+  font-size: 12px; line-height: 1.35; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); }
+.rs-compare-note[data-tone="ok"] { border-color: rgba(126, 231, 135, .4); color: #c9f5cd; }
+.rs-compare-note[data-tone="same"] { color: var(--ui-neutral, #c9c4d6); }
+.rs-compare-note[data-tone="bad"] { border-color: rgba(255, 107, 107, .5); color: #ffc9c9; }
+.rs-spinner { width: 14px; height: 14px; flex: none; border-radius: 50%; border: 2px solid rgba(63, 240, 255, .25); border-top-color: #3ff0ff;
+  animation: rs-spin .8s linear infinite; }
+@keyframes rs-spin { to { transform: rotate(360deg); } }
+#resultsPanel.rs-is-busy .rs-cards, #resultsPanel.rs-is-busy .rs-actions, #resultsPanel.rs-is-busy .rs-hero { opacity: .45; pointer-events: none; }

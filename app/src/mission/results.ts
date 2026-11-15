@@ -41,12 +41,21 @@ export function createResultsPanel(root: HTMLElement) {
   let area: ReachableArea | null = null;
   let areaVisible = false;
   let areaStatus = "";
+  /** A comparison was requested from this panel and its answer is pending (display only). */
+  let comparing = false;
+  let failure = "";
   const listeners: ((id: string) => void)[] = [];
   function render() {
     const opened = new Set(Array.from(root.querySelectorAll<HTMLDetailsElement>("details[open][data-detail]"), (e) => e.dataset.detail));
     const scroll = root.querySelector(".mp-body")?.scrollTop ?? 0;
-    root.hidden = !response;
+    root.hidden = !response && !failure;
     root.classList.toggle("collapsed", collapsed);
+    root.classList.toggle("rs-is-busy", comparing);
+    if (!response && failure) {
+      root.innerHTML = `<header class="mp-head"><h2>${esc(t("rs.title"))}</h2></header>
+        <div class="mp-body"><p class="rs-compare-note" data-tone="bad" role="alert">${esc(t("rs.compareFailed", { msg: failure }))}</p></div>`;
+      return;
+    }
     if (!response) { root.innerHTML = ""; return; }
     const r = response;
     const geo = Boolean(r.geographic_adapter);
@@ -68,11 +77,12 @@ export function createResultsPanel(root: HTMLElement) {
         </div>
         ${geo ? `<p class="rs-legend"><span class="sw sw-out"></span>${esc(t("nav.outbound"))}${selected && sharesPath(selected.outbound, selected.return)
           ? ` <small class="rs-same">${esc(t("rs.samePath"))}</small>` : `<span class="sw sw-ret"></span>${esc(t("nav.return"))}`}
-          <small class="rs-smooth" title="${esc(t("rs.smoothedHint"))}">· ${esc(t("rs.smoothed"))}</small></p>` : ""}
+          <small class="rs-smooth" title="${esc(t("rs.smoothedHint"))}">· ${esc(t("rs.smoothed"))}</small>
+          ${r.alternatives.length > 1 ? `<span class="rs-legend-others"><span class="sw sw-other"></span>${esc(t("rs.otherAlternatives"))}</span>` : ""}</p>` : ""}
+        ${compareBlock(r)}
         ${r.alternatives.length === 0 ? `<p>${esc(t("rs.noAlternatives"))}</p>` : ""}
         <ul class="rs-cards">${r.alternatives.map(card).join("")}</ul>
         <div class="rs-actions">
-          <button type="button" data-act="compare">${esc(t("nx.compare"))}</button>
           <button type="button" data-act="area" aria-pressed="${areaVisible}">${esc(t(areaVisible ? "nx.hideArea" : "nx.showArea"))}</button>
           <button type="button" data-act="recommend" ${suggestionStatus === "busy" ? "disabled" : ""}>${esc(t("nx.recommend"))}</button>
         </div>
@@ -98,6 +108,16 @@ export function createResultsPanel(root: HTMLElement) {
     root.querySelectorAll<HTMLDetailsElement>("details[data-detail]").forEach((el) => { el.open = opened.has(el.dataset.detail); });
     const body = root.querySelector(".mp-body");
     if (body) body.scrollTop = scroll;
+  }
+  function compareBlock(r: PlanResponse) {
+    if (comparing) return `<p class="rs-compare-note" role="status"><span class="rs-spinner" aria-hidden="true"></span>${esc(t("rs.comparing"))}</p>`;
+    if (r.request_echo.criterion === "comparison") {
+      const n = r.alternatives.length;
+      return `<p class="rs-compare-note" data-tone="${n > 1 ? "ok" : "same"}" role="status">${esc(n > 1 ? t("rs.comparedMany", { n }) : t("rs.comparedSame"))}</p>`;
+    }
+    return `<button type="button" class="rs-compare" data-act="compare">
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M11 3l4 4-4 4M20 17H9M13 13l-4 4 4 4"/></svg>
+      <span>${esc(t("nx.compare"))}</span></button>`;
   }
   function metric(key: string, title: MessageKey, value: number | null) {
     return `<div><dt>${esc(plain(title))}</dt><dd data-metric="${key}" class="${value !== null && value < 0 ? "rs-neg" : ""}" title="${esc(seconds(value))}">${esc(duration(value))}</dd></div>`;
@@ -192,7 +212,7 @@ export function createResultsPanel(root: HTMLElement) {
     const target = e.target as HTMLElement;
     if (target.closest('[data-act="collapse"]')) { collapsed = !collapsed; render(); }
     if (target.closest('[data-act="focus-route"]')) root.dispatchEvent(new CustomEvent("focus-calculated-route", { bubbles: true }));
-    if (target.closest('[data-act="compare"]')) root.dispatchEvent(new CustomEvent("compare-calculated-routes", { bubbles: true }));
+    if (target.closest('[data-act="compare"]') && !comparing) { comparing = true; failure = ""; render(); root.dispatchEvent(new CustomEvent("compare-calculated-routes", { bubbles: true })); }
     if (target.closest('[data-act="area"]')) root.dispatchEvent(new CustomEvent("toggle-reachable-area", { bubbles: true }));
     if (target.closest('[data-act="recommend"]')) root.dispatchEvent(new CustomEvent("request-calculated-recommendations", { bubbles: true }));
     const index = target.closest<HTMLButtonElement>("button[data-proposal]")?.dataset.proposal;
@@ -204,10 +224,16 @@ export function createResultsPanel(root: HTMLElement) {
   render();
   return {
     show(r: PlanResponse) {
+      comparing = false; failure = "";
       response = r; area = null; areaStatus = ""; areaVisible = false; suggestions = null; suggestionStatus = ""; collapsed = false; selectedId = r.alternatives[0]?.id ?? null; render();
       if (selectedId) listeners.forEach((cb) => cb(selectedId!));
     },
-    clear() { response = null; area = null; areaStatus = ""; areaVisible = false; suggestions = null; suggestionStatus = ""; selectedId = null; render(); },
+    clear() {
+      // While a comparison requested here is pending, keep the previous result on screen (dimmed,
+      // not interactive) instead of an empty flash; it is replaced by show() or failed().
+      if (comparing) { area = null; areaStatus = ""; areaVisible = false; suggestions = null; suggestionStatus = ""; render(); return; }
+      failure = ""; response = null; area = null; areaStatus = ""; areaVisible = false; suggestions = null; suggestionStatus = ""; selectedId = null; render(); },
+    failed(message: string) { if (!comparing) return; comparing = false; response = null; failure = message; render(); },
     areaState(value: ReachableArea | string, visible: boolean) { areaVisible = visible; if (typeof value === "string") areaStatus = value; else { area = value; areaStatus = ""; } render(); },
     recommendationState(value: Recommendations | string) { if (typeof value === "string") suggestionStatus = value; else { suggestions = value; suggestionStatus = ""; } render(); },
     onSelect(cb: (id: string) => void) { listeners.push(cb); },
