@@ -76,4 +76,47 @@ Missing complete movement leaves totals/margins null with `unavailable_totals_re
 
 ## Consumer decisions still pending
 
-P1/P3 must accept/revise draft fields, version migration, metric versus future geographic geometry, request revision handling, error mapping and the separate margin names before shared v1 integration. P3 must supply reviewed real reference/mask/solar conventions and historical availability/revision policy, with coverage/quality checks before fixing a real replay start. Communication remains the next navigation extension after baseline service integration. `app/` and its existing static fallback are unchanged for P1's later integration work.
+Shared-v1 acceptance remains separate. Current main already consumes the development
+draft, calculated geographic routes and request/revision protocol without static
+planning-response fallbacks. The backend now supplies explicit real solar/time and
+reconstructed historical availability conventions. Independent geographic/scientific
+validation and exact archival availability remain limitations. The owner-directed
+reconciliation preserves all main frontend files exactly; dedicated environment
+presentation and stale main copy remain for P1. Communication remains separate work.
+# Additive environmental discovery
+
+Parcel scenarios advertise `coverage: {from_utc, to_utc}` and optional `environment`
+metadata (package/source identities, policy, coverage and limitations). Discovery never
+publishes unfiltered daily source values or retrospective verification metrics.
+This remains the consumer-review-pending development draft; shared v0 is unchanged.
+
+Real historical `environment.decision_records` are allowlisted records. Forecast
+`value` is null; the explicitly named `quantiles` object carries p10/p50/p90 with
+nulls preserved. Model ID/version, variable/units, issue/target sol and lead,
+`training_cutoff_utc`, `model_available_at_utc`, reconstructed `issued_at_utc`,
+target `valid_from_utc`/`valid_to_utc`, effective availability and input intervals
+are separate fields. Provenance includes source identity/location and reconstruction
+basis. `observed`, baselines and `skill_summary` from the export are never copied.
+An actual request is [gale-replay.request.json](examples/gale-replay.request.json).
+
+`environment.provider_metadata` identifies prepared sources, policy and provider
+versions. `missing_forecast_variables` explicitly lists variables without eligible,
+applicable forecasts; historical observations do not fill that gap. Exclusion counts
+include `unknown_availability`, `not_available_as_of`, `model_not_available_as_of`
+and `outside_mission_target_interval`. Unknown evidence is not a successful forecast.
+Only derived geometric daylight affects environmental mission status. Weather/RAD
+remain context and do not enter graph/base-search identities.
+
+`mission_target_interval` gives `from_utc`, optional `to_utc` and scope:
+`complete_reserved_sortie` or `departure_context_only` when route duration is unavailable.
+RAD target validity preserves the original fixed-longitude legacy source partition;
+weather targets use the explicit corrected local-sol mapping at the issue rover location.
+Per-observation unknown RAD retrieval time and analytically computed solar retrieval
+are null with provenance explanations; they are never borrowed from REMS retrieval.
+Forecast applicability outside the prepared parcel is excluded explicitly.
+
+Compatibility is verified using main's unchanged `api.ts`, `request.ts` and
+`validation.ts`, imported by `scripts/tests/main_frontend_compatibility.test.cjs`.
+Additional environment fields remain additive; no frontend-only fields or controls
+are required. UI duration parsing is not reinterpreted in the backend. Exact
+physical-second requests remain supported independently of main's minute editor.

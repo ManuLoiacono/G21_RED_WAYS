@@ -74,7 +74,7 @@ class GalePackageChecks(unittest.TestCase):
         self.assertEqual(app.health()["default_parcel"]["id"], parcel.id)
         metadata = app.parcel(f"id={parcel.id}&version={parcel.version}")
         self.assertEqual(metadata["geographic_conversion"], "available")
-        self.assertEqual(metadata["scenarios"][0]["id"], "gale_development_missing_daylight")
+        self.assertEqual(metadata["scenarios"][0]["id"], "gale_historical_replay")
         request = json.loads((Path(__file__).parents[1]/"examples/gale.request.json").read_text())
         request["parcel"] = {"id": parcel.id, "version": parcel.version}
         response = plan_draft(PreparedPlanner(registry), request)

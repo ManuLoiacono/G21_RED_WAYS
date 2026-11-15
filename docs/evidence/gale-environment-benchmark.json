@@ -1,0 +1,481 @@
+{
+  "terrain_fixture": false,
+  "environment_fixture": false,
+  "request": {
+    "schema_version": "p2-plan-draft-1",
+    "request_id": "gale-historical-daylight",
+    "revision": 0,
+    "parcel": {
+      "id": "gale_hirise_019698",
+      "version": "native2-v1"
+    },
+    "scenario": {
+      "id": "gale_historical_replay",
+      "version": "v1",
+      "as_of_utc": "2025-10-26T00:26:28Z"
+    },
+    "origin": {
+      "type": "poi",
+      "poi_id": "base"
+    },
+    "destination": {
+      "type": "poi",
+      "poi_id": "sample"
+    },
+    "team": {
+      "catalog_version": "synthetic-team-v1",
+      "humans": [
+        {
+          "profile_id": "explorer_01",
+          "payload_kg": 0
+        }
+      ],
+      "robots": [
+        {
+          "profile_id": "support_rover",
+          "payload_kg": 0
+        }
+      ]
+    },
+    "mission": {
+      "template_id": "reconnaissance",
+      "template_version": "synthetic-mission-templates-v1",
+      "tasks": [
+        {
+          "id": "visual_reconnaissance",
+          "duration_s": 600
+        }
+      ],
+      "time_budget_s": 21600,
+      "reserve_s": 1800,
+      "departure_utc": "2025-10-26T00:26:28Z"
+    },
+    "criterion": "fastest"
+  },
+  "versions": {
+    "backend": "directed-eight-neighbor-csr-v1/scipy-1.11.4",
+    "catalog": "synthetic-team-v1",
+    "data": "89841fb7875d22c00dbd9f64fb3c8ee781fc7ddbbc38a386e833eb6d0da7291a",
+    "masks": "89841fb7875d22c00dbd9f64fb3c8ee781fc7ddbbc38a386e833eb6d0da7291a",
+    "mission": "complete-mission-v1",
+    "movement": "synthetic_constant_speed_v1",
+    "parcel": "native2-v1",
+    "parcel_content_id": "89841fb7875d22c00dbd9f64fb3c8ee781fc7ddbbc38a386e833eb6d0da7291a",
+    "scenario": "v1",
+    "slope": "native-central-difference-3x3-valid-max-block-mean-elevation-v1",
+    "templates": "synthetic-mission-templates-v1"
+  },
+  "locations": {
+    "destination": {
+      "adapter_id": "gale-eqc-scene-v1",
+      "cell": [
+        790,
+        1317
+      ],
+      "effective_elevation_m": -3328.9900512695312,
+      "effective_xy_m": [
+        8144640.154805867,
+        -286119.9700135037
+      ],
+      "geographic_conversion": "available",
+      "requested": {
+        "frame": null,
+        "poi_id": "sample",
+        "type": "poi",
+        "xy_m": null
+      },
+      "requested_xy_m": [
+        8144639.813189891,
+        -286118.96494499914
+      ]
+    },
+    "origin": {
+      "adapter_id": "gale-eqc-scene-v1",
+      "cell": [
+        731,
+        1288
+      ],
+      "effective_elevation_m": -3339.572265625,
+      "effective_xy_m": [
+        8144581.473491781,
+        -286000.58389174327
+      ],
+      "geographic_conversion": "available",
+      "requested": {
+        "frame": null,
+        "poi_id": "base",
+        "type": "poi",
+        "xy_m": null
+      },
+      "requested_xy_m": [
+        8144580.538492368,
+        -286000.41554995254
+      ]
+    }
+  },
+  "grid": {
+    "shape": [
+      1463,
+      1463
+    ],
+    "spacing_m": [
+      2.023493589159021,
+      2.023493589159021
+    ],
+    "nodes": 2140369,
+    "traversable_nodes": 496561,
+    "directed_edges": 2834284
+  },
+  "runtime": {
+    "python": "3.11.7",
+    "numpy": "1.26.4",
+    "scipy": "1.11.4",
+    "platform": "Windows-10-10.0.26300-SP0"
+  },
+  "timing_s": {
+    "package_load": 4.470867399999406,
+    "graph_build": 7.253865399979986,
+    "two_source_searches": 1.1324825000483543,
+    "reconstruction": 0.12469919997965917
+  },
+  "process_peak_rss_bytes": {
+    "after_imports": 50757632,
+    "after_package_load": 152059904,
+    "after_graph_build": 152059904,
+    "after_two_source_searches": 354676736,
+    "after_reconstruction": 354676736
+  },
+  "storage_bytes": {
+    "csr": 42572888,
+    "search_arrays": 51368856
+  },
+  "assessment": "viable_model",
+  "search_status": "complete",
+  "missing_required": [],
+  "legs": {
+    "outbound": {
+      "ascent_m": 10.65496826171875,
+      "descent_m": 0.07275390625,
+      "duration_s": 539.2080915339404,
+      "horizontal_distance_m": 149.4160220668453,
+      "reason": null,
+      "search_cost_s": 539.2080915339403,
+      "status": "found",
+      "vertices": 62
+    },
+    "return": {
+      "ascent_m": 0.07275390625,
+      "descent_m": 10.65496826171875,
+      "duration_s": 579.529436795662,
+      "horizontal_distance_m": 149.4160220668453,
+      "reason": null,
+      "search_cost_s": 579.5294367956619,
+      "status": "found",
+      "vertices": 62
+    }
+  },
+  "metrics": {
+    "daylight_departure_margin_s": 0.4580790000036359,
+    "daylight_reserved_return_margin_s": 40531.472726670414,
+    "elapsed_s": 1718.7375283296024,
+    "estimated_return_offset_s": 89706.7375283296,
+    "mission_margin_s": 18081.262471670398,
+    "outbound_s": 539.2080915339404,
+    "participant_margins": [
+      {
+        "kind": "human",
+        "margin_s": 18081.262471670398,
+        "max_sortie_s": 21600.0,
+        "model_id": "synthetic_constant_speed_v1",
+        "participant_id": "explorer_01"
+      },
+      {
+        "kind": "robot",
+        "margin_s": 14481.262471670398,
+        "max_sortie_s": 18000.0,
+        "model_id": "synthetic_constant_speed_v1",
+        "participant_id": "support_rover"
+      }
+    ],
+    "reserve_s": 1800.0,
+    "reserved_deadline_offset_s": 91506.7375283296,
+    "reserved_total_s": 3518.7375283296024,
+    "return_s": 579.529436795662,
+    "tasks_s": 600.0,
+    "temporal_budget_limiting_constraints": [
+      "participants[1].max_sortie_s"
+    ],
+    "temporal_budget_limiting_margin_s": 14481.262471670398,
+    "temporal_budget_limiting_participant_ids": [
+      "support_rover"
+    ],
+    "time_budget_s": 21600.0,
+    "unavailable_totals_reason": null
+  },
+  "environment_identity": {
+    "provider_metadata": {
+      "applicability_bounds_lonlat": {
+        "east": 137.409972778361,
+        "north": -4.800031214320459,
+        "south": -4.849974465735206,
+        "west": 137.36002952694625
+      },
+      "availability_policy": "completed-inputs-retrospective-v1",
+      "content_id": "b422bc6b7e2416c5f894105696f20d863f692d8f562edc82ffc3dcdd5baec8c8",
+      "default_explanation": "First chronological eligible target coverage with geometric daylight at the prepared base, rounded upward to a UTC second; no outcome scoring.",
+      "default_instant_utc": "2025-10-26T00:26:28Z",
+      "format": "gale-environment-sources-1",
+      "last_training_sol": 4698,
+      "limitations": [
+        "Historical hindcast, not operational or current Mars weather.",
+        "Source rover locations/elevations are forward-filled waypoints, not a validated weather field at the hypothetical base.",
+        "Daily reports are not hourly weather; RAD is silicon detector B RTG-corrected microgray/day, not human effective dose.",
+        "SILSO uses modern revised daily values; original 2025 revisions are not recoverable."
+      ],
+      "method_reference": "https://www.giss.nasa.gov/tools/mars24/help/algorithm.html",
+      "policy_description": "Retrospective assumption: release after all included sol and Earth-day input intervals and frozen training inputs complete. Zero processing/publication lag is assumed, not an archival NASA timestamp. Modern source revisions remain a limitation.",
+      "provider_version": "exported-hindcast-provider-v1",
+      "replay_sols": [
+        4699,
+        4739
+      ],
+      "solar_method": "mars24-2025-spherical-geometric-v1",
+      "source_package_id": "b422bc6b7e2416c5f894105696f20d863f692d8f562edc82ffc3dcdd5baec8c8",
+      "source_retrieved_at_utc": "2026-11-14T18:31:18Z",
+      "sources": [
+        {
+          "path": "data/processed/ml/daily_weather.parquet",
+          "sha256": "e7fabc642a2ef45fb45946d58c8aa77c3fdd55cdf5bb406d52cb4db01c1ef195"
+        },
+        {
+          "path": "data/processed/ml/rad_daily.parquet",
+          "sha256": "19efa418f91a3f5b218b98f2832b87c34b8e08997fe70f29568286549b6ba5a9"
+        },
+        {
+          "path": "data/processed/ml/sunspots_daily.parquet",
+          "sha256": "8c70e9e5f4e8bd42bfe373fef0efa084d5f6b7d443cdeff2446f23c56a0faf31"
+        },
+        {
+          "path": "data/processed/ml/daily_weather_summary.json",
+          "sha256": "59b55b26a6e63e9c8566a7072a7573e8e25ba99376c1527f52cb14f769581c4d"
+        },
+        {
+          "path": "data/processed/ml/rad_daily_summary.json",
+          "sha256": "05244dd9bcff180538da1e6e92c05f345d6a883194b020214ceced8906ba545b"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4699.json",
+          "sha256": "9b7ad2a2e87a54011b7cae629f2900e36ad88696002d8f422dfa4bb5c31eabbf"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4700.json",
+          "sha256": "cd2019d789bef0b9290d7c0e081e472009c1fd7d552a09479cd16ea1d218d5c9"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4701.json",
+          "sha256": "1284cd7208fcdb563b0ef07208defe30ce264b994eda845a7eb83b372356e53e"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4702.json",
+          "sha256": "80e558f2e5160ee6d46ad221fb40d73a75f0598fb94133a93a031ddedf6378f6"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4703.json",
+          "sha256": "73cf567fce807785ce0f659245c3f30474262a66a25042fdfd07285c84dc4216"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4704.json",
+          "sha256": "f5b5b8888b49890b79af9bb63dc55a406065c841b2c03b3c36351c7be91055cb"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4705.json",
+          "sha256": "44f0a994fc464f2240263e05e71fc8725ebc709d9a8a07ccd51767ac2c2f05a0"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4706.json",
+          "sha256": "62fd617996a7a8e0e5b9083053f433a3786d7e06fee231d07638662d134396be"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4707.json",
+          "sha256": "ff0e20a8de5516ae30aca01ad1dd0461df2305d5ff47fd2a722f1425c73d7a14"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4708.json",
+          "sha256": "193f903b8c879efb0c7f7b0b1a1e40a0ee9d247760dad0e7932542282baf51b1"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4709.json",
+          "sha256": "3feb6a5018460de68d826d6832d63da250ca6fa9cb9e722021a2c429585f1bd9"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4710.json",
+          "sha256": "67fe064761406fd31734d7f40e9589108c5eb6907ebc33dc7433d34a3bdf8c38"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4711.json",
+          "sha256": "fcc63222d66a6ed9a8befe821687a4573601a21a65c95f2dfa480ac7407ce831"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4712.json",
+          "sha256": "2557c40615c8914f839084d66e1aaa200a96f9f258c85fb4bb50c4faf034fe88"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4713.json",
+          "sha256": "3d8ca0018f88a67777d67a27b94cf87214ad6d2f3ef1e640aa147b90acd192a7"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4714.json",
+          "sha256": "b06d5c3bc3945e88c11342906c1dcc3bf8cdafa71317233b5c31f971bc3f4c44"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4715.json",
+          "sha256": "96ac6f52764979d3a805a97585f3dbdd16d524ffcca73182f5e9e74901fa1469"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4716.json",
+          "sha256": "3981e71599f05182795c814935572ac203591ee259ef94b67713e022ae65837a"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4717.json",
+          "sha256": "248b047409747e605f62eff8fd00a86ab1655802f95274ffae8be9c0b1f66f8f"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4718.json",
+          "sha256": "d877149c62b20781cbca1ac489507fd6d50b18c63b8933b7f173f54329128e48"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4719.json",
+          "sha256": "10c27ba9681857e1235e3298293f755277787a3fdddf4b79dcc9e390cde97388"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4720.json",
+          "sha256": "c726c889cc26eee895e04f7d32bb543a9ff87b8185e01da37a20fde34647dc50"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4721.json",
+          "sha256": "bfd170da06ed941a8025b82b9f31f781df52cabce2b607e6d4342022f769f79b"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4722.json",
+          "sha256": "058d2ee727f7bf0a2d31286be87902758e04bde74abe1a91ce3ecd7f7dca6b43"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4723.json",
+          "sha256": "e4483c43932390fb6e479ab211f5549ddbeefddab3216ad313f2d3f399552928"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4724.json",
+          "sha256": "ae93104f561059d9b06fb5b50c752fe94af153b3c5c8b9c363dd179b8d9dd9c6"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4725.json",
+          "sha256": "558a17a4add623a57fd296d7ae9975f81788cf8e76e4ea774bcb770ad83dc0c4"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4726.json",
+          "sha256": "6fb0771d8881a53045fc59c93c7ffc8ad9419c1d0559915863b896cf18319298"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4727.json",
+          "sha256": "61065290e3367f33a3f83b040d49f1fb5a8481458bf17b12c3d0a323a70b5d23"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4728.json",
+          "sha256": "0c6d80776006baa7dc5db77adf3ad3417f8f472a21267ab6af94eecac3b696de"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4729.json",
+          "sha256": "6d6aed74f4db80fcfebbe3998cab6d7c26200dc606741150089eecbe5e0a7d30"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4730.json",
+          "sha256": "a4ec73991c3b3cf339019a5eddd4b8f22c48aa7eb46e8829fdff0651935baa27"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4731.json",
+          "sha256": "f058bdaac5f585b131e64f97ac57080b30fecca86cbc24a08230041e08a767ae"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4732.json",
+          "sha256": "0aadb3c2bc95a05aec4fbe2d4c3772560f0fffbb3b163ac390e1d10f10fade4a"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4733.json",
+          "sha256": "3676f451bed2729983e164e837bb175cf05371c5d562c81a3c14a909d6c9ee73"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4734.json",
+          "sha256": "78837d91d0d924addd93c67553211df5bbcab03d364ab188b0700537367ee4c5"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4735.json",
+          "sha256": "d782655a4c9afd0caa47b9b931c8adabf2500acb0e35e9c83593c043869b435c"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4736.json",
+          "sha256": "16679695603929fd8c321ae5685c2902c2915fec0b88a5c2d1d49eaa5f8486f9"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4737.json",
+          "sha256": "24e1a2282786ba8f864d976034cc09743035cf5ff4ee14fa838631268d1827c3"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4738.json",
+          "sha256": "6d1f5d1499a6e87ed1e552870e3c0cf77d5a58897e49e4d3debb87f6716150ed"
+        },
+        {
+          "path": "data/processed/ml/forecasts/sol_4739.json",
+          "sha256": "3ceba6ddc24de37ee72d8b235098354661ecdf6621033fa5558d1d91a9ebb3cd"
+        },
+        {
+          "path": "ml/artifacts/A1_pressure/metrics.json",
+          "sha256": "44fbee43fb9275456ee22ed263a9a7a62b173e07acb4c17654566340544dfbfe"
+        },
+        {
+          "path": "ml/artifacts/A2_temperature/metrics.json",
+          "sha256": "369bec5e3c05fce47e33e0332b1cdbff31481f6bf61a60aa1414d8de35a1c21d"
+        },
+        {
+          "path": "ml/artifacts/B1_dose/metrics.json",
+          "sha256": "7052fcf02be867a9fe8e6626114b0f4724bae4db6c3b408d152c20bf4da66786"
+        },
+        {
+          "path": "ml/requirements.txt",
+          "sha256": "41a0e0d2833f7fd720391c6e71f172ef47dddc41bbac59c8271b8b6afd0dc38f"
+        },
+        {
+          "path": "ml/datasets/build_rad_daily.py",
+          "sha256": "5ddec24f050aec1e8c066efc352133162867baf551466b623be44713faf28bec"
+        },
+        {
+          "path": "ml/models/b1_dose.py",
+          "sha256": "85724dd92bfe28129b494f47997dffd092463e560f0e3b65d4027d9aec253ac4"
+        },
+        {
+          "path": "ml/evaluation/common.py",
+          "sha256": "57980c869cfbe56d9030cc72c9544bfcaf468e75ec0099335621d93f06dd280a"
+        }
+      ],
+      "training_cutoff_utc": "2025-10-25T00:00:00Z",
+      "version": "v2"
+    },
+    "snapshot": {
+      "as_of_utc": "2025-10-26T00:26:28Z",
+      "availability_policy": "reconstruct_declared; exact eligible records only; empty selection attested at cutoff.",
+      "available_at_utc": "2025-10-26T00:00:00Z",
+      "evaluation_location_id": "analytical-origin:af7f211a6d57ffdb87967d09fb2726c1cff9c873d39f6c6fc5a646edaee7f495",
+      "fixture": false,
+      "mode": "historical_replay",
+      "scenario_id": "gale_historical_replay",
+      "scenario_version": "v1",
+      "snapshot_id": "d3c52f19d320fbd06ee9915c5cfdcbb7cbfe52a32ca018c5beeecefb51e53c80"
+    },
+    "selected_models": [
+      "A1_lgbm_norm_v1",
+      "A2_lgbm_q_v1",
+      "A2_ridge_a100_v1",
+      "B1_lgbm_v1"
+    ]
+  },
+  "memory_note": "OS process high-water RSS includes runtime, imports, native workspaces and allocator retention; not incremental allocation."
+}

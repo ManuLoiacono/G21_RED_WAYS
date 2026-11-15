@@ -60,12 +60,18 @@ def load_gale(path):
     return parcel
 
 
-def gale_registry(path):
+def gale_registry(path, environment_path=None):
+    from .environment_package import DEFAULT_PACKAGE, load_environment_package, source_metadata
+
+    environment = load_environment_package(DEFAULT_PACKAGE if environment_path is None else environment_path)
     fixtures = fixture_registry()
     parcel = load_gale(path)
     # Retain the existing explicitly assumed development clock; provide no fabricated solar records.
     old = fixtures.scenario("synthetic_missing_daylight", "v1", fixtures.parcels[0])
     scenario = replace(old, id="gale_development_missing_daylight", parcel_id=parcel.id, parcel_version=parcel.version,
                        evaluation_location_id=parcel.evaluation_location_id, records=(),
+                       metadata_json=canonical(source_metadata(environment)),
                        content_id=identity({"parcel": parcel.content_id, "scenario": "gale-development-missing-daylight-v1", "clock": old.content_id}))
-    return PreparedRegistry((*fixtures.parcels, parcel), (*fixtures.scenarios, scenario))
+    from .real_environment import replay_scenarios
+    replay = replay_scenarios(parcel, environment)
+    return PreparedRegistry((*fixtures.parcels, parcel), (*fixtures.scenarios, *replay, scenario))

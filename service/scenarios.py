@@ -1,10 +1,10 @@
 """As-of record selection, separate from verification data and movement effects."""
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, replace
 
 from engine import DaylightWindow, Departure, SnapshotReference
 from .prepared import FixtureClockMapping, PreparedRecord, PreparedScenario
-from .validation import PlanningInputError, identity, utc
+from .validation import PlanningInputError, identity, loads_strict, utc
 
 
 @dataclass(frozen=True)
@@ -31,10 +31,22 @@ class SelectedScenario:
     missing_optional_variables: tuple[str, ...]
     assumptions: tuple[str, ...]
     clock: FixtureClockMapping
+    missing_forecast_variables: tuple[str, ...] = ()
+    provider_metadata: dict | None = None
+    mission_target_interval: dict | None = None
     selection_rule: str = "Latest eligible issue time, then effective availability, then revision within each source/kind/series; no outcome scoring."
 
 
-def select_scenario(scenario: PreparedScenario, as_of_utc: str, departure_utc: str) -> SelectedScenario:
+def select_scenario(scenario: PreparedScenario, as_of_utc: str, departure_utc: str, *, evaluation_location=None, mission_end_utc=None) -> SelectedScenario:
+    from .solar import ADAPTER, METHOD
+    real = scenario.clock.adapter_id == ADAPTER
+    if real:
+        from .real_environment import solar_record
+        if evaluation_location is None:
+            raise PlanningInputError("missing_solar_location", "environment.location", "Real solar evidence requires actual analytical evaluation coordinates.")
+        derived = solar_record(scenario, departure_utc, evaluation_location)
+        scenario = replace(scenario, evaluation_location_id=evaluation_location[2],
+                           records=(*scenario.records, *((derived,) if derived else ())))
     cutoff = utc(as_of_utc, "scenario.as_of_utc")
     # Require explicit fixture mapping coverage for both the decision and departure.
     scenario.clock.departure(as_of_utc, path="scenario.as_of_utc")
@@ -43,11 +55,25 @@ def select_scenario(scenario: PreparedScenario, as_of_utc: str, departure_utc: s
     departure = scenario.clock.departure(departure_utc)
     cutoff_text = cutoff.isoformat().replace("+00:00", "Z")
     eligible, exclusions = {}, []
-    assumptions = [scenario.clock.assumption, "Synthetic record values/times do not claim archival NASA availability."]
+    assumptions = [scenario.clock.assumption]
+    assumptions.append("Derived geometric daylight uses a spherical horizontal horizon, solar center at 0 degrees; no refraction, terrain shadow or scene registration." if real else "Synthetic record values/times do not claim archival NASA availability.")
     for record in scenario.records:
         if record.kind == "verification":
             exclusions.append(RecordExclusion(record.record_id, "verification_only"))
             continue
+        if real and record.kind == "forecast":
+            bounds = loads_strict(scenario.metadata_json)["applicability_bounds_lonlat"]
+            lon, lat, _ = evaluation_location
+            if not bounds["west"] <= lon <= bounds["east"] or not bounds["south"] <= lat <= bounds["north"]:
+                exclusions.append(RecordExclusion(record.record_id, "forecast_spatial_context_mismatch"))
+                continue
+            # Require full reserved sortie containment, not just an eligible issue.
+            end = utc(mission_end_utc or departure_utc, "mission.end_utc")
+            if (utc(departure_utc, "mission.departure_utc") < utc(record.valid_from_utc, "forecast.valid_from_utc") or
+                    utc(departure_utc, "mission.departure_utc") >= utc(record.valid_to_utc, "forecast.valid_to_utc") or
+                    end > utc(record.valid_to_utc, "forecast.valid_to_utc")):
+                exclusions.append(RecordExclusion(record.record_id, "outside_mission_target_interval"))
+                continue
         available = record.available_at_utc
         basis = "declared_fixture_availability"
         if available is None:
@@ -65,6 +91,9 @@ def select_scenario(scenario: PreparedScenario, as_of_utc: str, departure_utc: s
             continue
         if record.observation_end_utc is not None and utc(record.observation_end_utc, "record.observation_end_utc") > cutoff:
             exclusions.append(RecordExclusion(record.record_id, "observation_interval_incomplete"))
+            continue
+        if record.model_available_at_utc is not None and utc(record.model_available_at_utc, "forecast.model_available_at_utc") > cutoff:
+            exclusions.append(RecordExclusion(record.record_id, "model_not_available_as_of"))
             continue
         # Availability, completed observation interval and issue time are all gates.
         gates = [utc(available, "record.available_at_utc")]
@@ -90,16 +119,30 @@ def select_scenario(scenario: PreparedScenario, as_of_utc: str, departure_utc: s
         if record.epoch_id != scenario.clock.timeline.epoch_id or record.source_location_id != scenario.evaluation_location_id:
             raise PlanningInputError("daylight_context_mismatch", "scenario.records", "Selected solar evidence has the wrong epoch or location.")
         daylight = DaylightWindow(scenario.clock.timeline, *record.value, scenario.evaluation_location_id,
-                                  "Prepared synthetic physical-second window; no inferred solar conversion.", record.record_id, record.evidence_kind)
+                                  METHOD if real else "Prepared synthetic physical-second window; no inferred solar conversion.", record.record_id, record.evidence_kind)
     assumptions.extend(item.record.availability_assumption for item in records if item.availability_basis == "reconstructed_assumption")
     if any(item.availability_basis == "reconstructed_assumption" for item in records):
         assumptions.append("Retrospective reconstruction, not an exact reproduction of operational knowledge.")
-    snapshot_id = identity({"package": scenario.content_id, "cutoff": cutoff_text,
-                            "selected": [item.record.record_id for item in records], "policy": scenario.availability_policy})
+    decision_identity = []
+    for item in records:
+        material = asdict(item)
+        provenance = material["record"].get("provenance")
+        if provenance:
+            # Raw-export hashes attest provenance, but include retrospective fields.
+            # They must not affect a decision snapshot's semantic identity.
+            provenance.pop("source_identity", None)
+        decision_identity.append(material)
+    snapshot_id = identity({"package": [scenario.id, scenario.version] if real else scenario.content_id, "cutoff": cutoff_text,
+                            "selected": decision_identity if real else [item.record.record_id for item in records], "policy": scenario.availability_policy,
+                            "departure": departure_utc, "evaluation_location": scenario.evaluation_location_id})
     available_at = max((item.effective_available_at_utc for item in records), key=lambda value: utc(value, "record.time"), default=cutoff_text)
     snapshot = SnapshotReference(scenario.id, scenario.version, snapshot_id, cutoff_text, available_at,
                                  f"{scenario.availability_policy}; exact eligible records only; empty selection attested at cutoff.",
                                  scenario.evaluation_location_id, scenario.fixture)
-    variables = {item.record.variable for item in records if item.record.value is not None}
+    variables = {item.record.variable for item in records if item.record.value is not None or item.record.quantiles and any(v is not None for v in item.record.quantiles.values())}
     optional = tuple(item for item in ("pressure_pa", "daily_min_temp_c", "daily_max_temp_c") if item not in variables)
-    return SelectedScenario(snapshot, departure, daylight, records, tuple(exclusions), () if daylight else ("daylight",), optional, tuple(assumptions), scenario.clock)
+    forecast_variables = {item.record.variable for item in records if item.record.kind == "forecast" and item.record.quantiles and item.record.quantiles.get("p50") is not None}
+    missing_forecasts = tuple(v for v in ("pressure_pa", "daily_min_temp_c", "daily_max_temp_c", "dose_b_rtgcorr_ugy_day") if v not in forecast_variables)
+    return SelectedScenario(snapshot, departure, daylight, records, tuple(exclusions), () if daylight else ("daylight",), optional, tuple(assumptions), scenario.clock, missing_forecasts,
+                            loads_strict(scenario.metadata_json) if real else None,
+                            {"from_utc": departure_utc, "to_utc": mission_end_utc, "scope": "complete_reserved_sortie" if mission_end_utc else "departure_context_only"} if real else None)

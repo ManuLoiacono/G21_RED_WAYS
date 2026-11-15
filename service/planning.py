@@ -1,6 +1,7 @@
 """One bounded movement context and base search, with fresh mission evaluation."""
 
 from dataclasses import asdict, dataclass
+import math
 from threading import Lock
 
 import scipy
@@ -90,7 +91,11 @@ class PreparedPlanner:
         start = resolve_location(parcel, origin, "origin")
         end = resolve_location(parcel, destination, "destination")
         members = tuple(sorted(resolve_team(CATALOG, team), key=lambda member: member.identity.profile_id))
-        selected = select_scenario(scenario, as_of_utc, departure_utc)
+        location = None
+        if parcel.geographic_adapter:
+            lon, lat = (math.degrees(v / parcel.geographic_adapter["radius_m"]) for v in start.effective_xy_m)
+            location = (lon, lat, f"analytical-origin:{identity(start.effective_xy_m)}")
+        selected = select_scenario(scenario, as_of_utc, departure_utc, evaluation_location=location)
         context = movement_context(parcel, members)
         graph_reused = self._context == context and self._graph is not None
         if not graph_reused:
@@ -113,6 +118,15 @@ class PreparedPlanner:
             self._search = self._base = None
             raise PlanningInputError("stale_movement_context", "movement_context", "Search does not belong to the active graph/base.")
         routes = routes_to(search, end.cell)
+        if location is not None:
+            from .solar import ADAPTER, iso
+            if scenario.clock.adapter_id == ADAPTER:
+                durations = (routes.outbound.duration_s, routes.return_leg.duration_s)
+                try:
+                    mission_end = iso(selected.departure.offset_s + math.fsum((*durations, *(task.duration_s for task in tasks), reserve_s))) if all(d is not None for d in durations) else None
+                except (OverflowError, ValueError) as exc:
+                    raise PlanningInputError("mission_interval_overflow", "mission", "Mission physical interval exceeds the supported timestamp range.") from exc
+                selected = select_scenario(scenario, as_of_utc, departure_utc, evaluation_location=location, mission_end_utc=mission_end)
         mission = evaluate_mission(routes, tasks, members, time_budget_s=time_budget_s, reserve_s=reserve_s,
                                    departure=selected.departure, daylight=selected.daylight, snapshot=selected.snapshot)
         return PlanEvaluation(parcel, start, end, members, context, selected, routes, mission, graph_reused, search_reused)

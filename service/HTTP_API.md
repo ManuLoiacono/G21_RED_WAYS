@@ -158,3 +158,19 @@ python -m unittest discover -s service/tests -p 'test_*.py'
 ```
 
 Real loopback tests cover metadata/catalog identity, no graph construction for metadata, exact versions, configured preflight/errors and separate-process CLI/client startup. Planning tests observe actual engine calls, movement reuse and changed-input arithmetic, participant failure, exact daylight equality, missing evidence, concurrent busy handling, backend/reconstruction/timeout failure and recovery, malformed/schema/body/task rejection and complete-output bounds. Regressions preserve request/revision, inconclusive/null states, calculated one-way/no-return and same-cell geometry, exact byte bounds, duplicate framing, stopped-service errors and continued busy state after disconnect. Existing prepared-planner checks remain applicable.
+# Real historical environment extension
+
+`GET /health` additionally reports `environment_mode` as `historical_replay` or
+`synthetic_fixture`. `GET /parcel` advertises exact scenario coverage (end exclusive
+for real replay), source/package/policy metadata and a chronological default instant.
+`POST /plan` remains `p2-plan-draft-1`; its additive environment fields are documented
+in [the draft exchange](EXCHANGE_DRAFT.md) and [runtime contract](../docs/ENVIRONMENT_RUNTIME.md).
+Forecasts and observations are selected offline; no fitting or NASA download occurs
+during planning. Use [gale-replay.request.json](examples/gale-replay.request.json).
+
+The reconciled branch contributes no tracked `app/` changes relative to incorporated
+main. Existing health/parcel/catalog/request/response fields and nullability remain
+compatible. Eligible forecast/observation metadata is available in the existing raw
+evidence detail, HTTP response and CLI. Dedicated environmental UI and correction of
+main's old clock/daylight wording are deferred to P1. See the
+[backend-only delivery and launch instructions](../docs/handoffs/P2_ENVIRONMENT_DELIVERY.md).
