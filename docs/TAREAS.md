@@ -96,3 +96,24 @@ P2-02 update (2026-11-14): directed metric routing, synthetic acceptance checks 
 | Domingo 14:00–18:00 | Video de 3 min y documentación |
 | Domingo 18:00–21:30 | Arranque limpio, revisión, carga |
 | Domingo 21:30–23:59 | Solo incidencias de entrega |
+
+---
+
+## ML — Modelos predictivos (hindcast) (`ml/`, rama `ml/...`)
+
+Plan: `docs/ML_PREDICCION.md`. Resultados: `docs/ML_RESULTADOS.md`. Solo toca `ml/`, `data/raw/ml/`, `data/processed/ml/`, `docs/ML_*` y `contracts/forecast.example.json` (borrador).
+
+| ID | Prio | Tarea | Criterio de cierre |
+| --- | --- | --- | --- |
+| [x] ML-00 | P0 | Estructura `ml/`, `requirements.txt`, `config.py`, README | `python -m ml.<algo>` corre desde la raíz |
+| [x] ML-01 | P0 | `sources/rems.py` + `sources/waypoints.py` con caché | Los dos crudos en `data/raw/ml/` |
+| [x] ML-02 | P0 | **DS-W** (`daily_weather.parquet`) con Ls, año marciano, `dtr_c`, elevación y presión corregida | Tabla con conteo de faltantes por columna; rango exacto de soles de la ventana de prueba |
+| [x] ML-03 | P0 | Baselines (persistencia y climatología por Ls) + validación por año marciano + métricas | `metrics.json` de los baselines |
+| [x] ML-04 | P0 | **A1 presión** | Métricas vs. baselines en validación y en la ventana final |
+| [x] ML-05 | P0 | **A2 temperatura con cuantiles** | Métricas + cobertura del p10–p90 |
+| [~] ML-06 | P0 | `export/` + `contracts/forecast.example.json` (borrador) | JSON por sol de la ventana; P1 y P2 avisados (falta avisar) |
+| [x] ML-07 | P1 | `sources/rad.py`: leer un CDF y reportar variables, unidades y calidad | Informe en `docs/ML_RESULTADOS.md` |
+| [x] ML-08 | P1 | **DS-R** + **B1 dosis de fondo** (con S6 manchas solares) | Métricas vs. media móvil |
+| [x] ML-09 | P1 | **DS-S** (DONKI 2013–2025) + **C1 evaluación** contra MAVEN y RAD | Tabla de aciertos, falsas alarmas y error en horas, con `n` (RAD completo; MAVEN solo ±3 días alrededor de alertas; FLR caído) |
+| [ ] ML-10 | P2 | B2 eventos, D-proxy polvo, C2 corrección de DONKI, A3 UV | Solo si ML-00 a ML-09 están cerrados |
+| [~] ML-11 | P0 | `docs/ML_RESULTADOS.md`: números finales para el video, con `n` y limitaciones | Revisado por otro integrante (A1–A2 listos; faltan RAD/DONKI y la revisión) |

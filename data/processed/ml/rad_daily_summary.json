@@ -1,0 +1,123 @@
+{
+  "n_observations": 407657,
+  "n_observations_flagged": 17490,
+  "flags": {
+    "": 390167,
+    "Cmds": 14164,
+    "DAN": 2853,
+    "High Temp": 310,
+    "DAN,Cmds": 148,
+    "Cmds,High Temp": 9,
+    "DAN,High Temp": 4,
+    "Cary": 1,
+    "Eddie,Cmds": 1
+  },
+  "n_sols_with_any_obs": 4635,
+  "n_sols_with_dose": 4536,
+  "min_clean_obs_per_sol": 48,
+  "sol_range_with_dose": [
+    310,
+    4995
+  ],
+  "first_obs_utc": "2012-08-17 10:20:37+00:00",
+  "last_obs_utc": "2026-11-11 16:37:16+00:00",
+  "n_sols_with_dose_before_cutoff": 4239,
+  "test_window": {
+    "n_sols": 41,
+    "n_sols_with_dose": 41,
+    "sols_without_dose": []
+  },
+  "sol_assignment_check": {
+    "n": 4479,
+    "first_obs_day_minus_rems_date_days": {
+      "-1": 2247,
+      "0": 2232
+    }
+  },
+  "dose_by_mars_year": [
+    {
+      "mars_year": 31,
+      "count": 25,
+      "mean": 144.78,
+      "min": 141.38,
+      "max": 147.9
+    },
+    {
+      "mars_year": 32,
+      "count": 604,
+      "mean": 143.29,
+      "min": 120.11,
+      "max": 228.51
+    },
+    {
+      "mars_year": 33,
+      "count": 647,
+      "mean": 179.05,
+      "min": 137.37,
+      "max": 211.28
+    },
+    {
+      "mars_year": 34,
+      "count": 639,
+      "mean": 208.66,
+      "min": 158.46,
+      "max": 388.86
+    },
+    {
+      "mars_year": 35,
+      "count": 661,
+      "mean": 220.61,
+      "min": 205.79,
+      "max": 234.14
+    },
+    {
+      "mars_year": 36,
+      "count": 666,
+      "mean": 195.01,
+      "min": 140.62,
+      "max": 569.21
+    },
+    {
+      "mars_year": 37,
+      "count": 660,
+      "mean": 127.68,
+      "min": 91.56,
+      "max": 1692.01
+    },
+    {
+      "mars_year": 38,
+      "count": 634,
+      "mean": 111.85,
+      "min": 97.33,
+      "max": 137.84
+    }
+  ],
+  "missing_per_column": {
+    "sol": 0,
+    "date_utc": 0,
+    "ls_deg": 0,
+    "mars_year": 0,
+    "before_cutoff": 0,
+    "in_test_window": 0,
+    "n_obs": 0,
+    "n_obs_flagged": 0,
+    "source_files": 360,
+    "dose_b_total_ugy_day": 459,
+    "dose_b_rtgcorr_ugy_day": 459,
+    "dose_e_total_ugy_day": 459,
+    "dose_b_rtgcorr_ugy_day_max_hourly": 459,
+    "n_obs_clean": 0,
+    "has_dose": 0
+  },
+  "sunspots": {
+    "source": {
+      "url": "https://www.sidc.be/SILSO/DATA/SN_d_tot_V2.0.csv",
+      "fetched_at": "2026-11-14T19:22:06Z",
+      "bytes": 2898450,
+      "content_type": "text/csv"
+    },
+    "last_date": "2026-10-31",
+    "first_provisional": "2026-07-01"
+  },
+  "units": "uGy/day (RAD DOSIMETRY_TOTAL; B = silicon, E = tissue-equivalent plastic)"
+}

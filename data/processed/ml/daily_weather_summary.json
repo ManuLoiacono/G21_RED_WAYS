@@ -1,0 +1,207 @@
+{
+  "n_rows": 4995,
+  "n_rems_records": 4745,
+  "sol_range": [
+    1,
+    4995
+  ],
+  "missing_per_column": {
+    "sol": 0,
+    "date_utc": 0,
+    "has_rems_record": 0,
+    "ls_deg": 0,
+    "rems_ls_deg": 250,
+    "ls_minus_rems_ls_deg": 250,
+    "mars_year": 0,
+    "pressure_pa": 277,
+    "pressure_norm_pa": 277,
+    "min_temp_c": 278,
+    "max_temp_c": 278,
+    "dtr_c": 278,
+    "min_gts_temp_c": 279,
+    "max_gts_temp_c": 279,
+    "uv_category": 277,
+    "uv_level": 277,
+    "sunrise_lmst": 250,
+    "sunset_lmst": 250,
+    "sunrise_lmst_min": 250,
+    "sunset_lmst_min": 250,
+    "rover_elev_m": 2,
+    "rover_lon_deg": 2,
+    "rover_lat_deg": 2,
+    "has_waypoint": 0,
+    "before_cutoff": 0,
+    "in_test_window": 0
+  },
+  "missing_per_column_rems_rows_only": {
+    "sol": 0,
+    "date_utc": 0,
+    "has_rems_record": 0,
+    "ls_deg": 0,
+    "rems_ls_deg": 0,
+    "ls_minus_rems_ls_deg": 0,
+    "mars_year": 0,
+    "pressure_pa": 27,
+    "pressure_norm_pa": 27,
+    "min_temp_c": 28,
+    "max_temp_c": 28,
+    "dtr_c": 28,
+    "min_gts_temp_c": 29,
+    "max_gts_temp_c": 29,
+    "uv_category": 27,
+    "uv_level": 27,
+    "sunrise_lmst": 0,
+    "sunset_lmst": 0,
+    "sunrise_lmst_min": 0,
+    "sunset_lmst_min": 0,
+    "rover_elev_m": 1,
+    "rover_lon_deg": 1,
+    "rover_lat_deg": 1,
+    "has_waypoint": 0,
+    "before_cutoff": 0,
+    "in_test_window": 0
+  },
+  "sols_by_mars_year": [
+    {
+      "mars_year": 31,
+      "sol_min": 1,
+      "sol_max": 350,
+      "n_sols": 350,
+      "n_rems_records": 317,
+      "n_pressure": 304,
+      "date_min": "2012-08-07",
+      "date_max": "2013-07-31",
+      "ls_min": 151.3590546358,
+      "ls_max": 359.9621715499
+    },
+    {
+      "mars_year": 32,
+      "sol_min": 351,
+      "sol_max": 1018,
+      "n_sols": 668,
+      "n_rems_records": 632,
+      "n_pressure": 621,
+      "date_min": "2013-08-01",
+      "date_max": "2015-06-18",
+      "ls_min": 0.4611293072,
+      "ls_max": 359.9900116946
+    },
+    {
+      "mars_year": 33,
+      "sol_min": 1019,
+      "sol_max": 1686,
+      "n_sols": 668,
+      "n_rems_records": 656,
+      "n_pressure": 653,
+      "date_min": "2015-06-19",
+      "date_max": "2017-05-04",
+      "ls_min": 0.4888839742,
+      "ls_max": 359.507350617
+    },
+    {
+      "mars_year": 34,
+      "sol_min": 1687,
+      "sol_max": 2355,
+      "n_sols": 669,
+      "n_rems_records": 613,
+      "n_pressure": 613,
+      "date_min": "2017-05-05",
+      "date_max": "2019-03-22",
+      "ls_min": 0.0071289307,
+      "ls_max": 359.5067843856
+    },
+    {
+      "mars_year": 35,
+      "sol_min": 2356,
+      "sol_max": 3023,
+      "n_sols": 668,
+      "n_rems_records": 661,
+      "n_pressure": 661,
+      "date_min": "2019-03-23",
+      "date_max": "2021-02-06",
+      "ls_min": 0.006628159,
+      "ls_max": 359.5191701137
+    },
+    {
+      "mars_year": 36,
+      "sol_min": 3024,
+      "sol_max": 3692,
+      "n_sols": 669,
+      "n_rems_records": 624,
+      "n_pressure": 624,
+      "date_min": "2021-02-07",
+      "date_max": "2022-12-25",
+      "ls_min": 0.0189076966,
+      "ls_max": 359.534664502
+    },
+    {
+      "mars_year": 37,
+      "sol_min": 3693,
+      "sol_max": 4361,
+      "n_sols": 669,
+      "n_rems_records": 634,
+      "n_pressure": 634,
+      "date_min": "2022-12-26",
+      "date_max": "2024-11-11",
+      "ls_min": 0.0344064412,
+      "ls_max": 359.545477591
+    },
+    {
+      "mars_year": 38,
+      "sol_min": 4362,
+      "sol_max": 4995,
+      "n_sols": 634,
+      "n_rems_records": 608,
+      "n_pressure": 608,
+      "date_min": "2024-11-13",
+      "date_max": "2026-08-25",
+      "ls_min": 0.5441900301,
+      "ls_max": 341.5560515394
+    }
+  ],
+  "test_window": {
+    "dates_utc": [
+      "2025-10-25",
+      "2025-12-05"
+    ],
+    "sol_min": 4699,
+    "sol_max": 4739,
+    "n_sols": 41,
+    "n_rems_records": 41,
+    "rems_record_sol_min": 4699,
+    "rems_record_sol_max": 4739,
+    "sols_without_rems_record": [],
+    "n_pressure": 41,
+    "n_min_temp": 41,
+    "n_max_temp": 41,
+    "mars_year": [
+      38
+    ],
+    "ls_range_deg": [
+      160.85,
+      183.39
+    ]
+  },
+  "last_sol_before_cutoff": 4698,
+  "ls_vs_rems": {
+    "abs_diff_mean_deg": 0.767,
+    "abs_diff_p99_deg": 1.456,
+    "abs_diff_max_deg": 1.608
+  },
+  "elev_ref_m": -4500.971,
+  "scale_height_m": 11000.0,
+  "sources": {
+    "rems": {
+      "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json",
+      "fetched_at": "2026-11-14T18:31:18Z",
+      "bytes": 1730689,
+      "content_type": "application/json;charset=utf-8"
+    },
+    "waypoints": {
+      "url": "https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_waypoints.json",
+      "fetched_at": "2026-11-14T18:31:21Z",
+      "bytes": 665124,
+      "content_type": "application/json"
+    }
+  }
+}

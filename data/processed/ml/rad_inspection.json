@@ -1,0 +1,2383 @@
+{
+  "coverage_by_year": {
+    "2012": {
+      "n_days": 2,
+      "first_doy": 230,
+      "last_doy": 231,
+      "versions": {
+        "v02": 2
+      }
+    },
+    "2013": {
+      "n_days": 247,
+      "first_doy": 81,
+      "last_doy": 365,
+      "versions": {
+        "v02": 247
+      }
+    },
+    "2014": {
+      "n_days": 365,
+      "first_doy": 1,
+      "last_doy": 365,
+      "versions": {
+        "v02": 365
+      }
+    },
+    "2015": {
+      "n_days": 347,
+      "first_doy": 1,
+      "last_doy": 365,
+      "versions": {
+        "v03": 31,
+        "v04": 300,
+        "v05": 16
+      }
+    },
+    "2016": {
+      "n_days": 366,
+      "first_doy": 1,
+      "last_doy": 366,
+      "versions": {
+        "v03": 47,
+        "v04": 318,
+        "v05": 1
+      }
+    },
+    "2017": {
+      "n_days": 365,
+      "first_doy": 1,
+      "last_doy": 365,
+      "versions": {
+        "v03": 81,
+        "v04": 244,
+        "v05": 23,
+        "v06": 15,
+        "v07": 2
+      }
+    },
+    "2018": {
+      "n_days": 337,
+      "first_doy": 1,
+      "last_doy": 365,
+      "versions": {
+        "v03": 1,
+        "v04": 336
+      }
+    },
+    "2019": {
+      "n_days": 364,
+      "first_doy": 1,
+      "last_doy": 365,
+      "versions": {
+        "v04": 364
+      }
+    },
+    "2020": {
+      "n_days": 363,
+      "first_doy": 1,
+      "last_doy": 366,
+      "versions": {
+        "v04": 363
+      }
+    },
+    "2021": {
+      "n_days": 365,
+      "first_doy": 1,
+      "last_doy": 365,
+      "versions": {
+        "v04": 365
+      }
+    },
+    "2022": {
+      "n_days": 365,
+      "first_doy": 1,
+      "last_doy": 365,
+      "versions": {
+        "v03": 3,
+        "v04": 193,
+        "v05": 169
+      }
+    },
+    "2023": {
+      "n_days": 361,
+      "first_doy": 1,
+      "last_doy": 365,
+      "versions": {
+        "v03": 1,
+        "v04": 50,
+        "v05": 154,
+        "v06": 20,
+        "v07": 119,
+        "v08": 9,
+        "v09": 8
+      }
+    },
+    "2024": {
+      "n_days": 366,
+      "first_doy": 1,
+      "last_doy": 366,
+      "versions": {
+        "v03": 91,
+        "v04": 243,
+        "v05": 27,
+        "v06": 5
+      }
+    },
+    "2025": {
+      "n_days": 365,
+      "first_doy": 1,
+      "last_doy": 365,
+      "versions": {
+        "v02": 17,
+        "v03": 110,
+        "v04": 209,
+        "v05": 27,
+        "v06": 2
+      }
+    },
+    "2026": {
+      "n_days": 315,
+      "first_doy": 1,
+      "last_doy": 315,
+      "versions": {
+        "v00": 12,
+        "v01": 28,
+        "v02": 65,
+        "v03": 117,
+        "v04": 45,
+        "v05": 35,
+        "v06": 9,
+        "v07": 4
+      }
+    }
+  },
+  "variables_identical_to_2025": {
+    "msl_rad_obs-l2_2012231_v02.cdf": true,
+    "msl_rad_obs-l2_2013298_v02.cdf": true,
+    "msl_rad_obs-l2_2014298_v02.cdf": true,
+    "msl_rad_obs-l2_2015298_v04.cdf": true,
+    "msl_rad_obs-l2_2016298_v04.cdf": true,
+    "msl_rad_obs-l2_2017298_v04.cdf": true,
+    "msl_rad_obs-l2_2018298_v04.cdf": true,
+    "msl_rad_obs-l2_2019298_v04.cdf": true,
+    "msl_rad_obs-l2_2020298_v04.cdf": true,
+    "msl_rad_obs-l2_2021298_v04.cdf": true,
+    "msl_rad_obs-l2_2022298_v04.cdf": true,
+    "msl_rad_obs-l2_2023298_v05.cdf": true,
+    "msl_rad_obs-l2_2024298_v03.cdf": true,
+    "msl_rad_obs-l2_2025298_v04.cdf": true,
+    "msl_rad_obs-l2_2026298_v03.cdf": true
+  },
+  "samples": [
+    {
+      "file": "msl_rad_obs-l2_2012231_v02.cdf",
+      "data_version": "['02']",
+      "generation_date": "['20260617_14:36:16']",
+      "n_obs": 25,
+      "first_obs_utc": "2012-08-18T09:36:22.000000000",
+      "last_obs_utc": "2012-08-18T11:46:43.000000000",
+      "spacing_s_median": 327.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 12,
+        "DAN": 12,
+        "Cmds": 1
+      },
+      "dose_median_clean": {
+        "Total Dose B": 0.0,
+        "RTG Corrected Dose B": NaN,
+        "Total Dose E": 142.08
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 0.0,
+        "RTG Corrected Dose B": NaN,
+        "Total Dose E": 455.75
+      },
+      "n_nan_dose": 25,
+      "alive_time_s_median": 293.7760314941406,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2013298_v02.cdf",
+      "data_version": "['02']",
+      "generation_date": "['20260617_14:41:08']",
+      "n_obs": 39,
+      "first_obs_utc": "2013-10-25T12:15:45.000000000",
+      "last_obs_utc": "2013-10-25T23:39:17.000000000",
+      "spacing_s_median": 1024.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 38,
+        "Cmds": 1
+      },
+      "dose_median_clean": {
+        "Total Dose B": 213.35,
+        "RTG Corrected Dose B": 147.28,
+        "Total Dose E": 209.58
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 189.01,
+        "RTG Corrected Dose B": 122.94,
+        "Total Dose E": 194.74
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 922.2225952148438,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2014298_v02.cdf",
+      "data_version": "['02']",
+      "generation_date": "['20260617_14:51:24']",
+      "n_obs": 87,
+      "first_obs_utc": "2014-10-25T00:07:12.000000000",
+      "last_obs_utc": "2014-10-25T23:56:57.000000000",
+      "spacing_s_median": 1024.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 82,
+        "Cmds": 5
+      },
+      "dose_median_clean": {
+        "Total Dose B": 200.39,
+        "RTG Corrected Dose B": 135.06,
+        "Total Dose E": 199.34
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 169.87,
+        "RTG Corrected Dose B": 104.54,
+        "Total Dose E": 167.04
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 923.97021484375,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2015298_v04.cdf",
+      "data_version": "['04']",
+      "generation_date": "['20260617_15:01:51']",
+      "n_obs": 86,
+      "first_obs_utc": "2015-10-25T00:00:19.000000000",
+      "last_obs_utc": "2015-10-25T23:44:32.000000000",
+      "spacing_s_median": 1026.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 78,
+        "Cmds": 4,
+        "DAN": 4
+      },
+      "dose_median_clean": {
+        "Total Dose B": 219.49,
+        "RTG Corrected Dose B": 154.91,
+        "Total Dose E": 220.96
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 198.01,
+        "RTG Corrected Dose B": 133.42,
+        "Total Dose E": 222.31
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 921.5235595703125,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2016298_v04.cdf",
+      "data_version": "['04']",
+      "generation_date": "['20260617_15:13:46']",
+      "n_obs": 87,
+      "first_obs_utc": "2016-10-24T00:06:29.000000000",
+      "last_obs_utc": "2016-10-24T23:59:26.000000000",
+      "spacing_s_median": 1026.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 80,
+        "Cmds": 5,
+        "DAN": 2
+      },
+      "dose_median_clean": {
+        "Total Dose B": 253.95,
+        "RTG Corrected Dose B": 190.1,
+        "Total Dose E": 261.44
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 190.65,
+        "RTG Corrected Dose B": 126.8,
+        "Total Dose E": 196.83
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 913.6592407226562,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2017298_v04.cdf",
+      "data_version": "['04']",
+      "generation_date": "['20260617_15:25:55']",
+      "n_obs": 86,
+      "first_obs_utc": "2017-10-25T00:14:05.000000000",
+      "last_obs_utc": "2017-10-25T23:58:24.000000000",
+      "spacing_s_median": 1026.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 82,
+        "Cmds": 4
+      },
+      "dose_median_clean": {
+        "Total Dose B": 257.33,
+        "RTG Corrected Dose B": 194.21,
+        "Total Dose E": 274.9
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 206.54,
+        "RTG Corrected Dose B": 143.41,
+        "Total Dose E": 217.23
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 912.0863647460938,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2018298_v04.cdf",
+      "data_version": "['04']",
+      "generation_date": "['20260617_15:36:59']",
+      "n_obs": 86,
+      "first_obs_utc": "2018-10-25T00:06:21.000000000",
+      "last_obs_utc": "2018-10-25T23:47:26.000000000",
+      "spacing_s_median": 1026.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 83,
+        "Cmds": 3
+      },
+      "dose_median_clean": {
+        "Total Dose B": 279.27,
+        "RTG Corrected Dose B": 216.86,
+        "Total Dose E": 303.14
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 187.47,
+        "RTG Corrected Dose B": 125.06,
+        "Total Dose E": 199.35
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 907.5425415039062,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2019298_v04.cdf",
+      "data_version": "['04']",
+      "generation_date": "['20260617_15:48:56']",
+      "n_obs": 84,
+      "first_obs_utc": "2019-10-25T00:14:27.000000000",
+      "last_obs_utc": "2019-10-25T23:48:27.000000000",
+      "spacing_s_median": 1026.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 82,
+        "Cmds": 2
+      },
+      "dose_median_clean": {
+        "Total Dose B": 280.17,
+        "RTG Corrected Dose B": 218.46,
+        "Total Dose E": 309.56
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 203.73,
+        "RTG Corrected Dose B": 142.02,
+        "Total Dose E": 228.24
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 906.668701171875,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2020298_v04.cdf",
+      "data_version": "['04']",
+      "generation_date": "['20260617_16:00:56']",
+      "n_obs": 85,
+      "first_obs_utc": "2020-10-24T00:06:42.000000000",
+      "last_obs_utc": "2020-10-24T23:55:30.000000000",
+      "spacing_s_median": 1026.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 82,
+        "Cmds": 3
+      },
+      "dose_median_clean": {
+        "Total Dose B": 279.13,
+        "RTG Corrected Dose B": 218.12,
+        "Total Dose E": 313.27
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 225.04,
+        "RTG Corrected Dose B": 164.04,
+        "Total Dose E": 253.09
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 906.668701171875,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2021298_v04.cdf",
+      "data_version": "['04']",
+      "generation_date": "['20260617_16:13:09']",
+      "n_obs": 86,
+      "first_obs_utc": "2021-10-25T00:16:21.000000000",
+      "last_obs_utc": "2021-10-25T23:52:28.000000000",
+      "spacing_s_median": 1026.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 81,
+        "DAN": 2,
+        "Cmds": 3
+      },
+      "dose_median_clean": {
+        "Total Dose B": 268.34,
+        "RTG Corrected Dose B": 208.03,
+        "Total Dose E": 289.73
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 78.18,
+        "RTG Corrected Dose B": 17.87,
+        "Total Dose E": 123.85
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 910.3387451171875,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2022298_v04.cdf",
+      "data_version": "['04']",
+      "generation_date": "['20260617_16:24:34']",
+      "n_obs": 85,
+      "first_obs_utc": "2022-10-25T00:03:25.000000000",
+      "last_obs_utc": "2022-10-25T23:52:07.000000000",
+      "spacing_s_median": 1026.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 82,
+        "Cmds": 3
+      },
+      "dose_median_clean": {
+        "Total Dose B": 225.61,
+        "RTG Corrected Dose B": 165.98,
+        "Total Dose E": 234.25
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 173.66,
+        "RTG Corrected Dose B": 114.03,
+        "Total Dose E": 178.16
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 919.2516479492188,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2023298_v05.cdf",
+      "data_version": "['05']",
+      "generation_date": "['20260617_14:32:39']",
+      "n_obs": 85,
+      "first_obs_utc": "2023-10-25T00:05:37.000000000",
+      "last_obs_utc": "2023-10-25T23:59:56.000000000",
+      "spacing_s_median": 1026.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 82,
+        "Cmds": 3
+      },
+      "dose_median_clean": {
+        "Total Dose B": 184.12,
+        "RTG Corrected Dose B": 125.16,
+        "Total Dose E": 178.25
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 138.21,
+        "RTG Corrected Dose B": 79.25,
+        "Total Dose E": 138.13
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 929.2130737304688,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2024298_v03.cdf",
+      "data_version": "['03']",
+      "generation_date": "['20260506_23:59:58']",
+      "n_obs": 86,
+      "first_obs_utc": "2024-10-24T00:04:21.000000000",
+      "last_obs_utc": "2024-10-24T23:55:06.000000000",
+      "spacing_s_median": 1026.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 83,
+        "Cmds": 3
+      },
+      "dose_median_clean": {
+        "Total Dose B": 167.53,
+        "RTG Corrected Dose B": 109.24,
+        "Total Dose E": 156.55
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 54.7,
+        "RTG Corrected Dose B": 84.89,
+        "Total Dose E": 60.01
+      },
+      "n_nan_dose": 2,
+      "alive_time_s_median": 932.7083740234375,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2025298_v04.cdf",
+      "data_version": "['04']",
+      "generation_date": "['20260507_00:11:45']",
+      "n_obs": 84,
+      "first_obs_utc": "2025-10-25T00:15:56.000000000",
+      "last_obs_utc": "2025-10-25T23:48:56.000000000",
+      "spacing_s_median": 1026.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 82,
+        "Cmds": 2
+      },
+      "dose_median_clean": {
+        "Total Dose B": 167.58,
+        "RTG Corrected Dose B": 109.95,
+        "Total Dose E": 157.09
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 121.18,
+        "RTG Corrected Dose B": 63.55,
+        "Total Dose E": 107.9
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 932.8831176757812,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    },
+    {
+      "file": "msl_rad_obs-l2_2026298_v03.cdf",
+      "data_version": "['03']",
+      "generation_date": "['20261026_16:24:28']",
+      "n_obs": 84,
+      "first_obs_utc": "2026-10-25T00:16:41.000000000",
+      "last_obs_utc": "2026-10-25T23:46:36.000000000",
+      "spacing_s_median": 1026.0,
+      "dose_units": "uGray/day",
+      "dose_labels": [
+        "Total Dose B",
+        "RTG Corrected Dose B",
+        "Total Dose E"
+      ],
+      "flags": {
+        "": 82,
+        "Cmds": 2
+      },
+      "dose_median_clean": {
+        "Total Dose B": 186.57,
+        "RTG Corrected Dose B": 129.6,
+        "Total Dose E": 184.83
+      },
+      "dose_median_flagged": {
+        "Total Dose B": 124.7,
+        "RTG Corrected Dose B": 67.73,
+        "Total Dose E": 107.64
+      },
+      "n_nan_dose": 0,
+      "alive_time_s_median": 927.6402587890625,
+      "variables": {
+        "ALIVE_TIME": {
+          "dims": [],
+          "units": "seconds",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TOTAL": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE": {
+          "dims": [
+            16,
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "data"
+        },
+        "DOSIMETRY_TIMESLICE_AXIS": {
+          "dims": [
+            16
+          ],
+          "units": "rclk",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_DOSE_AXIS": {
+          "dims": [
+            3
+          ],
+          "units": "uGray/day",
+          "var_type": "support_data"
+        },
+        "LET_A1A2": {
+          "dims": [
+            52
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "LET_BIN_ENERGY": {
+          "dims": [
+            52
+          ],
+          "units": "keV/micron",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_NEUTRAL_DE": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_D": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_NEUTRAL_E": {
+          "dims": [
+            96
+          ],
+          "units": "counts",
+          "var_type": "data"
+        },
+        "HISTOGRAM_BIN_ENERGY_D": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "HISTOGRAM_BIN_ENERGY_E": {
+          "dims": [
+            96
+          ],
+          "units": "MeV",
+          "var_type": "support_data"
+        },
+        "FLAGGED_DATA": {
+          "dims": [],
+          "units": "NA",
+          "var_type": "metadata"
+        },
+        "EPOCH": {
+          "dims": [],
+          "units": "ms",
+          "var_type": "support_data"
+        },
+        "DOSIMETRY_OBS_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_TIMESLICE_LABEL": {
+          "dims": [
+            16
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        },
+        "DOSIMETRY_DOSE_LABEL": {
+          "dims": [
+            3
+          ],
+          "units": "None",
+          "var_type": "metadata"
+        }
+      }
+    }
+  ]
+}
