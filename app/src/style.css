@@ -920,3 +920,7 @@ button.wz-sum { position: relative; }
 /* Payload: subtle note when the carrying limit is reached. */
 .wz-limit-note { color: var(--ui-muted); font-size: 11px; font-style: italic; animation: wzFade .2s both; }
 .wz-limit-note:empty { display: none; }
+
+/* Number steppers take the full field width; the value never collapses. */
+#missionWizard .wz-num { width: 100%; box-sizing: border-box; align-self: stretch; }
+#missionWizard .wz-num input { width: auto; flex: 1 1 auto; min-width: 4ch; }
