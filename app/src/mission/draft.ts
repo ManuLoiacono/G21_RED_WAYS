@@ -60,7 +60,7 @@ export interface Parcel {
   geographic_conversion: "unavailable" | "available";
   geographic_adapter: GeographicAdapter | null;
   bounds_lonlat: { west: number; south: number; east: number; north: number } | null;
-  scenarios: { id: string; version: string; fixture: boolean }[];
+  scenarios: { id: string; version: string; fixture: boolean; coverage?: { from_utc: string; to_utc: string }; environment?: Record<string, unknown> | null }[];
   planning_defaults: { origin_poi_id: string; destination_poi_id: string; scenario: PlanRequest["scenario"]; departure_utc: string };
   reference_description: string;
   grid: { shape: Pair; spacing_m: Pair; origin_center_xy_m: Pair; row_direction: string };

@@ -118,6 +118,7 @@ class PreparedScenario:
     records: tuple[PreparedRecord, ...]
     required_evidence: tuple[str, ...]
     content_id: str
+    metadata_json: str | None = None
 
 
 class PreparedRegistry:

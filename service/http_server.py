@@ -142,7 +142,9 @@ class HTTPApplication:
                 "geographic_adapter": parcel.geographic_adapter,
                 "bounds_lonlat": loads_strict(parcel.metadata_json)["bounds_lonlat"] if parcel.metadata_json else None,
                 "reference_description": parcel.reference_description,
-                "scenarios": [{"id": s.id, "version": s.version, "fixture": s.fixture} for s in scenarios],
+                "scenarios": [{"id": s.id, "version": s.version, "fixture": s.fixture,
+                               "coverage": {"from_utc": s.clock.valid_from_utc, "to_utc": s.clock.valid_to_utc},
+                               "environment": loads_strict(s.metadata_json) if s.metadata_json else None} for s in scenarios],
                 "planning_defaults": {"origin_poi_id": "base", "destination_poi_id": "sample",
                                       "scenario": {"id": scenario.id, "version": scenario.version, "as_of_utc": scenario.clock.utc_epoch},
                                       "departure_utc": scenario.clock.utc_epoch} if scenario else None,
@@ -321,15 +323,18 @@ def main(argv=None):
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--allow-origin", action="append", help="Repeat to replace the default browser origins.")
     parser.add_argument("--gale-package", help="Explicit trusted manifest path; register this exact Gale package and make it the UI default.")
+    parser.add_argument("--environment-package", help="Trusted prepared environmental source inventory (requires --gale-package).")
     args = parser.parse_args(argv)
     if not 1 <= args.port <= 65535:
         parser.error("Port must be between 1 and 65535.")
+    if args.environment_package and not args.gale_package:
+        parser.error("--environment-package requires --gale-package.")
     try:
         registry = None
         default_parcel = None
         if args.gale_package:
             from .gale import gale_registry
-            registry = gale_registry(args.gale_package)
+            registry = gale_registry(args.gale_package, args.environment_package)
             real = registry.parcels[-1]
             default_parcel = (real.id, real.version)
         app = HTTPApplication(allowed_origins=DEFAULT_ORIGINS if args.allow_origin is None else args.allow_origin,

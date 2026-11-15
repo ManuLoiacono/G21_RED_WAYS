@@ -76,3 +76,10 @@ python3 scripts/build_rems_backup.py   # solo biblioteca estándar
 ```
 
 Los faltantes se guardan como `--` y la app los muestra como «—», nunca como cero. No se guardan `wind_speed`, `abs_humidity` ni `atmo_opacity` (siempre vacíos o «Sunny»).
+# Offline environmental preparation
+
+See [environment runtime setup](../docs/ENVIRONMENT_RUNTIME.md) for the isolated
+engine/preparation interpreter. Run `python -m scripts.prepare_environment` to rebuild
+the bounded JSON source inventory from the committed ML exports. This does not train
+models or download data. Real startup verifies this package and the analytical terrain;
+synthetic mode remains the explicit no-argument development mode.

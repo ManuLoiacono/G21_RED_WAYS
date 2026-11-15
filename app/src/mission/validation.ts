@@ -30,7 +30,9 @@ export function isParcel(x: unknown): x is Parcel {
   return object(x) && x.schema_version === DRAFT_SCHEMA && str(x.id) && str(x.version) && str(x.content_id) && typeof x.fixture === "boolean" &&
     x.coordinate_frame === "parcel_metric" && geographicState(x.geographic_conversion) && str(x.reference_description) &&
     (x.geographic_conversion === "available" ? isGeographicAdapter(x.geographic_adapter) && object(x.bounds_lonlat) && ["west", "south", "east", "north"].every((k) => object(x.bounds_lonlat) && num(x.bounds_lonlat[k])) : x.geographic_adapter === null) &&
-    list(x.scenarios, (s) => str(s.id) && str(s.version) && typeof s.fixture === "boolean") &&
+    list(x.scenarios, (s) => str(s.id) && str(s.version) && typeof s.fixture === "boolean" &&
+      (s.coverage === undefined || object(s.coverage) && str(s.coverage.from_utc) && str(s.coverage.to_utc)) &&
+      (s.environment === undefined || s.environment === null || object(s.environment) && finiteJson(s.environment))) &&
     object(x.planning_defaults) && str(x.planning_defaults.origin_poi_id) && str(x.planning_defaults.destination_poi_id) && str(x.planning_defaults.departure_utc) &&
     object(x.planning_defaults.scenario) && str(x.planning_defaults.scenario.id) && str(x.planning_defaults.scenario.version) && str(x.planning_defaults.scenario.as_of_utc) &&
     object(x.grid) && pair(x.grid.shape) && pair(x.grid.spacing_m) && pair(x.grid.origin_center_xy_m) && str(x.grid.row_direction) &&

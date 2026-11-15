@@ -1,0 +1,897 @@
+{
+  "format": "gale-environment-sources-1",
+  "version": "v1",
+  "availability_policy": "completed-inputs-retrospective-v1",
+  "policy_description": "Retrospective assumption: release after all included sol and Earth-day input intervals and frozen training inputs complete. Zero processing/publication lag is assumed, not an archival NASA timestamp. Modern source revisions remain a limitation.",
+  "training_cutoff_utc": "2025-10-25T00:00:00Z",
+  "last_training_sol": 4698,
+  "replay_sols": [
+    4699,
+    4739
+  ],
+  "sources": [
+    {
+      "path": "data/processed/ml/daily_weather.parquet",
+      "sha256": "e7fabc642a2ef45fb45946d58c8aa77c3fdd55cdf5bb406d52cb4db01c1ef195"
+    },
+    {
+      "path": "data/processed/ml/rad_daily.parquet",
+      "sha256": "19efa418f91a3f5b218b98f2832b87c34b8e08997fe70f29568286549b6ba5a9"
+    },
+    {
+      "path": "data/processed/ml/sunspots_daily.parquet",
+      "sha256": "8c70e9e5f4e8bd42bfe373fef0efa084d5f6b7d443cdeff2446f23c56a0faf31"
+    },
+    {
+      "path": "data/processed/ml/daily_weather_summary.json",
+      "sha256": "59b55b26a6e63e9c8566a7072a7573e8e25ba99376c1527f52cb14f769581c4d"
+    },
+    {
+      "path": "data/processed/ml/rad_daily_summary.json",
+      "sha256": "05244dd9bcff180538da1e6e92c05f345d6a883194b020214ceced8906ba545b"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4699.json",
+      "sha256": "9b7ad2a2e87a54011b7cae629f2900e36ad88696002d8f422dfa4bb5c31eabbf"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4700.json",
+      "sha256": "cd2019d789bef0b9290d7c0e081e472009c1fd7d552a09479cd16ea1d218d5c9"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4701.json",
+      "sha256": "1284cd7208fcdb563b0ef07208defe30ce264b994eda845a7eb83b372356e53e"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4702.json",
+      "sha256": "80e558f2e5160ee6d46ad221fb40d73a75f0598fb94133a93a031ddedf6378f6"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4703.json",
+      "sha256": "73cf567fce807785ce0f659245c3f30474262a66a25042fdfd07285c84dc4216"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4704.json",
+      "sha256": "f5b5b8888b49890b79af9bb63dc55a406065c841b2c03b3c36351c7be91055cb"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4705.json",
+      "sha256": "44f0a994fc464f2240263e05e71fc8725ebc709d9a8a07ccd51767ac2c2f05a0"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4706.json",
+      "sha256": "62fd617996a7a8e0e5b9083053f433a3786d7e06fee231d07638662d134396be"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4707.json",
+      "sha256": "ff0e20a8de5516ae30aca01ad1dd0461df2305d5ff47fd2a722f1425c73d7a14"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4708.json",
+      "sha256": "193f903b8c879efb0c7f7b0b1a1e40a0ee9d247760dad0e7932542282baf51b1"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4709.json",
+      "sha256": "3feb6a5018460de68d826d6832d63da250ca6fa9cb9e722021a2c429585f1bd9"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4710.json",
+      "sha256": "67fe064761406fd31734d7f40e9589108c5eb6907ebc33dc7433d34a3bdf8c38"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4711.json",
+      "sha256": "fcc63222d66a6ed9a8befe821687a4573601a21a65c95f2dfa480ac7407ce831"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4712.json",
+      "sha256": "2557c40615c8914f839084d66e1aaa200a96f9f258c85fb4bb50c4faf034fe88"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4713.json",
+      "sha256": "3d8ca0018f88a67777d67a27b94cf87214ad6d2f3ef1e640aa147b90acd192a7"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4714.json",
+      "sha256": "b06d5c3bc3945e88c11342906c1dcc3bf8cdafa71317233b5c31f971bc3f4c44"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4715.json",
+      "sha256": "96ac6f52764979d3a805a97585f3dbdd16d524ffcca73182f5e9e74901fa1469"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4716.json",
+      "sha256": "3981e71599f05182795c814935572ac203591ee259ef94b67713e022ae65837a"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4717.json",
+      "sha256": "248b047409747e605f62eff8fd00a86ab1655802f95274ffae8be9c0b1f66f8f"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4718.json",
+      "sha256": "d877149c62b20781cbca1ac489507fd6d50b18c63b8933b7f173f54329128e48"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4719.json",
+      "sha256": "10c27ba9681857e1235e3298293f755277787a3fdddf4b79dcc9e390cde97388"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4720.json",
+      "sha256": "c726c889cc26eee895e04f7d32bb543a9ff87b8185e01da37a20fde34647dc50"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4721.json",
+      "sha256": "bfd170da06ed941a8025b82b9f31f781df52cabce2b607e6d4342022f769f79b"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4722.json",
+      "sha256": "058d2ee727f7bf0a2d31286be87902758e04bde74abe1a91ce3ecd7f7dca6b43"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4723.json",
+      "sha256": "e4483c43932390fb6e479ab211f5549ddbeefddab3216ad313f2d3f399552928"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4724.json",
+      "sha256": "ae93104f561059d9b06fb5b50c752fe94af153b3c5c8b9c363dd179b8d9dd9c6"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4725.json",
+      "sha256": "558a17a4add623a57fd296d7ae9975f81788cf8e76e4ea774bcb770ad83dc0c4"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4726.json",
+      "sha256": "6fb0771d8881a53045fc59c93c7ffc8ad9419c1d0559915863b896cf18319298"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4727.json",
+      "sha256": "61065290e3367f33a3f83b040d49f1fb5a8481458bf17b12c3d0a323a70b5d23"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4728.json",
+      "sha256": "0c6d80776006baa7dc5db77adf3ad3417f8f472a21267ab6af94eecac3b696de"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4729.json",
+      "sha256": "6d6aed74f4db80fcfebbe3998cab6d7c26200dc606741150089eecbe5e0a7d30"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4730.json",
+      "sha256": "a4ec73991c3b3cf339019a5eddd4b8f22c48aa7eb46e8829fdff0651935baa27"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4731.json",
+      "sha256": "f058bdaac5f585b131e64f97ac57080b30fecca86cbc24a08230041e08a767ae"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4732.json",
+      "sha256": "0aadb3c2bc95a05aec4fbe2d4c3772560f0fffbb3b163ac390e1d10f10fade4a"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4733.json",
+      "sha256": "3676f451bed2729983e164e837bb175cf05371c5d562c81a3c14a909d6c9ee73"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4734.json",
+      "sha256": "78837d91d0d924addd93c67553211df5bbcab03d364ab188b0700537367ee4c5"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4735.json",
+      "sha256": "d782655a4c9afd0caa47b9b931c8adabf2500acb0e35e9c83593c043869b435c"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4736.json",
+      "sha256": "16679695603929fd8c321ae5685c2902c2915fec0b88a5c2d1d49eaa5f8486f9"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4737.json",
+      "sha256": "24e1a2282786ba8f864d976034cc09743035cf5ff4ee14fa838631268d1827c3"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4738.json",
+      "sha256": "6d1f5d1499a6e87ed1e552870e3c0cf77d5a58897e49e4d3debb87f6716150ed"
+    },
+    {
+      "path": "data/processed/ml/forecasts/sol_4739.json",
+      "sha256": "3ceba6ddc24de37ee72d8b235098354661ecdf6621033fa5558d1d91a9ebb3cd"
+    }
+  ],
+  "source_provenance": {
+    "rems": {
+      "url": "https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json",
+      "fetched_at": "2026-11-14T18:31:18Z",
+      "bytes": 1730689,
+      "content_type": "application/json;charset=utf-8"
+    },
+    "waypoints": {
+      "url": "https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_waypoints.json",
+      "fetched_at": "2026-11-14T18:31:21Z",
+      "bytes": 665124,
+      "content_type": "application/json"
+    }
+  },
+  "daily_sources": [
+    {
+      "sol": 4698,
+      "date_utc": "2025-10-24T00:00:00Z",
+      "sunrise_lmst": "05:26",
+      "sunset_lmst": "17:21",
+      "rover_lon_deg": 137.3810353,
+      "rover_lat_deg": -4.80783916,
+      "rover_elev_m": -3610.432,
+      "pressure_pa": 686.0,
+      "min_temp_c": -75.0,
+      "max_temp_c": -3.0,
+      "dose_b_rtgcorr_ugy_day": 110.14210941090303
+    },
+    {
+      "sol": 4699,
+      "date_utc": "2025-10-25T00:00:00Z",
+      "sunrise_lmst": "05:26",
+      "sunset_lmst": "17:21",
+      "rover_lon_deg": 137.3810353,
+      "rover_lat_deg": -4.80783916,
+      "rover_elev_m": -3610.432,
+      "pressure_pa": 687.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": -3.0,
+      "dose_b_rtgcorr_ugy_day": 110.62294405982608
+    },
+    {
+      "sol": 4700,
+      "date_utc": "2025-10-26T00:00:00Z",
+      "sunrise_lmst": "05:26",
+      "sunset_lmst": "17:21",
+      "rover_lon_deg": 137.3810353,
+      "rover_lat_deg": -4.80783916,
+      "rover_elev_m": -3610.432,
+      "pressure_pa": 687.0,
+      "min_temp_c": -75.0,
+      "max_temp_c": -3.0,
+      "dose_b_rtgcorr_ugy_day": 108.97104240866268
+    },
+    {
+      "sol": 4701,
+      "date_utc": "2025-10-27T00:00:00Z",
+      "sunrise_lmst": "05:26",
+      "sunset_lmst": "17:21",
+      "rover_lon_deg": 137.3810353,
+      "rover_lat_deg": -4.80783916,
+      "rover_elev_m": -3610.432,
+      "pressure_pa": 687.0,
+      "min_temp_c": -75.0,
+      "max_temp_c": 0.0,
+      "dose_b_rtgcorr_ugy_day": 110.61303082634421
+    },
+    {
+      "sol": 4702,
+      "date_utc": "2025-10-28T00:00:00Z",
+      "sunrise_lmst": "05:26",
+      "sunset_lmst": "17:21",
+      "rover_lon_deg": 137.3810353,
+      "rover_lat_deg": -4.80783916,
+      "rover_elev_m": -3610.432,
+      "pressure_pa": 686.0,
+      "min_temp_c": -76.0,
+      "max_temp_c": -1.0,
+      "dose_b_rtgcorr_ugy_day": 106.62083677404067
+    },
+    {
+      "sol": 4703,
+      "date_utc": "2025-10-29T00:00:00Z",
+      "sunrise_lmst": "05:25",
+      "sunset_lmst": "17:21",
+      "rover_lon_deg": 137.3810353,
+      "rover_lat_deg": -4.80783916,
+      "rover_elev_m": -3610.432,
+      "pressure_pa": 689.0,
+      "min_temp_c": -76.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 107.01111330304828
+    },
+    {
+      "sol": 4704,
+      "date_utc": "2025-10-30T00:00:00Z",
+      "sunrise_lmst": "05:25",
+      "sunset_lmst": "17:21",
+      "rover_lon_deg": 137.3810353,
+      "rover_lat_deg": -4.80783916,
+      "rover_elev_m": -3610.432,
+      "pressure_pa": 690.0,
+      "min_temp_c": -75.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 99.46037957834643
+    },
+    {
+      "sol": 4705,
+      "date_utc": "2025-10-31T00:00:00Z",
+      "sunrise_lmst": "05:25",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810353,
+      "rover_lat_deg": -4.80783916,
+      "rover_elev_m": -3610.432,
+      "pressure_pa": 691.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": -3.0,
+      "dose_b_rtgcorr_ugy_day": 100.39557647705078
+    },
+    {
+      "sol": 4706,
+      "date_utc": "2025-11-01T00:00:00Z",
+      "sunrise_lmst": "05:25",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810353,
+      "rover_lat_deg": -4.80783916,
+      "rover_elev_m": -3610.432,
+      "pressure_pa": 690.0,
+      "min_temp_c": -75.0,
+      "max_temp_c": -1.0,
+      "dose_b_rtgcorr_ugy_day": 100.15621344987736
+    },
+    {
+      "sol": 4707,
+      "date_utc": "2025-11-02T00:00:00Z",
+      "sunrise_lmst": "05:25",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810353,
+      "rover_lat_deg": -4.80783916,
+      "rover_elev_m": -3610.432,
+      "pressure_pa": 689.0,
+      "min_temp_c": -75.0,
+      "max_temp_c": -1.0,
+      "dose_b_rtgcorr_ugy_day": 100.22701735723587
+    },
+    {
+      "sol": 4708,
+      "date_utc": "2025-11-03T00:00:00Z",
+      "sunrise_lmst": "05:24",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810353,
+      "rover_lat_deg": -4.80783916,
+      "rover_elev_m": -3610.432,
+      "pressure_pa": 690.0,
+      "min_temp_c": -76.0,
+      "max_temp_c": 0.0,
+      "dose_b_rtgcorr_ugy_day": 99.55436850155101
+    },
+    {
+      "sol": 4709,
+      "date_utc": "2025-11-04T00:00:00Z",
+      "sunrise_lmst": "05:24",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810495,
+      "rover_lat_deg": -4.80799931,
+      "rover_elev_m": -3608.689,
+      "pressure_pa": 691.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": -1.0,
+      "dose_b_rtgcorr_ugy_day": 102.38627633383108
+    },
+    {
+      "sol": 4710,
+      "date_utc": "2025-11-05T00:00:00Z",
+      "sunrise_lmst": "05:24",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810495,
+      "rover_lat_deg": -4.80799931,
+      "rover_elev_m": -3608.689,
+      "pressure_pa": 692.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -10.0,
+      "dose_b_rtgcorr_ugy_day": 100.84387652079265
+    },
+    {
+      "sol": 4711,
+      "date_utc": "2025-11-06T00:00:00Z",
+      "sunrise_lmst": "05:24",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 692.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": -4.0,
+      "dose_b_rtgcorr_ugy_day": 103.45802253274357
+    },
+    {
+      "sol": 4712,
+      "date_utc": "2025-11-07T00:00:00Z",
+      "sunrise_lmst": "05:24",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 693.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": -9.0,
+      "dose_b_rtgcorr_ugy_day": 103.39309198716107
+    },
+    {
+      "sol": 4713,
+      "date_utc": "2025-11-08T00:00:00Z",
+      "sunrise_lmst": "05:23",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 692.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -1.0,
+      "dose_b_rtgcorr_ugy_day": 102.25449335434857
+    },
+    {
+      "sol": 4714,
+      "date_utc": "2025-11-09T00:00:00Z",
+      "sunrise_lmst": "05:23",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 692.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 105.27216184706916
+    },
+    {
+      "sol": 4715,
+      "date_utc": "2025-11-10T00:00:00Z",
+      "sunrise_lmst": "05:23",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 692.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 106.05764240938075
+    },
+    {
+      "sol": 4716,
+      "date_utc": "2025-11-11T00:00:00Z",
+      "sunrise_lmst": "05:23",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 695.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 137.8372782090131
+    },
+    {
+      "sol": 4717,
+      "date_utc": "2025-11-12T00:00:00Z",
+      "sunrise_lmst": "05:23",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 695.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 113.34119070143927
+    },
+    {
+      "sol": 4718,
+      "date_utc": "2025-11-13T00:00:00Z",
+      "sunrise_lmst": "05:22",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 695.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": -5.0,
+      "dose_b_rtgcorr_ugy_day": 110.24129800235524
+    },
+    {
+      "sol": 4719,
+      "date_utc": "2025-11-14T00:00:00Z",
+      "sunrise_lmst": "05:22",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 696.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": -6.0,
+      "dose_b_rtgcorr_ugy_day": 108.74710700625465
+    },
+    {
+      "sol": 4720,
+      "date_utc": "2025-11-15T00:00:00Z",
+      "sunrise_lmst": "05:22",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 696.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 107.62002300080799
+    },
+    {
+      "sol": 4721,
+      "date_utc": "2025-11-16T00:00:00Z",
+      "sunrise_lmst": "05:22",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 697.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 107.16100756327312
+    },
+    {
+      "sol": 4722,
+      "date_utc": "2025-11-17T00:00:00Z",
+      "sunrise_lmst": "05:22",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 699.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": -4.0,
+      "dose_b_rtgcorr_ugy_day": 106.14794158935547
+    },
+    {
+      "sol": 4723,
+      "date_utc": "2025-11-18T00:00:00Z",
+      "sunrise_lmst": "05:21",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 700.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -3.0,
+      "dose_b_rtgcorr_ugy_day": 107.22179628259995
+    },
+    {
+      "sol": 4724,
+      "date_utc": "2025-11-19T00:00:00Z",
+      "sunrise_lmst": "05:21",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 700.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -3.0,
+      "dose_b_rtgcorr_ugy_day": 106.02405664780561
+    },
+    {
+      "sol": 4725,
+      "date_utc": "2025-11-20T00:00:00Z",
+      "sunrise_lmst": "05:21",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 701.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 106.83682559785389
+    },
+    {
+      "sol": 4726,
+      "date_utc": "2025-11-22T00:00:00Z",
+      "sunrise_lmst": "05:21",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 702.0,
+      "min_temp_c": -72.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 106.12969425746373
+    },
+    {
+      "sol": 4727,
+      "date_utc": "2025-11-23T00:00:00Z",
+      "sunrise_lmst": "05:21",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 702.0,
+      "min_temp_c": -72.0,
+      "max_temp_c": 2.0,
+      "dose_b_rtgcorr_ugy_day": 106.04467333625345
+    },
+    {
+      "sol": 4728,
+      "date_utc": "2025-11-24T00:00:00Z",
+      "sunrise_lmst": "05:21",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 704.0,
+      "min_temp_c": -72.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 104.97717635210823
+    },
+    {
+      "sol": 4729,
+      "date_utc": "2025-11-25T00:00:00Z",
+      "sunrise_lmst": "05:21",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 705.0,
+      "min_temp_c": -72.0,
+      "max_temp_c": -4.0,
+      "dose_b_rtgcorr_ugy_day": 103.59045137677874
+    },
+    {
+      "sol": 4730,
+      "date_utc": "2025-11-26T00:00:00Z",
+      "sunrise_lmst": "05:20",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 705.0,
+      "min_temp_c": -72.0,
+      "max_temp_c": -5.0,
+      "dose_b_rtgcorr_ugy_day": 101.07807177166606
+    },
+    {
+      "sol": 4731,
+      "date_utc": "2025-11-27T00:00:00Z",
+      "sunrise_lmst": "05:20",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 706.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -1.0,
+      "dose_b_rtgcorr_ugy_day": 99.36741413789638
+    },
+    {
+      "sol": 4732,
+      "date_utc": "2025-11-28T00:00:00Z",
+      "sunrise_lmst": "05:20",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 706.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -1.0,
+      "dose_b_rtgcorr_ugy_day": 98.21245765686035
+    },
+    {
+      "sol": 4733,
+      "date_utc": "2025-11-29T00:00:00Z",
+      "sunrise_lmst": "05:20",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 706.0,
+      "min_temp_c": -72.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 102.75639405361441
+    },
+    {
+      "sol": 4734,
+      "date_utc": "2025-11-30T00:00:00Z",
+      "sunrise_lmst": "05:20",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 708.0,
+      "min_temp_c": -72.0,
+      "max_temp_c": -3.0,
+      "dose_b_rtgcorr_ugy_day": 102.8130568560432
+    },
+    {
+      "sol": 4735,
+      "date_utc": "2025-12-01T00:00:00Z",
+      "sunrise_lmst": "05:20",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 710.0,
+      "min_temp_c": -71.0,
+      "max_temp_c": -4.0,
+      "dose_b_rtgcorr_ugy_day": 108.44269446439522
+    },
+    {
+      "sol": 4736,
+      "date_utc": "2025-12-02T00:00:00Z",
+      "sunrise_lmst": "05:20",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 709.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -3.0,
+      "dose_b_rtgcorr_ugy_day": 104.76244928696576
+    },
+    {
+      "sol": 4737,
+      "date_utc": "2025-12-03T00:00:00Z",
+      "sunrise_lmst": "05:19",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 709.0,
+      "min_temp_c": -71.0,
+      "max_temp_c": -3.0,
+      "dose_b_rtgcorr_ugy_day": 103.62441496007582
+    },
+    {
+      "sol": 4738,
+      "date_utc": "2025-12-04T00:00:00Z",
+      "sunrise_lmst": "05:19",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 710.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -4.0,
+      "dose_b_rtgcorr_ugy_day": 103.16116207347197
+    },
+    {
+      "sol": 4739,
+      "date_utc": "2025-12-05T00:00:00Z",
+      "sunrise_lmst": "05:19",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 712.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -2.0,
+      "dose_b_rtgcorr_ugy_day": 102.39600699288505
+    },
+    {
+      "sol": 4740,
+      "date_utc": "2025-12-06T00:00:00Z",
+      "sunrise_lmst": "05:19",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810041,
+      "rover_lat_deg": -4.80800755,
+      "rover_elev_m": -3607.722,
+      "pressure_pa": 713.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": -5.0,
+      "dose_b_rtgcorr_ugy_day": 102.17302416633157
+    },
+    {
+      "sol": 4741,
+      "date_utc": "2025-12-07T00:00:00Z",
+      "sunrise_lmst": "05:19",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810137,
+      "rover_lat_deg": -4.80776275,
+      "rover_elev_m": -3611.533,
+      "pressure_pa": 714.0,
+      "min_temp_c": -72.0,
+      "max_temp_c": 3.0,
+      "dose_b_rtgcorr_ugy_day": 102.92680131821405
+    },
+    {
+      "sol": 4742,
+      "date_utc": "2025-12-08T00:00:00Z",
+      "sunrise_lmst": "05:19",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810137,
+      "rover_lat_deg": -4.80776275,
+      "rover_elev_m": -3611.533,
+      "pressure_pa": 716.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": 3.0,
+      "dose_b_rtgcorr_ugy_day": 103.00672077852137
+    },
+    {
+      "sol": 4743,
+      "date_utc": "2025-12-09T00:00:00Z",
+      "sunrise_lmst": "05:19",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810137,
+      "rover_lat_deg": -4.80776275,
+      "rover_elev_m": -3611.533,
+      "pressure_pa": 716.0,
+      "min_temp_c": -73.0,
+      "max_temp_c": 2.0,
+      "dose_b_rtgcorr_ugy_day": 104.89584530101104
+    },
+    {
+      "sol": 4744,
+      "date_utc": "2025-12-10T00:00:00Z",
+      "sunrise_lmst": "05:19",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810137,
+      "rover_lat_deg": -4.80776275,
+      "rover_elev_m": -3611.533,
+      "pressure_pa": 717.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": 2.0,
+      "dose_b_rtgcorr_ugy_day": 106.05276643662225
+    },
+    {
+      "sol": 4745,
+      "date_utc": "2025-12-11T00:00:00Z",
+      "sunrise_lmst": "05:19",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810137,
+      "rover_lat_deg": -4.80776275,
+      "rover_elev_m": -3611.533,
+      "pressure_pa": 719.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": 2.0,
+      "dose_b_rtgcorr_ugy_day": 104.75965835934593
+    },
+    {
+      "sol": 4746,
+      "date_utc": "2025-12-12T00:00:00Z",
+      "sunrise_lmst": "05:18",
+      "sunset_lmst": "17:20",
+      "rover_lon_deg": 137.3810137,
+      "rover_lat_deg": -4.80776275,
+      "rover_elev_m": -3611.533,
+      "pressure_pa": 719.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": 3.0,
+      "dose_b_rtgcorr_ugy_day": 104.24583452801372
+    },
+    {
+      "sol": 4747,
+      "date_utc": "2025-12-13T00:00:00Z",
+      "sunrise_lmst": "05:18",
+      "sunset_lmst": "17:21",
+      "rover_lon_deg": 137.3810137,
+      "rover_lat_deg": -4.80776275,
+      "rover_elev_m": -3611.533,
+      "pressure_pa": 721.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": 1.0,
+      "dose_b_rtgcorr_ugy_day": 106.23262250991095
+    },
+    {
+      "sol": 4748,
+      "date_utc": "2025-12-14T00:00:00Z",
+      "sunrise_lmst": "05:18",
+      "sunset_lmst": "17:21",
+      "rover_lon_deg": 137.3811194,
+      "rover_lat_deg": -4.80790799,
+      "rover_elev_m": -3610.29,
+      "pressure_pa": 722.0,
+      "min_temp_c": -78.0,
+      "max_temp_c": -5.0,
+      "dose_b_rtgcorr_ugy_day": 105.87105821308337
+    },
+    {
+      "sol": 4749,
+      "date_utc": "2025-12-15T00:00:00Z",
+      "sunrise_lmst": "05:18",
+      "sunset_lmst": "17:21",
+      "rover_lon_deg": 137.3811194,
+      "rover_lat_deg": -4.80790799,
+      "rover_elev_m": -3610.29,
+      "pressure_pa": 722.0,
+      "min_temp_c": -74.0,
+      "max_temp_c": 1.0,
+      "dose_b_rtgcorr_ugy_day": 107.85617998908548
+    }
+  ],
+  "limitations": [
+    "Historical hindcast, not operational or current Mars weather.",
+    "Source rover locations/elevations are forward-filled waypoints, not a validated weather field at the hypothetical base.",
+    "Daily reports are not hourly weather; RAD is silicon detector B RTG-corrected microgray/day, not human effective dose.",
+    "SILSO uses modern revised daily values; original 2025 revisions are not recoverable."
+  ],
+  "content_id": "0275b9cc48c5c82c590216ac2c8f95f036e28acc44f1cd8ea5b4272e9ef7e25d"
+}

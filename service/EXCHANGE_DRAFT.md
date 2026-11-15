@@ -77,3 +77,9 @@ Missing complete movement leaves totals/margins null with `unavailable_totals_re
 ## Consumer decisions still pending
 
 P1/P3 must accept/revise draft fields, version migration, metric versus future geographic geometry, request revision handling, error mapping and the separate margin names before shared v1 integration. P3 must supply reviewed real reference/mask/solar conventions and historical availability/revision policy, with coverage/quality checks before fixing a real replay start. Communication remains the next navigation extension after baseline service integration. `app/` and its existing static fallback are unchanged for P1's later integration work.
+# Additive environmental discovery
+
+Parcel scenarios advertise `coverage: {from_utc, to_utc}` and optional `environment`
+metadata (package/source identities, policy, coverage and limitations). Discovery never
+publishes unfiltered daily source values or retrospective verification metrics.
+This remains the consumer-review-pending development draft; shared v0 is unchanged.
