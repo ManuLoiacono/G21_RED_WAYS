@@ -1,3 +1,4 @@
+import { simulationEnvironment } from "./simulationEnvironment";
 import * as Cesium from "cesium";
 import { onLanguageChange, t, tOr } from "../i18n";
 import { esc } from "../ui/format";
@@ -172,6 +173,16 @@ export function createTracking(viewer: Cesium.Viewer, mount: HTMLElement, grid: 
     place(state);
     const bar = root.querySelector<HTMLElement>(".tk-bar i");
     if (bar) bar.style.width = `${(100 * t0 / Math.max(simEnd(), 1)).toFixed(2)}%`;
+    const environment = root.querySelector<HTMLElement>(".tk-environment");
+    if (environment && response && alt) {
+      const html = simulationEnvironment(alt, response, t0);
+      if (environment.dataset.html !== html) {
+        const opened = environment.querySelector("details")?.open;
+        environment.innerHTML = html; environment.dataset.html = html;
+        const details = environment.querySelector("details"); if (details && opened) details.open = true;
+      }
+      environment.classList.toggle("demo-playing", playing);
+    }
     const clock = root.querySelector(".tk-clock");
     if (clock) clock.textContent = `T+${hms(t0)} / ${hms(simEnd())}`;
     const phase = root.querySelector(".tk-phase");
@@ -306,6 +317,7 @@ export function createTracking(viewer: Cesium.Viewer, mount: HTMLElement, grid: 
         ${totalDelay() ? `<small>${esc(t("tk.totalDelay", { t: duration(totalDelay()) }))}</small>` : ""}
         ${decided && !pending ? `<small class="tk-decided">${esc(t("tk.decided", { option: t(`tk.option.${decided.id}`), margin: duration(decided.response.options.find((o) => o.id === decided!.id)?.metrics.mission_margin_s ?? null) }))}</small>` : ""}
       </div>
+      <div class="tk-environment">${simulationEnvironment(alt, response, t0)}</div>
       ${error ? `<p class="tk-error" role="alert">${esc(error)}</p>` : ""}
       ${pending ? `<section class="tk-eval" role="status">
         <p>${esc(t("tk.evalIntro", { delay: duration(pendingAt?.added ?? 0), elapsed: duration(pending.elapsed_at_event_s) }))}</p>

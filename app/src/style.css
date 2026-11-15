@@ -1010,3 +1010,9 @@ button.wz-sum { position: relative; }
 .tk-pov { padding: 3px 9px; border-radius: 7px; border: 1px solid rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .06); color: inherit; font-size: 11px; }
 .tk-pov[aria-pressed="true"] { border-color: rgba(255, 209, 102, .7); background: rgba(255, 209, 102, .16); color: #ffe2a3; }
 .tk-option header small { margin-right: auto; margin-left: 6px; font-size: 10px; color: rgba(214, 209, 226, .7); }
+
+.tk-environment { max-height: 15rem; overflow: auto; }
+.demo-clock-pulse { color: #ffd166; }
+.demo-playing .demo-clock-pulse { animation: demo-clock 2s ease-in-out infinite; }
+@keyframes demo-clock { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .demo-playing .demo-clock-pulse { animation: none; } }

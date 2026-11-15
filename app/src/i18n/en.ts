@@ -8,6 +8,7 @@ export const en: Record<MessageKey, string> = {
   "demo.activity": "Activity duration",
   "demo.distance": "Round-trip distance",
   "demo.ascent": "Cumulative ascent",
+  "demo.daily": "Daily evidence at simulated UTC; no hourly forecast. Pulse illustrates the simulation clock, not spatial weather.",
   "context.environment": "Environmental context",
   "context.pressure": "Pressure",
   "context.minimum": "Daily minimum temperature",

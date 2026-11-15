@@ -9,6 +9,7 @@ export const es = {
   "demo.activity": "Duración de actividad",
   "demo.distance": "Distancia de ida y vuelta",
   "demo.ascent": "Ascenso acumulado",
+  "demo.daily": "Datos diarios en UTC simulado; sin pronóstico horario. El pulso ilustra el reloj simulado, no un fenómeno meteorológico.",
   "context.environment": "Contexto ambiental",
   "context.pressure": "Presión",
   "context.minimum": "Temperatura mínima diaria",

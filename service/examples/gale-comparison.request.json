@@ -17,7 +17,7 @@
   },
   "destination": {
     "type": "poi",
-    "poi_id": "control"
+    "poi_id": "sample"
   },
   "team": {
     "catalog_version": "synthetic-team-v1",
