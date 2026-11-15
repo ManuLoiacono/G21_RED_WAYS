@@ -7,7 +7,10 @@ from service.planning import PreparedPlanner
 from service.exchange import plan_draft
 class PhotoLocations(unittest.TestCase):
     def test_default_and_representative_teams_return_from_each_destination(self):
-        planner=PreparedPlanner(gale_registry('data/processed/gale/analytical/manifest.json'))
+        manifest=Path('data/processed/gale/analytical/manifest.json')
+        if not manifest.with_name('terrain.npz').exists():
+            self.skipTest('Verified real archive unavailable; run python -m scripts.prepare_gale --factor 2.')
+        planner=PreparedPlanner(gale_registry(manifest))
         req=json.loads(Path('service/examples/gale-replay.request.json').read_text())
         default=req['team']
         teams=[default,{**default,'robots':[],'humans':[{'profile_id':'explorer_02','payload_kg':0}]},

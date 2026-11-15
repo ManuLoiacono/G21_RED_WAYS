@@ -19,7 +19,7 @@ Analytical coordinates use the existing spherical EQC frame (R=3,396,190 m). Sce
 
 ## Actual checks
 
-- Full service suite: 105 passed, zero skips (83.090 s); additional photo-location test: 1 passed, covering nine actual round trips (57.932 s).
+- Full service suite: 105 passed, zero skips (83.090 s); additional photo-location test: 1 passed, covering nine actual round trips (57.932 s), repeated in the isolated runtime after adding the absent-archive skip guard: passed with zero skips (61.242 s).
 - Full engine suite: 51 passed (0.449 s).
 - Frontend/real HTTP suite: 18 passed, zero skips (75.502 s), including comparison, deduplication, recommendation payload conservation, reachable area, request revisions, stale rejection, rendering, duration paste guard and daily simulation filtering.
 - TypeScript typecheck passed. Final production build passed: 1,691 modules in 88 s; existing large-bundle warning remains (main 5,278.16 kB before gzip).
