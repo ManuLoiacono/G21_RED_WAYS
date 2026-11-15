@@ -28,11 +28,20 @@ def benchmark():
     result = measured("first_visibility", lambda: plan_draft(planner, request))
     measured("warm_visibility", lambda: plan_draft(planner, request))
     values, counts = np.unique(planner._visibility.states, return_counts=True)
+    request["criterion"] = "comparison"
+    comparison = measured("comparison", lambda: plan_draft(planner, request))
+    distinct_request = json.loads(Path("service/examples/gale-comparison.request.json").read_text())
+    distinct = measured("distinct_comparison", lambda: plan_draft(planner, distinct_request))
+    from service.recommendations import recommendations
+    suggestions = measured("recommendations", lambda: recommendations(planner, request))
     return {"method": "real-grid-navigation-benchmark-v1", "timing_s": timing, "serialized_bytes": output,
             "grid_cells": planner._graph.grid.node_count, "directed_edges": planner._graph.csr.nnz,
             "visibility_counts": dict(zip(map(str, values), map(int, counts))),
             "visibility": result["visibility"], "communication": result["alternatives"][0]["communication"],
             "baseline_metrics": baseline["alternatives"][0]["metrics"],
+            "default_comparison_count": len(comparison["alternatives"]),
+            "distinct_comparison": [{"criteria": a["criteria"], "metrics": a["metrics"], "optimization": a["optimization"]} for a in distinct["alternatives"]],
+            "recommendations": {"attempted": suggestions["attempted"], "proposals": [{"id": p["id"], "assessment": p["assessment"], "delta": p["delta"]} for p in suggestions["proposals"]]},
             "peak_process_rss_bytes": peak_rss_bytes(),
             "memory_scope": "whole-process high-water RSS including native workspaces and allocator retention"}
 

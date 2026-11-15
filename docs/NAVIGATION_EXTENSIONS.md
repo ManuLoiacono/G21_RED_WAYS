@@ -51,3 +51,57 @@ checks, frontend 10 + external consumer 5, TypeScript and production build.
 Consumer files sharing one planner must run with `--test-concurrency=1`:
 an initial parallel-file run correctly received HTTP 409 busy responses. The
 serial rerun is the acceptance run; no automatic retry hides busy behavior.
+
+## B: distinct candidates and evaluated suggestions
+
+`criterion: "fastest"` retains the baseline calculation. Explicit
+`criterion: "comparison"` adds lower-positive-ascent and visibility-prioritized
+optima. Each leg is searched independently on the original directed topology.
+Primary Dijkstra uses ascent metres or source/target half-edge time without
+confirmed visibility. A second Dijkstra uses physical seconds only on exactly
+tight primary edges. Explicit zero primary edges remain present; positive travel
+time breaks zero-score cycles. There is no arbitrary metre-to-second weighting.
+The tight-edge test uses the same float64 additions as primary Dijkstra, with no
+epsilon permitting a worse primary edge. Real elevations originate in float32.
+
+Reconstruction always uses original movement weights. `search_cost_s` remains
+physical time (the secondary search duration), never an ascent score. Typed
+`optimization` fields record actual units, total positive ascent and hidden/unknown
+time. Complete directed cell sequences deduplicate candidates, retaining all
+associated criterion badges; at most three routes are returned. Default real
+reference input produces one route with three badges. The committed
+`gale-comparison.request.json` uses Morgan Vale, no robots and the control POI:
+fastest/visibility activity 1208.300784 s, positive ascent 9.135193 m;
+lower-ascent activity 1328.456994 s, positive ascent 8.109680 m.
+
+Each candidate has independent complete budgets, checks, assessment and environment
+target applicability. Top-level assessment refers to fastest only. A real target-end
+test retains four eligible forecasts for fastest and excludes them for the longer
+candidate crossing the boundary. No resource-constrained global optimum is claimed.
+Selected cards drive the actual map paths, raw environmental evidence and focus action.
+
+`POST /recommendations` accepts the same identified draft request. It evaluates up
+to three deterministic departures/team configurations under one planner lock.
+The cutoff, endpoints, tasks, reserve, mission budget and total payload stay fixed.
+Removed payload is explicitly reassigned within capacities and checked through
+`resolve_comparison`. Departures cannot precede cutoff or leave replay coverage.
+Known incompatible results are rejected, and unresolved-evidence improvements
+are explicitly not proven viable. Coverage is bounded, not exhaustive. The UI
+shows proposed names, complete load allocation, departure and calculated deltas;
+only "Apply these changes and recalculate" changes state and sends a fresh identity.
+Edits invalidate pending recommendations, including edit/revert and newer responses.
+
+Delivery B verification: 42 engine tests; 92 service tests; 17 live
+frontend/consumer tests, no skips; TypeScript and production build. The exhaustive
+tiny-grid reference has three genuinely distinct objectives and checks each directed
+leg's optimum, physical seconds and zero-score ties. Real-grid benchmark:
+comparison 1.777 s, distinct Morgan/control comparison 7.645 s, bounded suggestions
+11.282 s; 123464-byte distinct response, 6725-byte suggestions, peak whole-process
+RSS 774303744 bytes across all contexts under concurrent test load. These are
+local measurements, not a performance guarantee or capability validation.
+One full run exposed a Windows connection reset on oversized HTTP input. The
+adapter now drains at most MAX_BODY_BYTES + 1 bytes with a short timeout before
+rejecting a small overflow, preserving the strict body cap and the 413 response.
+The focused protocol regression and subsequent full suite are the acceptance checks.
+Install `service/requirements.txt` for the navigation runtime; it preserves the
+engine NumPy/SciPy pins and supplies GDAL through rasterio's official wheel.

@@ -1,4 +1,4 @@
-import { DRAFT_SCHEMA, type Catalogs, type Health, type Parcel, type PlanResponse } from "./draft";
+import { DRAFT_SCHEMA, type Catalogs, type Health, type Parcel, type PlanResponse, type Recommendations } from "./draft";
 
 type Obj = Record<string, unknown>;
 export const object = (x: unknown): x is Obj => typeof x === "object" && x !== null && !Array.isArray(x);
@@ -57,6 +57,8 @@ const check = (c: Obj) => str(c.rule_id) && ["passed", "failed", "missing_eviden
   (c.participant_id === null || str(c.participant_id)) && ["actual_s", "limit_s", "margin_s"].every((k) => nullableNum(c[k])) && strings(c.evidence_ids);
 const communication = (x: unknown) => object(x) && (x.status === "unevaluated" ||
   x.status === "evaluated" && ["visible_s", "occluded_s", "unknown_s", "max_without_confirmed_s"].every((k) => num(x[k]) && (x[k] as number) >= 0));
+const environment = (e: unknown) => object(e) && strings(e.missing_required) && strings(e.missing_optional_variables) &&
+  Array.isArray(e.decision_records) && e.decision_records.every(object) && object(e.clock_mapping) && object(e.snapshot);
 
 /** Validate all nested values read by the UI; null metrics stay unavailable. */
 export function isDraftResponse(x: unknown): x is PlanResponse {
@@ -69,11 +71,24 @@ export function isDraftResponse(x: unknown): x is PlanResponse {
     object(x.input_provenance) && typeof x.input_provenance.fixture === "boolean" && str(x.input_provenance.movement_parameters_evidence) && str(x.input_provenance.geographic_conversion) &&
     (x.input_provenance.geographic_conversion === "available" ? isGeographicAdapter(x.geographic_adapter) : x.input_provenance.geographic_conversion === "unavailable" && x.geographic_adapter === null) &&
     list(x.alternatives, (a) => str(a.id) && str(a.criterion) && assessment(a.assessment) && str(a.search_status) && a.coordinate_frame === "parcel_metric" &&
-      leg(a.outbound) && leg(a.return) && metrics(a.metrics) && list(a.checks, check) && (a.communication === undefined || communication(a.communication))) &&
+      leg(a.outbound) && leg(a.return) && metrics(a.metrics) && list(a.checks, check) && (a.communication === undefined || communication(a.communication)) &&
+      (a.environment === undefined || environment(a.environment)) && (a.criteria === undefined || strings(a.criteria)) && (a.optimization === undefined || object(a.optimization) && ["total_positive_ascent_m", "without_confirmed_s", "physical_travel_s"].every((k) => object(a.optimization) && nullableNum(a.optimization[k])))) &&
     list(x.resolved_team, (p) => str(p.kind) && identity(p.identity) && parameters(p.parameters) && num(p.payload_kg)) &&
-    object(e) && strings(e.missing_required) && strings(e.missing_optional_variables) && Array.isArray(e.decision_records) && e.decision_records.every(object) && object(e.clock_mapping) && object(e.snapshot) &&
+    environment(e) &&
     object(locations) && ["origin", "destination"].every((k) => object(locations[k]) && pair(locations[k].effective_xy_m) &&
       pair(locations[k].requested_xy_m) && pair(locations[k].cell) && (locations[k].cell as number[]).every((n) => Number.isInteger(n) && n >= 0) &&
       num(locations[k].effective_elevation_m) && str(locations[k].adapter_id) && geographicState(locations[k].geographic_conversion) && object(locations[k].requested)) &&
     strings(x.not_evaluated) && strings(x.assumptions) && object(x.versions) && Object.values(x.versions).every(str);
+}
+
+export function isRecommendations(x: unknown): x is Recommendations {
+  return object(x) && finiteJson(x) && x.schema_version === "p2-recommendations-1" && object(x.request_echo) &&
+    str(x.request_echo.request_id) && num(x.request_echo.revision) && num(x.attempted) && x.attempted <= 3 && x.cap === 3 &&
+    list(x.proposals, (p) => str(p.id) && ["viable_model", "insufficient_evidence"].includes(p.assessment as string) && str(p.evidence_status) && num(p.total_payload_kg) &&
+      object(p.delta) && Object.values(p.delta).every(nullableNum) &&
+      list(p.team_summary, (m) => str(m.id) && str(m.name) && num(m.payload_kg)) && object(p.proposed_request) &&
+      object(p.proposed_request.mission) && str(p.proposed_request.mission.departure_utc) && object(p.proposed_request.team) &&
+      str(p.proposed_request.team.catalog_version) && ["humans", "robots"].every((g) => object(p.proposed_request) && object(p.proposed_request.team) &&
+        list(p.proposed_request.team[g], (m) => str(m.profile_id) && num(m.payload_kg) && (m.mission_overrides === undefined || object(m.mission_overrides) && Object.values(m.mission_overrides).every(num))))) &&
+    Array.isArray(x.proposals) && x.proposals.length <= 3;
 }

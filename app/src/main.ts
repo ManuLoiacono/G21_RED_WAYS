@@ -23,6 +23,9 @@ import { createMissionContext, setUpInputModeMenu, setUpSettingsMenu } from "./u
 import type { PlanResponse } from "./mission/draft";
 import { createSceneRoutes } from "./mission/sceneRoutes";
 import { createScenePois } from "./mission/scenePois";
+import { requestRecommendations } from "./mission/api";
+import { calculationKey } from "./mission/request";
+import type { PlanRequest } from "./mission/draft";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -40,6 +43,8 @@ Cesium.Ellipsoid.default = Cesium.Ellipsoid.MARS;
 let viewer!: Cesium.Viewer;
 let sceneRoutes: ReturnType<typeof createSceneRoutes> | null = null;
 let activeResponse: PlanResponse | null = null;
+let activeAlternative: string | null = null;
+let recommendationSequence = 0;
 /** Loading message on screen (re-translated on a language switch); null once loaded. */
 let loadingKey: MessageKey | null = null;
 
@@ -370,15 +375,31 @@ const panel = createMissionPanel(document.getElementById("missionPanel")!);
 const results = createResultsPanel(document.getElementById("resultsPanel")!);
 const context = createMissionContext(document.getElementById("hudContext")!);
 panel.onChange((request) => context.update(request));
-panel.onStale(() => { activeResponse = null; results.clear(); sceneRoutes?.clear(); });
+panel.onStale(() => { recommendationSequence += 1; activeResponse = null; activeAlternative = null; results.clear(); sceneRoutes?.clear(); });
 async function showSceneResponse(response: PlanResponse) {
-  try { await sceneRoutes?.show(response, panel.getParcel()); }
+  try { await sceneRoutes?.show(response, panel.getParcel(), activeAlternative); }
   catch (error) { console.error(error); showToast(t("nav.sceneMismatch")); }
 }
 document.addEventListener("plan-response", (event) => {
   activeResponse = (event as CustomEvent<PlanResponseEvent>).detail.response;
   results.show(activeResponse);
-  void showSceneResponse(activeResponse);
+});
+results.onSelect((id) => { activeAlternative = id; if (activeResponse) void showSceneResponse(activeResponse); });
+document.addEventListener("compare-calculated-routes", () => panel.compare());
+document.addEventListener("request-calculated-recommendations", async () => {
+  const original = activeResponse;
+  if (!original) return;
+  const sequence = ++recommendationSequence;
+  results.recommendationState("busy");
+  const result = await requestRecommendations(original.request_echo);
+  const current = panel.getRequest();
+  if (sequence !== recommendationSequence || activeResponse !== original || !current || calculationKey(current) !== calculationKey(original.request_echo)) return;
+  if (!result.ok) { results.recommendationState(result.error); return; }
+  if (calculationKey(result.data.request_echo) !== calculationKey(original.request_echo) || result.data.request_echo.request_id !== original.request_echo.request_id || result.data.request_echo.revision !== original.request_echo.revision) return;
+  results.recommendationState(result.data);
+});
+document.addEventListener("apply-calculated-proposal", (event) => {
+  if (activeResponse) panel.applyRecommendation((event as CustomEvent<PlanRequest>).detail);
 });
 document.addEventListener("focus-calculated-route", () => { void sceneRoutes?.focus(); });
 main().catch((err) => {

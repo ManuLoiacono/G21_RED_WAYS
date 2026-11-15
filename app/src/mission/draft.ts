@@ -76,7 +76,7 @@ export interface PlanRequest {
   destination: { type: "poi"; poi_id: string };
   team: { catalog_version: string; humans: Member[]; robots: Member[] };
   mission: { template_id: string; template_version: string; tasks: { id: string; duration_s: number }[]; time_budget_s: number; reserve_s: number; departure_utc: string };
-  criterion: "fastest";
+  criterion: "fastest" | "comparison";
   options?: { visibility?: boolean; communication?: { base_height_m?: number; receiver_height_m?: number } };
 }
 export interface Reason { code: string; path: string; message: string }
@@ -128,7 +128,21 @@ export interface Alternative {
   return: Leg;
   metrics: Metrics;
   checks: Check[];
+  criteria?: string[];
+  optimization?: { total_positive_ascent_m: number | null; without_confirmed_s: number | null; physical_travel_s: number | null };
+  environment?: PlanResponse["environment"];
   communication?: { status: string; visible_s?: number; occluded_s?: number; unknown_s?: number; max_without_confirmed_s?: number };
+}
+export interface Recommendations {
+  schema_version: "p2-recommendations-1";
+  request_echo: PlanRequest;
+  attempted: number;
+  cap: number;
+  proposals: {
+    id: string; proposed_request: PlanRequest; assessment: Assessment; evidence_status: string;
+    total_payload_kg: number; delta: Record<string, number | null>;
+    team_summary: { id: string; name: string; payload_kg: number }[];
+  }[];
 }
 export interface PlanResponse {
   schema_version: typeof DRAFT_SCHEMA;

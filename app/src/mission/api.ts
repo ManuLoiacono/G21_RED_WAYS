@@ -1,6 +1,6 @@
 import { t } from "../i18n";
-import type { Catalogs, Health, Parcel, PlanRequest, PlanResponse } from "./draft";
-import { isCatalogs, isDraftResponse, isHealth, isParcel, object } from "./validation";
+import type { Catalogs, Health, Parcel, PlanRequest, PlanResponse, Recommendations } from "./draft";
+import { isCatalogs, isDraftResponse, isHealth, isParcel, isRecommendations, object } from "./validation";
 
 export const SERVICE_URL = (import.meta.env.VITE_SERVICE_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
 export interface ServiceMetadata { health: Health; parcel: Parcel; catalogs: Catalogs }
@@ -43,4 +43,7 @@ export async function loadParcel(id: string, version: string): Promise<Result<Pa
 
 export function requestPlan(req: PlanRequest): Promise<Result<PlanResponse>> {
   return read("/plan", isDraftResponse, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req) });
+}
+export function requestRecommendations(req: PlanRequest): Promise<Result<Recommendations>> {
+  return read("/recommendations", isRecommendations, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req) });
 }

@@ -3,6 +3,17 @@
  * Values may contain trusted inline HTML (<strong>) and `{name}` placeholders.
  */
 export const es = {
+  "nx.compare": "Comparar tiempo, ascenso y visibilidad",
+  "nx.recommend": "Evaluar sugerencias de configuración",
+  "nx.bounded": "Se evaluaron {attempted} propuestas (máximo {cap}); búsqueda no exhaustiva. Se conservan tareas, reserva y carga requerida.",
+  "nx.proposedTeam": "Equipo propuesto y asignación explícita de carga",
+  "nx.unproven": "Mejora numérica; viabilidad completa no demostrada",
+  "nx.delta": "Cambio frente a la más rápida solicitada: actividad {time}; ascenso {ascent} m; interrupción máxima {interruption}.",
+  "nx.apply": "Aplicar estos cambios y recalcular",
+  "nx.noSuggestion": "Las propuestas evaluadas no demostraron una mejora.",
+  "nav.criterion.lowest_relative_effort": "Menor ascenso · aproximación geométrica del esfuerzo",
+  "nav.criterion.best_geometric_visibility": "Menor tiempo sin visibilidad geométrica confirmada",
+  "nav.scope.radio_performance": "Rendimiento de radio",
   "nx.visibility": "Visibilidad geométrica estimada",
   "nx.antennaHint": "Supuesto de escenario: antena base a 5 m y receptor del grupo a 2 m del suelo analítico por defecto. Configurables; no es cobertura de radio.",
   "nx.baseHeight": "Altura de antena base (m)",
@@ -421,7 +432,7 @@ export const es = {
   "nav.search": "Estado de búsqueda",
   "nav.elapsed": "Actividad transcurrida",
   "nav.reservedTotal": "Total con reserva",
-  "nav.criterion.fastest": "Menor tiempo · un candidato calculado",
+  "nav.criterion.fastest": "Más rápida",
   "nav.template.geological_observation": "Observación geológica",
   "nav.template.topographic_exploration": "Exploración topográfica",
   "nav.template.reconnaissance": "Reconocimiento",

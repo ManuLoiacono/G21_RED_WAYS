@@ -2,6 +2,17 @@ import type { MessageKey } from "./es";
 
 /** English UI text. Same keys as `es.ts` (the compiler checks that none is missing). */
 export const en: Record<MessageKey, string> = {
+  "nx.compare": "Compare time, ascent and visibility",
+  "nx.recommend": "Evaluate configuration suggestions",
+  "nx.bounded": "Evaluated {attempted} proposals (cap {cap}); search is not exhaustive. Required tasks, reserve and payload are preserved.",
+  "nx.proposedTeam": "Proposed team and explicit payload allocation",
+  "nx.unproven": "Numerical improvement; full viability is unproven",
+  "nx.delta": "Change from requested fastest: activity {time}; ascent {ascent} m; longest interruption {interruption}.",
+  "nx.apply": "Apply these changes and recalculate",
+  "nx.noSuggestion": "No demonstrated improvement in the bounded evaluated proposals.",
+  "nav.criterion.lowest_relative_effort": "Lower ascent · geometric effort proxy",
+  "nav.criterion.best_geometric_visibility": "Less time without confirmed geometric visibility",
+  "nav.scope.radio_performance": "Radio performance",
   "nx.visibility": "Estimated geometric visibility",
   "nx.antennaHint": "Scenario assumption: base antenna 5 m and co-located group receiver 2 m above analytical ground by default. Configurable; not radio coverage.",
   "nx.baseHeight": "Base antenna height (m)",
@@ -418,7 +429,7 @@ export const en: Record<MessageKey, string> = {
   "nav.search": "Search status",
   "nav.elapsed": "Elapsed activity",
   "nav.reservedTotal": "Total including reserve",
-  "nav.criterion.fastest": "Fastest · one calculated candidate",
+  "nav.criterion.fastest": "Fastest",
   "nav.template.geological_observation": "Geological observation",
   "nav.template.topographic_exploration": "Topographic exploration",
   "nav.template.reconnaissance": "Reconnaissance",

@@ -16,7 +16,7 @@ from .validation import PlanningInputError, loads_strict
 
 ADAPTER_VERSION = "p2-http-local-1"
 DEFAULT_ORIGINS = ("http://localhost:5173", "http://127.0.0.1:5173")
-ROUTES = {"/health": "GET", "/parcel": "GET", "/catalogs": "GET", "/plan": "POST"}
+ROUTES = {"/health": "GET", "/parcel": "GET", "/catalogs": "GET", "/plan": "POST", "/recommendations": "POST"}
 # Technical resource bounds, independent of scientific/operational thresholds.
 MAX_BODY_BYTES = 65_536
 MAX_TASKS = 64
@@ -100,7 +100,9 @@ class HTTPApplication:
                 "geographic_conversion": "available" if any(p.geographic_adapter for p in self.registry.parcels) else "unavailable",
                 "default_parcel": dict(zip(("id", "version"), self.default_parcel)),
                 "navigation_capabilities": {"visibility": "gdal-wang-edge-bounds-mars-v1", "base_height_m": 5,
-                                            "receiver_height_m": 2, "communication_is_preference": True},
+                                            "receiver_height_m": 2, "communication_is_preference": True,
+                                            "criteria": ["fastest", "lowest_relative_effort", "best_geometric_visibility"],
+                                            "comparison_request": "criterion=comparison", "recommendation_cap": 3},
                 "registered_parcels": [{"id": p.id, "version": p.version, "fixture": p.grid.fixture}
                                        for p in self.registry.parcels]}
 
@@ -253,6 +255,23 @@ class RequestHandler(BaseHTTPRequestHandler):
         normalized = lengths[0].lstrip("0") or "0"
         maximum = str(MAX_BODY_BYTES)
         if len(normalized) > len(maximum) or (len(normalized) == len(maximum) and normalized > maximum):
+            # A small overflow is commonly already in the socket buffer. On
+            # Windows, closing with unread bytes can reset the connection and
+            # discard the 413 response. Drain at most one bounded body plus a
+            # byte, with a short timeout; never parse or accept the overflow.
+            if len(normalized) <= len(str(MAX_BODY_BYTES + 1)) and int(normalized) <= MAX_BODY_BYTES + 1:
+                self.connection.settimeout(0.05)
+                remaining = int(normalized)
+                try:
+                    while remaining:
+                        chunk = self.rfile.read1(min(8192, remaining))
+                        if not chunk:
+                            break
+                        remaining -= len(chunk)
+                except OSError:
+                    pass
+                finally:
+                    self.connection.settimeout(10)
             raise HTTPProblem(413, "body_size_limit", "body", "Request body exceeds the technical byte limit.")
         length = int(normalized)
         try:
@@ -307,6 +326,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                 payload = app.health()
             elif parts.path == "/catalogs":
                 payload = export_catalogs()
+            elif parts.path == "/recommendations":
+                from .recommendations import recommendations
+                try:
+                    payload = recommendations(app.planner, self._read_payload())
+                except PlannerBusyError as exc:
+                    raise HTTPProblem(409, "planner_busy", "planner", str(exc)) from exc
+                except PlanningInputError as exc:
+                    raise HTTPProblem(422, exc.code, exc.path, str(exc)) from exc
             elif parts.path == "/plan":
                 payload = app.plan(self._read_payload())
             else:

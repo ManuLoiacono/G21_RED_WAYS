@@ -1,6 +1,6 @@
 """One bounded movement context and base search, with fresh mission evaluation."""
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import math
 from threading import Lock
 
@@ -62,6 +62,9 @@ class PlanEvaluation:
     search_reused: bool
     communication: dict | None = None
     visibility: dict | None = None
+    criteria: tuple[str, ...] = ("fastest",)
+    optimization: dict | None = None
+    candidates: tuple = ()
 
 
 class PreparedPlanner:
@@ -78,18 +81,18 @@ class PreparedPlanner:
         self._visibility = self._visibility_key = None
 
     def plan(self, *, parcel_id, parcel_version, scenario_id, scenario_version, origin, destination,
-             team, tasks, time_budget_s, reserve_s, departure_utc, as_of_utc, communication=None, evaluate_visibility=False):
+             team, tasks, time_budget_s, reserve_s, departure_utc, as_of_utc, communication=None, evaluate_visibility=False, criterion="fastest"):
         if not self._lock.acquire(blocking=False):
             raise PlannerBusyError("A calculation is already active on this planner instance.")
         try:
             return self._plan(parcel_id, parcel_version, scenario_id, scenario_version, origin, destination,
                               team, tasks, time_budget_s, reserve_s, departure_utc, as_of_utc,
-                              communication, evaluate_visibility)
+                              communication, evaluate_visibility, criterion)
         finally:
             self._lock.release()
 
     def _plan(self, parcel_id, parcel_version, scenario_id, scenario_version, origin, destination,
-              team, tasks, time_budget_s, reserve_s, departure_utc, as_of_utc, communication=None, evaluate_visibility=False):
+              team, tasks, time_budget_s, reserve_s, departure_utc, as_of_utc, communication=None, evaluate_visibility=False, criterion="fastest"):
         parcel = self.registry.parcel(parcel_id, parcel_version)
         scenario = self.registry.scenario(scenario_id, scenario_version, parcel)
         start = resolve_location(parcel, origin, "origin")
@@ -134,12 +137,49 @@ class PreparedPlanner:
         mission = evaluate_mission(routes, tasks, members, time_budget_s=time_budget_s, reserve_s=reserve_s,
                                    departure=selected.departure, daylight=selected.daylight, snapshot=selected.snapshot)
         comm = visibility = None
-        if evaluate_visibility:
+        if evaluate_visibility or criterion == "comparison":
             from engine.communication import communication_metrics
             layer = self.visibility(parcel, start.cell, communication)
             comm = communication_metrics(routes, layer.states, mission.tasks_s)
             visibility = {"id": layer.id, **layer.metadata}
-        return PlanEvaluation(parcel, start, end, members, context, selected, routes, mission, graph_reused, search_reused, comm, visibility)
+        result = PlanEvaluation(parcel, start, end, members, context, selected, routes, mission, graph_reused, search_reused, comm, visibility)
+        if criterion == "comparison":
+            from engine.comparison import METHOD, search_criterion
+            from engine.communication import communication_metrics
+            candidates = [result]
+            for name in ("lowest_relative_effort", "best_geometric_visibility"):
+                extra_search = search_criterion(self._graph, start.cell, name, layer.states)
+                extra_routes = routes_to(extra_search, end.cell)
+                del extra_search  # Only the fastest source arrays stay cached.
+                own_selected = selected
+                if location is not None and scenario.clock.adapter_id == ADAPTER:
+                    durations = (extra_routes.outbound.duration_s, extra_routes.return_leg.duration_s)
+                    own_end = iso(selected.departure.offset_s + math.fsum((*durations, *(t.duration_s for t in tasks), reserve_s))) if all(d is not None for d in durations) else None
+                    own_selected = select_scenario(scenario, as_of_utc, departure_utc, evaluation_location=location, mission_end_utc=own_end)
+                own_mission = evaluate_mission(extra_routes, tasks, members, time_budget_s=time_budget_s, reserve_s=reserve_s,
+                    departure=own_selected.departure, daylight=own_selected.daylight, snapshot=own_selected.snapshot)
+                own_comm = communication_metrics(extra_routes, layer.states, own_mission.tasks_s)
+                candidate = replace(result, routes=extra_routes, mission=own_mission, selected_scenario=own_selected,
+                                    communication=own_comm, criteria=(name,))
+                match = next((i for i, old in enumerate(candidates)
+                              if (old.routes.outbound.cells, old.routes.return_leg.cells) ==
+                                 (extra_routes.outbound.cells, extra_routes.return_leg.cells)), None)
+                if match is None:
+                    candidates.append(candidate)
+                else:
+                    candidates[match] = replace(candidates[match], criteria=(*candidates[match].criteria, name))
+            annotated = []
+            for candidate in candidates:
+                legs = (candidate.routes.outbound, candidate.routes.return_leg)
+                optimization = {"method": METHOD, "criteria": candidate.criteria,
+                    "total_positive_ascent_m": math.fsum(leg.ascent_m for leg in legs) if all(leg.ascent_m is not None for leg in legs) else None,
+                    "without_confirmed_s": candidate.communication.get("without_confirmed_s"),
+                    "physical_travel_s": math.fsum(leg.duration_s for leg in legs) if all(leg.duration_s is not None for leg in legs) else None,
+                    "units": {"lowest_relative_effort": "positive_ascent_m", "best_geometric_visibility": "without_confirmed_s", "fastest": "physical_travel_s"},
+                    "scope": "independent unconstrained criterion optima; each complete sortie evaluated afterward"}
+                annotated.append(replace(candidate, optimization=optimization))
+            result = replace(annotated[0], candidates=tuple(annotated))
+        return result
 
     def visibility(self, parcel, base, communication=None):
         """Called under the planner lock; retain one bounded base/terrain/height layer."""

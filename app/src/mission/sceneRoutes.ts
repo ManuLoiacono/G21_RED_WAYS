@@ -18,7 +18,7 @@ export function createSceneRoutes(viewer: Cesium.Viewer) {
       outlineColor: Cesium.Color.BLACK, outlineWidth: 3, style: Cesium.LabelStyle.FILL_AND_OUTLINE,
       pixelOffset: new Cesium.Cartesian2(0, offset), disableDepthTestDistance: Number.POSITIVE_INFINITY };
   }
-  async function show(r: PlanResponse, parcel: Parcel | null) {
+  async function show(r: PlanResponse, parcel: Parcel | null, selectedId?: string | null) {
     clear();
     if (!r.geographic_adapter) return;
     const a = parcel?.geographic_adapter;
@@ -28,7 +28,7 @@ export function createSceneRoutes(viewer: Cesium.Viewer) {
         a.horizontal_shift_m.east !== r.geographic_adapter.horizontal_shift_m.east || a.horizontal_shift_m.north !== r.geographic_adapter.horizontal_shift_m.north) {
       throw new Error("Calculated route does not match the active registered parcel/adapter.");
     }
-    const candidate = r.alternatives[0];
+    const candidate = r.alternatives.find((alt) => alt.id === selectedId) ?? r.alternatives[0];
     if (!candidate) return;
     const current = generation;
     response = r;
@@ -41,7 +41,7 @@ export function createSceneRoutes(viewer: Cesium.Viewer) {
       if (leg.status !== "found" || leg.xy_m.length === 0) continue;
       const color = Cesium.Color.fromCssColorString(name === "outbound" ? "#3ff0ff" : "#ffb347");
       const entity = source.entities.add({ id: `route:${r.request_echo.request_id}:${name}`, name: t(`nav.${name}`),
-        properties: { request_id: r.request_echo.request_id, leg: name, cells: leg.cells, xy_m: leg.xy_m },
+        properties: { request_id: r.request_echo.request_id, alternative_id: candidate.id, leg: name, cells: leg.cells, xy_m: leg.xy_m },
         ...(leg.xy_m.length === 1 ? {
           position: position(leg.xy_m[0], r.locations.origin.effective_elevation_m + a.vertical_offset_m),
           point: { pixelSize: name === "outbound" ? 24 : 14, color: color.withAlpha(.35), outlineColor: color, outlineWidth: 2,

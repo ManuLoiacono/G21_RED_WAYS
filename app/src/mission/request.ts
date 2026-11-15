@@ -40,3 +40,16 @@ export function calculationKey({ request_id: _id, revision: _revision, ...inputs
     value !== null && typeof value === "object" ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => [k, canonical(v)])) : value;
   return JSON.stringify(canonical(inputs));
 }
+
+/** Counterfactual application preserves every required mission input and kilogram. */
+export function canApplyProposal(current: PlanRequest, proposal: PlanRequest): boolean {
+  if (!proposal?.team || !proposal.mission || !proposal.scenario || !Array.isArray(proposal.team.humans) || !Array.isArray(proposal.team.robots)) return false;
+  const fixed = structuredClone(proposal);
+  fixed.team = structuredClone(current.team);
+  fixed.mission.departure_utc = current.mission.departure_utc;
+  fixed.criterion = current.criterion;
+  fixed.options = current.options;
+  if (calculationKey(fixed) !== calculationKey(current) || Date.parse(proposal.mission.departure_utc) < Date.parse(current.scenario.as_of_utc)) return false;
+  const payload = (r: PlanRequest) => [...r.team.humans, ...r.team.robots].reduce((sum, m) => sum + m.payload_kg, 0);
+  return Number.isFinite(Date.parse(proposal.mission.departure_utc)) && Math.abs(payload(current) - payload(proposal)) <= 1e-9;
+}

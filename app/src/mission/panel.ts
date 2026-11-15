@@ -3,7 +3,7 @@ import { esc } from "../ui/format";
 import { infoButton } from "../provenance/sources";
 import { loadMetadata, loadParcel, requestPlan, type ServiceMetadata } from "./api";
 import type { CatalogEntry, Member, Parameters, Parcel, PlanRequest, PlanResponse } from "./draft";
-import { baselineRequest, RequestGate } from "./request";
+import { baselineRequest, RequestGate, canApplyProposal } from "./request";
 import { KG_TO_LB, TEAM_FIXTURE } from "./teamFixture";
 import { fromHhMm, toHhMm } from "./time";
 import { familyIcon, ICONS, memberIcon } from "./icons";
@@ -17,6 +17,8 @@ import { familyIcon, ICONS, memberIcon } from "./icons";
  */
 export interface PlanResponseEvent { response: PlanResponse }
 export interface MissionPanel {
+  compare(): void;
+  applyRecommendation(proposal: PlanRequest): void;
   selectDestination(id: string): string | null;
   onChange(cb: (request: Readonly<PlanRequest>) => void): void;
   onStale(cb: () => void): void;
@@ -676,6 +678,21 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   root.addEventListener("click", onClick);
 
   const api: MissionPanel = {
+    compare() {
+      if (!state || busy) return;
+      edited(); state.criterion = "comparison"; step = 4; maxVisited = 4;
+      void calculate();
+    },
+    applyRecommendation(proposal) {
+      if (!state || busy || !canApplyProposal(state, proposal)) return;
+      if (![...proposal.team.humans, ...proposal.team.robots].every((m) => metadata?.catalogs.catalog.entries.some((e) => e.identity.profile_id === m.profile_id))) return;
+      // The service evaluates a proposal; only declared team/departure changes
+      // are applied. Other mission requirements remain the user's current input.
+      edited(); state.team = structuredClone(proposal.team);
+      state.mission.departure_utc = proposal.mission.departure_utc;
+      invalid.clear(); step = 4; maxVisited = 4; open = true;
+      void calculate();
+    },
     selectDestination(id) {
       if (!state || !metadata?.parcel.pois.some((p) => p.id === id)) return t("nav.locations");
       edited(); state.destination.poi_id = id; render(); return null;
