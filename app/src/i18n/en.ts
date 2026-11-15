@@ -39,6 +39,7 @@ export const en: Record<MessageKey, string> = {
   // Layers panel
   "layers.title": "Layers",
   "layers.hide": "Hide layers",
+  "layers.show": "Show layers",
   "layers.toggle": "Show or hide: {layer}",
   "layers.source": "Source of {layer}",
   "layers.locked": "Base",

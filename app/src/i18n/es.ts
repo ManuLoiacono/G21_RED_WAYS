@@ -40,6 +40,7 @@ export const es = {
   // Layers panel
   "layers.title": "Capas",
   "layers.hide": "Ocultar capas",
+  "layers.show": "Mostrar capas",
   "layers.toggle": "Mostrar u ocultar: {layer}",
   "layers.source": "Fuente de {layer}",
   "layers.locked": "Base",

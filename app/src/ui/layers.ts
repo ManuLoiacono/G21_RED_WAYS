@@ -85,6 +85,15 @@ export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): Layers
   }
 
   function render() {
+    root.classList.toggle("ly-collapsed", !open);
+    if (!open) {
+      // Collapsed: a compact "Layers" pill stays in place and reopens the panel.
+      root.innerHTML = `<button type="button" class="ly-reopen" data-act="open" aria-expanded="false"
+          aria-label="${esc(t("layers.show"))}" title="${esc(t("layers.show"))}">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+          <span>${esc(t("layers.title"))}</span><span class="ly-reopen-arrow" aria-hidden="true">›</span></button>`;
+      return;
+    }
     root.innerHTML = `
       <div class="ly-head">
         <h2>${esc(t("layers.title"))}</h2>
@@ -97,6 +106,12 @@ export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): Layers
     const target = e.target as HTMLElement;
     if (target.closest('[data-act="close"]')) {
       api.setOpen(false);
+      root.querySelector<HTMLButtonElement>(".ly-reopen")?.focus();
+      return;
+    }
+    if (target.closest('[data-act="open"]')) {
+      api.setOpen(true);
+      root.querySelector<HTMLButtonElement>('[data-act="close"]')?.focus();
       return;
     }
     const act = target.closest<HTMLButtonElement>(".ly-action");
@@ -118,7 +133,7 @@ export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): Layers
     setOpen(value) {
       if (open === value) return;
       open = value;
-      root.hidden = !open;
+      render();
       toggleListeners.forEach((cb) => cb(open));
     },
     isOpen: () => open,
@@ -128,7 +143,6 @@ export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): Layers
     },
   };
 
-  root.hidden = !open;
   render();
   onLanguageChange(render);
   return api;
