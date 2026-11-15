@@ -81,8 +81,6 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
   const tag = (kind: "assumed" | "derived" | "fictional") => `<span class="wz-tag" data-kind="${kind}">${esc(t(`wizard.tag.${kind}`))}</span>`;
   const paramText = (key: keyof Parameters, value: number) => key === "max_sortie_s" ? toHhMm(value) : num(value);
   const paramUnit = (key: keyof Parameters) => ({ flat_speed_m_s: "m/s", max_ascent_deg: "°", max_descent_deg: "°", carrying_limit_kg: "kg", max_sortie_s: "" })[key];
-  const activeScenario = (s: PlanRequest) => metadata?.parcel.scenarios.find((v) => v.id === s.scenario.id && v.version === s.scenario.version);
-  const clockNote = (s: PlanRequest) => t(activeScenario(s)?.fixture === false ? "env.clock" : "nav.clock");
 
   function distanceM(s: PlanRequest): number | null {
     const a = metadata?.parcel.pois.find((p) => p.id === s.origin.poi_id);
@@ -181,7 +179,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
         </div>
         ${showHonesty ? `<div class="wz-honesty-full">
           <p>${esc(t(metadata!.parcel.geographic_adapter ? "nav.realTerrain" : "nav.synthetic"))}</p>
-          <p>${esc(t("nav.unsupported"))}</p><p>${esc(clockNote(s))}</p><p>${esc(t("nav.locations"))}</p>
+          <p>${esc(t("nav.unsupported"))}</p><p>${esc(t("nav.clock"))}</p><p>${esc(t("nav.locations"))}</p>
           <p>${esc(t("wizard.team.fictionalNote"))} ${infoButton("navigation_draft", t("nav.provenance"))}</p></div>` : ""}
       </footer>
       ${peekMap ? `<button type="button" class="wz-peek-back" data-act="peek">${esc(t("wizard.mapBack"))}</button>` : ""}`;
@@ -339,24 +337,19 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
 
   function scheduleStep(s: PlanRequest) {
     const d = metadata!.parcel.planning_defaults;
-    const coverage = activeScenario(s)?.coverage;
-    const range = coverage ? `min="${esc(coverage.from_utc.replace("Z", ""))}" max="${esc(new Date(Date.parse(coverage.to_utc)-1).toISOString().replace("Z", ""))}"` : "";
     return `
       <label>${esc(t("nav.departureUtc"))} <small>${esc(t("wizard.schedule.utc"))}</small>
-        <input name="departure" type="datetime-local" step="1" ${range} value="${s.mission.departure_utc.replace("Z", "")}" /></label>
+        <input name="departure" type="datetime-local" step="1" value="${s.mission.departure_utc.replace("Z", "")}" /></label>
       <div class="wz-grid2">
         <label>${esc(t("wizard.schedule.reserve"))}<input name="reserve" type="text" inputmode="numeric" placeholder="hh:mm" value="${toHhMm(s.mission.reserve_s)}" /></label>
         <label>${esc(t("wizard.schedule.budget"))}<input name="budget" type="text" inputmode="numeric" placeholder="hh:mm" value="${toHhMm(s.mission.time_budget_s)}" /></label>
       </div>
       <p class="wz-derived" data-derived="available">${availableLine(s)}</p>
-      <p class="mp-hint">${esc(clockNote(s))}</p>
-      <p class="mp-hint" data-derived="decision-cutoff">${esc(t("env.asOf", { date: s.scenario.as_of_utc }))}</p>
-      ${coverage ? `<p class="mp-hint">${esc(t("env.coverage", { start: coverage.from_utc, end: coverage.to_utc }))}</p>` : ""}
       <details data-adv="schedule" class="wz-adv"><summary>${esc(t("wizard.advanced"))}${advancedModifiedBadge(s.scenario.id !== d.scenario.id || s.scenario.as_of_utc !== d.scenario.as_of_utc)}</summary>
         <label>${esc(t("nav.scenario"))}<select name="scenario">
           ${metadata!.parcel.scenarios.map(({ id }) => `<option value="${id}" ${s.scenario.id === id ? "selected" : ""}>${esc(tOr(`nav.scenario.${id}`, id))}</option>`).join("")}
         </select></label>
-        <label>${esc(t("nav.asOfUtc"))}<input name="as-of" type="datetime-local" step="1" ${range} value="${s.scenario.as_of_utc.replace("Z", "")}" /></label>
+        <label>${esc(t("nav.asOfUtc"))}<input name="as-of" type="datetime-local" step="1" value="${s.scenario.as_of_utc.replace("Z", "")}" /></label>
       </details>`;
   }
   function availableLine(s: PlanRequest) {
@@ -391,8 +384,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
         <ul>${s.mission.tasks.map((task) => `<li><span>${esc(taskName(task.id))}</span><span>${toHhMm(task.duration_s)}</span></li>`).join("")}</ul>
         <p>${esc(t("wizard.tasks.total", { t: toHhMm(tasks) }))}</p></button>
       <button type="button" class="wz-sum" data-goto="3"><h3>${ICONS.clock}${esc(t("wizard.step.schedule"))}</h3>
-        <p>${esc(t("wizard.summary.departure", { t: s.mission.departure_utc.replace("T", " ").replace(/Z$/, "") }))}</p>
-        <p>${esc(t("env.asOf", { date: s.scenario.as_of_utc }))}</p></button>
+        <p>${esc(t("wizard.summary.departure", { t: s.mission.departure_utc.replace("T", " ").replace(/:\d\dZ$/, "") }))}</p></button>
       <div class="wz-sum wz-time"><h3>${ICONS.clock}${esc(t("wizard.summary.time"))} ${tag("derived")}</h3>
         ${timeBar(s)}
         <p class="mp-hint">${esc(t("wizard.summary.noTravel"))}</p>
@@ -412,7 +404,6 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     const set = (key: string, html: string) => { const el = wizard.querySelector(`[data-derived="${key}"]`); if (el) el.innerHTML = html; };
     set("tasks-total", `${esc(t("wizard.tasks.total", { t: toHhMm(tasksTotal(state)) }))} ${tag("derived")}`);
     set("available", availableLine(state));
-    set("decision-cutoff", esc(t("env.asOf", { date: state.scenario.as_of_utc })));
     const live = wizard.querySelector(".wz-live");
     if (live) live.innerHTML = liveSummary(state);
     const errs = stepErrors(step, state);
@@ -521,7 +512,6 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     if (name === "scenario") {
       state.scenario.id = el.value;
       state.scenario.version = metadata.parcel.scenarios.find((s) => s.id === el.value)!.version;
-      render(); return;
     } else if (name === "departure" || name === "as-of") {
       if (mark(!!el.value && Number.isFinite(Date.parse(el.value + "Z")))) {
         const utc = new Date(el.value + "Z").toISOString().replace(".000Z", "Z");

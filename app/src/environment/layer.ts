@@ -18,8 +18,7 @@ import {
  *
  * The departure date (UTC, from the mission panel) is matched to the REMS report of the same Earth
  * date. It is a HISTORICAL observation of the rover, shown as context: never current weather or a
- * forecast. This panel is explicitly retrospective; selected decision records and derived
- * mission daylight come from the service and are displayed with the calculated result.
+ * forecast. It does not enter the route evaluation yet (the engine's daylight rule is P2's).
  */
 
 /** Cesium Mars heights ≈ rover elev_geoid + 71.2 m (CLAUDE.md); used only to draw the marker. */
@@ -38,7 +37,7 @@ export interface EnvironmentLayer {
   isVisible(): boolean;
   setVisible(on: boolean): void;
   /** Mission departure (ISO UTC); picks the REMS report of that Earth date. */
-  setDeparture(utc: string | null | undefined, asOfUtc?: string): void;
+  setDeparture(utc: string | null | undefined): void;
   /** Card HTML for the Layers panel (escaped). */
   legend(): string;
   /** Called when data arrives or the chosen sol changes (to refresh the Layers panel). */
@@ -49,7 +48,6 @@ export function createEnvironmentLayer(viewer: Cesium.Viewer): EnvironmentLayer 
   let data: EnvironmentData | null = null;
   let failed = false;
   let date: string | null = null;
-  let cutoff: string | null = null;
   let match: DayMatch | null = null;
   let where: Waypoint | null = null;
   const listeners: (() => void)[] = [];
@@ -136,8 +134,6 @@ export function createEnvironmentLayer(viewer: Cesium.Viewer): EnvironmentLayer 
       o.origin === "live" ? t("layers.rems.live") : t("layers.rems.cache", { date: o.fetchedAt.slice(0, 10) });
     return `
       <div class="env-card">
-        <p class="env-warn">${esc(t("env.retrospective"))}</p>
-        ${cutoff ? `<p class="ly-note">${esc(t("env.asOf", { date: cutoff }))}</p>` : ""}
         <div class="env-head">${esc(
           t("layers.rems.sol", { sol: String(d.sol), date: d.date, ls: d.ls === null ? "—" : String(d.ls) }),
         )}</div>
@@ -165,11 +161,10 @@ export function createEnvironmentLayer(viewer: Cesium.Viewer): EnvironmentLayer 
       source.show = on;
       listeners.forEach((cb) => cb());
     },
-    setDeparture(utc, asOfUtc) {
+    setDeparture(utc) {
       const next = utc ? utc.slice(0, 10) : null;
-      if (next === date && cutoff === (asOfUtc ?? null)) return;
+      if (next === date) return;
       date = next;
-      cutoff = asOfUtc ?? null;
       update();
     },
     legend,

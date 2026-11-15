@@ -1,19 +1,16 @@
-/** Duration presentation preserves physical seconds; exact minutes remain hh:mm. */
+/** `hh:mm` presentation of durations. The engine always receives seconds. */
 
-/** Seconds → hh:mm[:ss[.fraction]], with microsecond display precision. */
+/** Seconds → `hh:mm` (hours unbounded, minutes rounded). Display only. */
 export function toHhMm(seconds: number): string {
-  const total = Math.round(Math.max(0, seconds) * 1e6) / 1e6;
-  const h = Math.floor(total / 3600);
-  const m = Math.floor(total / 60) % 60;
-  const remainder = Number((total % 60).toFixed(6));
-  const clock = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-  return remainder === 0 ? clock : `${clock}:${remainder < 10 ? "0" : ""}${remainder}`;
+  const total = Math.max(0, Math.round(seconds / 60));
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-/** hh:mm[:ss[.fraction]] → physical seconds; null for malformed/nonfinite input. */
+/** `hh:mm` (h 0–99, m 0–59) → seconds, or null when the text is not a valid duration. */
 export function fromHhMm(text: string): number | null {
-  const match = /^\s*(\d+):([0-5]\d)(?::([0-5]\d(?:\.\d+)?))?\s*$/.exec(text);
+  const match = /^\s*(\d{1,2}):([0-5]\d)\s*$/.exec(text);
   if (!match) return null;
-  const value = Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3] ?? 0);
-  return Number.isFinite(value) ? value : null;
+  return Number(match[1]) * 3600 + Number(match[2]) * 60;
 }
