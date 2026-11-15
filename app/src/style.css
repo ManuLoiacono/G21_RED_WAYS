@@ -20,7 +20,19 @@
   --ui-radius: 10px;
   --ui-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
   --ui-blur: blur(10px);
+  --ui-scroll-thumb: rgba(255, 255, 255, 0.18);
+  --ui-scroll-thumb-hover: rgba(232, 131, 79, 0.75);
 }
+
+/* Scrollbars: thin, dark and rounded everywhere (replaces the light OS default on Windows). */
+* { scrollbar-width: thin; scrollbar-color: var(--ui-scroll-thumb) transparent; }
+*:hover { scrollbar-color: rgba(255, 255, 255, 0.28) transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ui-scroll-thumb); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--ui-scroll-thumb-hover); background-clip: padding-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
 
 /* Top bar: brand (left), mission context (center), actions (right). */
 #hud {
