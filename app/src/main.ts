@@ -256,13 +256,7 @@ async function main() {
     },
   ]);
   environment.onUpdate(() => layers.refresh());
-  const layersBtn = document.getElementById("toggleLayers") as HTMLButtonElement;
-  layersBtn.onclick = () => layers.setOpen(!layers.isOpen());
-  layersBtn.disabled = false;
-  layers.onToggle((open) => {
-    layersBtn.setAttribute("aria-expanded", String(open));
-    layersBtn.classList.toggle("active", open);
-  });
+  // The Layers panel opens and closes from its own header / collapsed pill (no HUD button).
   document.addEventListener("plan-response", () => {
     layers.refresh();
     layers.setOpen(false);
@@ -360,7 +354,7 @@ function trackHudHeight() {
 
 setUpLanguage();
 trackHudHeight();
-for (const id of ["toggleLayers", "resetView", "settingsBtn"]) {
+for (const id of ["resetView", "settingsBtn"]) {
   (document.getElementById(id) as HTMLButtonElement).disabled = true;
 }
 // Planning works independently of ion/terrain availability.
