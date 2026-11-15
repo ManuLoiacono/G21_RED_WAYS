@@ -2,7 +2,12 @@
 
 Date: 2026-11-15. Branch: `p2/environment-integration`.
 Isolated checkout: `C:/Users/Usuario/Desktop/Nasa Challenge/G21_ENVIRONMENT_INTEGRATION`.
-Base: fetched `origin/main` at `ec00116`; a second fetch still reported that commit.
+Initial base: fetched `origin/main` at `ec00116`. Finalization detected concurrent
+main `4256ea6` (P1's mission wizard, PR #15); it was integrated by a merge commit
+without rewriting published history. The five-step wizard, team cards, map-point
+preview and live summaries are preserved. Its schedule uses advertised replay
+coverage and real clock labels. Optional seconds in `hh:mm[:ss]` retain exact
+physical durations while preserving minute-only defaults.
 All four authorized deliveries are implemented. Main integration requires owner review;
 no automatic merge is performed.
 
@@ -107,6 +112,11 @@ The launcher uses `--strictPort`; it will not silently start a second instance e
 Use the real parcel, explorer_01 plus support_rover, zero loads, reconnaissance,
 600 s task, 1800 s reserve and 21600 s mission budget. Restore defaults between cases.
 All five requests are committed under `service/examples/gale-replay*.request.json`.
+In the new wizard, choose **New mission**, advance through Mission, Team, Tasks and
+Schedule, then calculate on Summary. Schedule's **Advanced** section edits decision
+cutoff/scenario. Duration inputs accept `00:10` for the 600 s task, `00:30` reserve
+and `06:00` budget; `00:10:01` is exactly 601 s. Edit mission returns to the summary
+and its step buttons reopen the relevant controls.
 
 | Case | Decision cutoff / departure UTC | Expected result |
 | --- | --- | --- |
@@ -142,12 +152,13 @@ the original 800 s activity / 2600 s including reserve acceptance case.
 | Analytical preparation | 3 passed after removing the accidental optional Pillow import. |
 | Real deterministic acceptance | All five cases passed; boundary +1 s failed as required; graph/base reuse checked. |
 | Forecast inventory | 41 files, 574 rows imported; finite/ordered quantiles, mapping, nulls, source hashes, malformed/duplicate/unknown/future records and target/spatial gates checked. |
-| Frontend transport/consumer | 12 passed, 0 skipped against the actual service with `SERVICE_TEST_URL` and `P2_TEST_PYTHON`. |
+| Frontend transport/consumer | 13 passed, 0 skipped against the actual service with `SERVICE_TEST_URL` and `P2_TEST_PYTHON`, including wizard duration round trips. |
 | TypeScript and full Cesium production build | Passed; existing large-chunk warning remains. Build used a nonsecret placeholder. |
 | Runtime dependency consistency | `pip check` passed; no ML requirements installed. |
 | Browser, private token | Streamed terrain, actual outbound/return/endpoints, predictions, daylight, ES/EN, task +1, stale edits, incompatible/missing/early cases and stopped-service/restart recovery verified. |
 | Delayed transport in browser | Real engine response held by the existing regression proxy, then task edited/reverted before release: no result resurrected. |
 | Preserved scene | Real Nevado Sajama panorama loaded; orbit drag, reset/focus and THEMIS toggle checked; mission totals unchanged. |
+| Concurrent main integration | Five-step wizard recalculated the same real route; +1 s task, invalidation, ES/EN, editable cutoff, early missing forecasts, late incompatibility and missing daylight were rechecked. TypeScript and the full production build passed after integration. |
 
 One initial HTTP test aborted with Windows WinError 10053, matching the prior handoff's
 intermittent loopback issue. Its isolated rerun and later full suites passed; it is not
@@ -174,6 +185,7 @@ $env:P2_TEST_PYTHON = (Resolve-Path .venv/Scripts/python.exe).Path
 Evidence: [acceptance JSON](../evidence/gale-environment-acceptance.json),
 [benchmark](../evidence/gale-environment-benchmark.json),
 [route and forecasts](../evidence/gale-environment-replay.jpg),
+[integrated wizard](../evidence/gale-environment-wizard.jpg),
 [daylight](../evidence/gale-environment-daylight.jpg),
 [loaded panorama](../evidence/gale-environment-panorama.jpg).
 

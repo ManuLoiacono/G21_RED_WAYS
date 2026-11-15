@@ -297,3 +297,13 @@ test("real replay missing daylight and earlier missing forecasts remain distinct
   assert.match(renderEnvironment(early.environment), /No eligible forecast/);
   assert.equal(early.movement_reuse.base_search, true);
 });
+
+test("wizard duration edits retain exact physical seconds and minute defaults", () => {
+  const { toHhMm, fromHhMm } = require("../src/mission/time.ts");
+  assert.equal(toHhMm(600), "00:10");
+  assert.equal(toHhMm(601), "00:10:01");
+  for (const seconds of [0, 1, 59.5, 60, 601, 1800, 21600, 359999, 360000]) {
+    assert.equal(fromHhMm(toHhMm(seconds)), seconds);
+  }
+  for (const text of ["-1:00", "00:60", "00:01:60", "invalid", "1e300:00"]) assert.equal(fromHhMm(text), null);
+});
