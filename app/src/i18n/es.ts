@@ -638,6 +638,7 @@ export const es = {
   "profile.noRoute": "La ruta calculada no tiene puntos dentro de la grilla de elevación.",
   "rs.smoothed": "trazo suavizado",
   "rs.smoothedHint": "La línea del mapa está suavizada para mostrarla (se aparta hasta ~2 m). La ruta calculada sigue la grilla de 2 m del motor; las métricas no cambian.",
+  "rs.samePath": "· el regreso usa el mismo camino",
 } as const;
 
 export type MessageKey = keyof typeof es;

@@ -354,7 +354,7 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
 
   /** Number input with custom − / + buttons (native spinners hidden). `max` caps typing and the + button. */
   function numField(name: string, value: number, step: number, max?: number) {
-    return `<span class="wz-num">
+    return `<span class="wz-numfield">
       <button type="button" class="wz-step" data-act="step" data-target="${esc(name)}" data-step="${-step}" aria-label="${esc(t("wizard.step.decrease"))}" tabindex="-1">−</button>
       <input name="${esc(name)}" type="number" min="0" ${max === undefined ? "" : `max="${max}"`} step="any" value="${esc(String(value))}" />
       <button type="button" class="wz-step" data-act="step" data-target="${esc(name)}" data-step="${step}" aria-label="${esc(t("wizard.step.increase"))}" tabindex="-1">+</button>

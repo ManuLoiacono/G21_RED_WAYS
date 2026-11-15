@@ -140,6 +140,30 @@ export function createRouteProfile(viewer: Cesium.Viewer, grid: ElevationGrid | 
     cursor.show = false;
   }
 
+  /**
+   * Centre the dock in the free part of the map: between the left results column and the right edge,
+   * at most MAX_WIDTH wide. Narrow screens keep the full-width CSS layout.
+   */
+  const MAX_WIDTH = 860;
+  function place() {
+    if (root.hidden) return;
+    if (window.matchMedia("(max-width: 900px)").matches) { root.style.left = ""; root.style.width = ""; root.style.right = ""; return; }
+    const results = document.getElementById("resultsPanel");
+    const rect = results && !results.hidden ? results.getBoundingClientRect() : null;
+    const from = rect && rect.width > 0 ? rect.right + 16 : 12;
+    const to = window.innerWidth - 12;
+    const width = Math.max(320, Math.min(MAX_WIDTH, to - from));
+    root.style.right = "auto";
+    root.style.width = `${width}px`;
+    root.style.left = `${Math.max(from, from + (to - from - width) / 2)}px`;
+  }
+  window.addEventListener("resize", place);
+  const resultsEl = document.getElementById("resultsPanel");
+  if (resultsEl) {
+    new ResizeObserver(place).observe(resultsEl);
+    new MutationObserver(place).observe(resultsEl, { attributes: true, attributeFilter: ["hidden", "class"] });
+  }
+
   root.addEventListener("click", (e) => {
     if ((e.target as HTMLElement).closest('[data-act="collapse"]')) { collapsed = !collapsed; render(); }
   });
@@ -154,6 +178,7 @@ export function createRouteProfile(viewer: Cesium.Viewer, grid: ElevationGrid | 
       if (response) build(response);
       collapsed = false;
       render();
+      place();
     },
     clear() { response = null; points = []; cursor.show = false; render(); },
   };

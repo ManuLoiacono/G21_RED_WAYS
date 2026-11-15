@@ -874,12 +874,12 @@ button.wz-sum { position: relative; }
 /* Number fields: custom − / + buttons, native spinners hidden. */
 #missionWizard input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
 #missionWizard input[type="number"]::-webkit-inner-spin-button, #missionWizard input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.wz-num { display: flex; align-items: stretch; min-width: 0; }
-.wz-num input { flex: 1; min-width: 0; text-align: center; border-radius: 0 !important; font-variant-numeric: tabular-nums; }
-#missionWizard .wz-num .wz-step { flex: none; width: 30px; padding: 0; display: grid; place-items: center; font-size: 16px; line-height: 1; color: var(--ui-fg); background: rgba(255, 255, 255, .06); border: 1px solid var(--ui-line-strong); cursor: pointer; transition: background .15s, color .15s; }
-#missionWizard .wz-num .wz-step:first-child { border-right: none; border-radius: 8px 0 0 8px; }
-#missionWizard .wz-num .wz-step:last-child { border-left: none; border-radius: 0 8px 8px 0; }
-#missionWizard .wz-num .wz-step:hover { color: #2a0e04; background: var(--wz-mars); }
+.wz-numfield { display: flex; align-items: stretch; min-width: 0; }
+.wz-numfield input { flex: 1; min-width: 0; text-align: center; border-radius: 0 !important; font-variant-numeric: tabular-nums; }
+#missionWizard .wz-numfield .wz-step { flex: none; width: 30px; padding: 0; display: grid; place-items: center; font-size: 16px; line-height: 1; color: var(--ui-fg); background: rgba(255, 255, 255, .06); border: 1px solid var(--ui-line-strong); cursor: pointer; transition: background .15s, color .15s; }
+#missionWizard .wz-numfield .wz-step:first-child { border-right: none; border-radius: 8px 0 0 8px; }
+#missionWizard .wz-numfield .wz-step:last-child { border-left: none; border-radius: 0 8px 8px 0; }
+#missionWizard .wz-numfield .wz-step:hover { color: #2a0e04; background: var(--wz-mars); }
 .wz-overload { min-height: 0; color: var(--ui-warn); font-size: 11.5px; line-height: 1.35; }
 .wz-overload:empty { display: none; }
 .wz-setting-row { grid-template-columns: minmax(0, 1fr) 190px auto; }
@@ -922,5 +922,20 @@ button.wz-sum { position: relative; }
 .wz-limit-note:empty { display: none; }
 
 /* Number steppers take the full field width; the value never collapses. */
-#missionWizard .wz-num { width: 100%; box-sizing: border-box; align-self: stretch; }
-#missionWizard .wz-num input { width: auto; flex: 1 1 auto; min-width: 4ch; }
+#missionWizard .wz-numfield { width: 100%; box-sizing: border-box; align-self: stretch; }
+#missionWizard .wz-numfield input { width: auto; flex: 1 1 auto; min-width: 4ch; }
+
+/* Route profile: compact, centred in the free map area (left/width set by place()). */
+#routeProfile { left: 396px; padding: 7px 12px 5px; gap: 2px; border-radius: 12px; }
+.rp-head { gap: 2px 12px; }
+.rp-head h2 { font-size: 12px; }
+.rp-head .wz-tag { font-size: 8.5px; }
+.rp-legs { font-size: 11px; gap: 2px 12px; }
+.rp-head button { width: 24px; height: 24px; font-size: 14px; }
+.rp-chart { height: 64px; gap: 6px; }
+.rp-y { font-size: 9.5px; min-width: 46px; }
+.rp-x { height: 12px; margin-left: 52px; font-size: 9.5px; }
+.rp-dest-label { font-size: 9.5px; padding: 0 6px; top: -1px; }
+.rp-line { stroke-width: 2; }
+@media (max-width: 900px) { .rp-chart { height: 56px; } }
+#routeProfile { box-sizing: border-box; }

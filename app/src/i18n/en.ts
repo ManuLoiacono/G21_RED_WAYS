@@ -635,4 +635,5 @@ export const en: Record<MessageKey, string> = {
   "profile.noRoute": "The calculated route has no points inside the elevation grid.",
   "rs.smoothed": "smoothed line",
   "rs.smoothedHint": "The map line is smoothed for display (up to ~2 m away). The calculated route follows the engine's 2 m grid; metrics are unchanged.",
+  "rs.samePath": "· the return uses the same path",
 };

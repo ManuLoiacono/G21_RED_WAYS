@@ -3,6 +3,7 @@ import { esc } from "../ui/format";
 import { infoButton } from "../provenance/sources";
 import type { Alternative, Check, PlanResponse } from "./draft";
 import { renderMetricPreview } from "./routes";
+import { sharesPath } from "./flowMaterial";
 
 export const ALT_COLORS = ["#3ff0ff", "#ffb347", "#c792ea", "#7ee787"];
 export const INCOMPATIBLE_COLOR = "#ff6b6b";
@@ -58,7 +59,8 @@ export function createResultsPanel(root: HTMLElement) {
           <span class="rs-badge rs-badge-lg" data-status="${esc(r.status)}">${esc(statusLabel(r.assessment))}</span>
           <small>${esc(t("nav.search"))}: ${esc(label("search", r.search_status))}</small>
         </div>
-        ${geo ? `<p class="rs-legend"><span class="sw sw-out"></span>${esc(t("nav.outbound"))}<span class="sw sw-ret"></span>${esc(t("nav.return"))}
+        ${geo ? `<p class="rs-legend"><span class="sw sw-out"></span>${esc(t("nav.outbound"))}${r.alternatives[0] && sharesPath(r.alternatives[0].outbound, r.alternatives[0].return)
+          ? ` <small class="rs-same">${esc(t("rs.samePath"))}</small>` : `<span class="sw sw-ret"></span>${esc(t("nav.return"))}`}
           <small class="rs-smooth" title="${esc(t("rs.smoothedHint"))}">· ${esc(t("rs.smoothed"))}</small></p>` : ""}
         ${r.alternatives.length === 0 ? `<p>${esc(t("rs.noAlternatives"))}</p>` : ""}
         <ul class="rs-cards">${r.alternatives.map(card).join("")}</ul>

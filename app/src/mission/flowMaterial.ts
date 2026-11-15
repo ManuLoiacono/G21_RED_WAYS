@@ -25,12 +25,13 @@ function register() {
           float across = abs(st.t - 0.5) * 2.0;              // 0 at the centre line, 1 at the edges
           float x = fract(st.s * repeat - t);                // position inside one chevron cell
           float d = x - across * 0.32;                       // bend the stripe into a ">" shape
-          float chevron = smoothstep(0.0, 0.07, d) * (1.0 - smoothstep(0.2, 0.3, d));
-          float edge = 1.0 - smoothstep(0.7, 1.0, across);   // soft borders
-          vec3 base = color.rgb * (0.62 + 0.38 * edge);
-          m.diffuse = mix(base, vec3(1.0), chevron * 0.85);
-          m.emission = m.diffuse * (0.25 + 0.55 * chevron);
-          m.alpha = color.a * mix(0.55, 1.0, edge);
+          float chevron = smoothstep(0.0, 0.06, d) * (1.0 - smoothstep(0.16, 0.24, d)) * (1.0 - smoothstep(0.55, 0.9, across));
+          float edge = 1.0 - smoothstep(0.8, 1.0, across);   // soft borders
+          vec3 base = color.rgb * 0.78;
+          vec3 bright = min(color.rgb * 1.35 + 0.12, vec3(1.0));
+          m.diffuse = mix(base, bright, chevron);
+          m.emission = m.diffuse * (0.15 + 0.35 * chevron);
+          m.alpha = color.a * mix(0.7, 1.0, edge);
           return m;
         }`,
     },
@@ -69,6 +70,13 @@ export function smoothForDisplay(points: Pair[], iterations = 2): Pair[] {
     pts = out;
   }
   return pts;
+}
+
+/** True when the return leg retraces the outbound cells in reverse (same path both ways). */
+export function sharesPath(outbound: { status: string; cells: Pair[] }, ret: { status: string; cells: Pair[] }): boolean {
+  if (outbound.status !== "found" || ret.status !== "found" || outbound.cells.length !== ret.cells.length || !outbound.cells.length) return false;
+  const n = outbound.cells.length;
+  return outbound.cells.every((c, i) => c[0] === ret.cells[n - 1 - i][0] && c[1] === ret.cells[n - 1 - i][1]);
 }
 
 export function lengthOf(points: Pair[]): number {
