@@ -10,6 +10,8 @@ global.location = { search: '?lang=en' };
 global.document = { documentElement: {} };
 const { isDraftResponse, isRecommendations } = require('../src/mission/validation.ts');
 const { RequestGate, canApplyProposal } = require('../src/mission/request.ts');
+const { isReachableArea } = require('../src/mission/validation.ts');
+const { decodeArea, conservativeBlocks } = require('../src/mission/area.ts');
 const service = process.env.SERVICE_TEST_URL;
 const real = () => JSON.parse(fs.readFileSync(require('node:path').join(__dirname, '../../service/examples/gale-comparison.request.json'), 'utf8'));
 async function post(path, request) {
@@ -51,4 +53,26 @@ test('evaluated proposal requires explicit payload-preserving application and a 
   gate.edit(); const second = gate.submit(suggestions.proposals[0].proposed_request);
   assert.notEqual(first.request_id, second.request_id);
   assert.equal(gate.accepts(first, { request_echo: first }, request), false);
+});
+
+test('compact real area validates identity, complete counts and conservative rendering', { skip: !service }, async () => {
+  const request = real();
+  const area = await post('/reachable-area', request);
+  assert.ok(isReachableArea(area));
+  const states = decodeArea(area);
+  assert.equal(states.length, 2140369);
+  const drawn = conservativeBlocks(states, area.grid.shape);
+  assert.ok(drawn.length > 0);
+  const cols = area.grid.shape[1];
+  for (const block of drawn) for (let r = block.row; r < block.row + block.height; r++) for (let c = block.col; c < block.col + block.width; c++) {
+    assert.equal(states[r * cols + c], block.state);
+    assert.ok(block.state === 4 || block.state === 5);
+  }
+  const bad = structuredClone(area); bad.counts['5'] += 1;
+  assert.equal(isReachableArea(bad), false);
+  bad.counts['5'] -= 1; bad.data = bad.data.slice(4);
+  assert.equal(isReachableArea(bad), false);
+  const gate = new RequestGate(); const old = gate.submit(request);
+  gate.edit(); gate.edit();
+  assert.equal(gate.accepts(old, { request_echo: old }, request), false);
 });

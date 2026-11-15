@@ -1,7 +1,7 @@
 import { onLanguageChange, t, tOr, type MessageKey } from "../i18n";
 import { esc } from "../ui/format";
 import { infoButton } from "../provenance/sources";
-import type { Alternative, Check, PlanResponse, Recommendations } from "./draft";
+import type { Alternative, Check, PlanResponse, Recommendations, ReachableArea } from "./draft";
 import { renderMetricPreview } from "./routes";
 
 export const ALT_COLORS = ["#3ff0ff", "#ffb347", "#c792ea", "#7ee787"];
@@ -18,6 +18,9 @@ export function createResultsPanel(root: HTMLElement) {
   let selectedId: string | null = null;
   let suggestions: Recommendations | null = null;
   let suggestionStatus = "";
+  let area: ReachableArea | null = null;
+  let areaVisible = false;
+  let areaStatus = "";
   const listeners: ((id: string) => void)[] = [];
   function render() {
     const opened = new Set(Array.from(root.querySelectorAll<HTMLDetailsElement>("details[open][data-detail]"), (e) => e.dataset.detail));
@@ -38,6 +41,9 @@ export function createResultsPanel(root: HTMLElement) {
         ${r.alternatives.length === 0 ? `<p>${esc(t("rs.noAlternatives"))}</p>` : ""}
         <ul class="rs-cards">${r.alternatives.map(card).join("")}</ul>
         <button type="button" data-act="compare">${esc(t("nx.compare"))}</button>
+        <button type="button" data-act="area" aria-pressed="${areaVisible}">${esc(t(areaVisible ? "nx.hideArea" : "nx.showArea"))}</button>
+        ${areaStatus ? `<p role="status">${esc(areaStatus === "busy" ? t("mp.status.calculating") : areaStatus)}</p>` : ""}
+        ${area ? `<p class="mp-hint" data-area-id="${esc(area.id)}">${esc(t("nx.areaLegend", { feasible: area.counts["5"], timeOnly: area.counts["4"], unknown: area.counts["0"] + area.counts["6"], resolution: area.grid.spacing_m[0].toFixed(3) }))}</p>` : ""}
         <button type="button" data-act="recommend" ${suggestionStatus === "busy" ? "disabled" : ""}>${esc(t("nx.recommend"))}</button>
         ${suggestionStatus ? `<p role="status">${esc(suggestionStatus === "busy" ? t("mp.status.calculating") : suggestionStatus)}</p>` : ""}
         ${suggestions ? `<section><p>${esc(t("nx.bounded", { attempted: suggestions.attempted, cap: suggestions.cap }))}</p>${suggestions.proposals.length ? suggestions.proposals.map((p, index) => `<article class="rs-card"><p>${esc(statusLabel(p.assessment))}${p.assessment !== "viable_model" ? ` · ${esc(t("nx.unproven"))}` : ""}</p><p>${esc(t("nx.proposedTeam"))}: ${p.team_summary.map((m) => `${esc(m.name)} (${m.payload_kg} kg)`).join(" · ")}</p><p>${esc(t("nav.departureUtc"))}: ${esc(p.proposed_request.mission.departure_utc)}</p><p>${esc(t("nx.delta", { time: seconds(p.delta.elapsed_s ?? null), ascent: p.delta.ascent_m ?? t("nav.unavailableValue"), interruption: seconds(p.delta.max_without_confirmed_s ?? null) }))}</p><button type="button" data-proposal="${index}">${esc(t("nx.apply"))}</button></article>`).join("") : `<p>${esc(t("nx.noSuggestion"))}</p>`}</section>` : ""}
@@ -113,6 +119,7 @@ export function createResultsPanel(root: HTMLElement) {
     if (target.closest('[data-act="collapse"]')) { collapsed = !collapsed; render(); }
     if (target.closest('[data-act="focus-route"]')) root.dispatchEvent(new CustomEvent("focus-calculated-route", { bubbles: true }));
     if (target.closest('[data-act="compare"]')) root.dispatchEvent(new CustomEvent("compare-calculated-routes", { bubbles: true }));
+    if (target.closest('[data-act="area"]')) root.dispatchEvent(new CustomEvent("toggle-reachable-area", { bubbles: true }));
     if (target.closest('[data-act="recommend"]')) root.dispatchEvent(new CustomEvent("request-calculated-recommendations", { bubbles: true }));
     const index = target.closest<HTMLButtonElement>("button[data-proposal]")?.dataset.proposal;
     if (index !== undefined && suggestions?.proposals[Number(index)]) root.dispatchEvent(new CustomEvent("apply-calculated-proposal", { bubbles: true, detail: suggestions.proposals[Number(index)].proposed_request }));
@@ -123,10 +130,11 @@ export function createResultsPanel(root: HTMLElement) {
   render();
   return {
     show(r: PlanResponse) {
-      response = r; suggestions = null; suggestionStatus = ""; collapsed = false; selectedId = r.alternatives[0]?.id ?? null; render();
+      response = r; area = null; areaStatus = ""; areaVisible = false; suggestions = null; suggestionStatus = ""; collapsed = false; selectedId = r.alternatives[0]?.id ?? null; render();
       if (selectedId) listeners.forEach((cb) => cb(selectedId!));
     },
-    clear() { response = null; suggestions = null; suggestionStatus = ""; selectedId = null; render(); },
+    clear() { response = null; area = null; areaStatus = ""; areaVisible = false; suggestions = null; suggestionStatus = ""; selectedId = null; render(); },
+    areaState(value: ReachableArea | string, visible: boolean) { areaVisible = visible; if (typeof value === "string") areaStatus = value; else { area = value; areaStatus = ""; } render(); },
     recommendationState(value: Recommendations | string) { if (typeof value === "string") suggestionStatus = value; else { suggestions = value; suggestionStatus = ""; } render(); },
     onSelect(cb: (id: string) => void) { listeners.push(cb); },
   };

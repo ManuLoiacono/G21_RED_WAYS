@@ -105,3 +105,43 @@ rejecting a small overflow, preserving the strict body cap and the 413 response.
 The focused protocol regression and subsequent full suite are the acceptance checks.
 Install `service/requirements.txt` for the navigation runtime; it preserves the
 engine NumPy/SciPy pins and supplies GDAL through rasterio's official wheel.
+
+## C: complete-sortie reachable area
+
+`POST /reachable-area` accepts the same identified draft and returns
+`p2-reachable-area-1`. It explicitly uses the two fastest physical-time base
+searches, regardless of comparison preference. Blocked vector evaluation checks
+outbound + sequential tasks + return + reserve against the mission limit, every
+participant limit, departure daylight and reserved-return daylight at the actual
+base under existing scenario semantics. Communication does not shrink this area.
+No route is reconstructed per cell; the ordinary selected destination is evaluated
+once while establishing the existing validated context. Task/budget changes reuse
+the graph and source arrays. Incomplete searches never produce feasible cells.
+
+The complete analytical grid is retained, with exact center/spacing/row transform,
+parcel/solar/team/mission applicability identity, request echo and counts. Status
+codes distinguish missing coverage (0), inadmissible (1), no directed round trip
+(2), mandatory time/daylight failure (3), movement/time-only with missing daylight
+(4), fully assessed model feasibility (5), and inconclusive search (6).
+Encoding is base64, two unsigned 4-bit codes per byte, first cell in the low nibble,
+row-major, zero unused final nibble. No expanded million-element JSON or truncation.
+The existing 2 MiB response cap remains in force.
+
+The results control explicitly calculates/toggles the area. A separate Cesium
+source has its own layer switch and legend. It checks registration before drawing.
+Only homogeneous 8-cell blocks of status 4 or 5 are drawn, inset one analytical
+cell; original grid texture coordinates handle partial final blocks without
+stretching. This conservative display can omit narrow feasible corridors but cannot
+paint across blocked/unknown cells. Green is modeled full feasibility; amber is
+only movement/time feasibility with essential evidence missing. Other states are
+transparent. Synthetic domains retain counts without pretending to register on Gale.
+Edits, edit/revert, newer plans and cancellation invalidate pending area responses.
+
+Delivery C: 46 engine tests, 94 service tests, 18 live frontend/consumer tests with
+no skips, TypeScript and build passed. Independent cell-by-cell mission checks,
+equality/+1 s, directed no-return, barrier/nodata, monotonicity and compact padding
+checks pass. On the real reference request: all 2140369 cells serialized in
+1430898 bytes; 136696 fully assessed cells, 1643808 inadmissible and 359865 without
+a complete directed sortie. Cached area 0.196 s, warm 0.208 s, task-edit reevaluation
+0.193 s, with graph/base searches reused. Current whole-run high-water RSS is
+776642560 bytes. See performance JSON for individual steps and output sizes.

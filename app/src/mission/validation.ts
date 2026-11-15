@@ -1,4 +1,5 @@
-import { DRAFT_SCHEMA, type Catalogs, type Health, type Parcel, type PlanResponse, type Recommendations } from "./draft";
+import { DRAFT_SCHEMA, type Catalogs, type Health, type Parcel, type PlanResponse, type Recommendations, type ReachableArea } from "./draft";
+import { decodeArea } from "./area";
 
 type Obj = Record<string, unknown>;
 export const object = (x: unknown): x is Obj => typeof x === "object" && x !== null && !Array.isArray(x);
@@ -91,4 +92,18 @@ export function isRecommendations(x: unknown): x is Recommendations {
       str(p.proposed_request.team.catalog_version) && ["humans", "robots"].every((g) => object(p.proposed_request) && object(p.proposed_request.team) &&
         list(p.proposed_request.team[g], (m) => str(m.profile_id) && num(m.payload_kg) && (m.mission_overrides === undefined || object(m.mission_overrides) && Object.values(m.mission_overrides).every(num))))) &&
     Array.isArray(x.proposals) && x.proposals.length <= 3;
+}
+
+export function isReachableArea(x: unknown): x is ReachableArea {
+  if (!object(x) || !finiteJson(x) || x.schema_version !== "p2-reachable-area-1" || x.encoding !== "base64-u4-low-nibble-first-row-major" ||
+      !str(x.id) || !str(x.parcel_content_id) || !object(x.request_echo) || !str(x.request_echo.request_id) || !num(x.request_echo.revision) ||
+      !object(x.grid) || !pair(x.grid.shape) || !pair(x.grid.spacing_m) || !(x.grid.spacing_m as number[]).every((v) => v > 0) || !pair(x.grid.origin_center_xy_m) ||
+      !["increasing_y", "decreasing_y"].includes(x.grid.row_direction as string) || !str(x.data) || !object(x.counts) || !str(x.search_status) || !num(x.evaluated_cells) ||
+      !(x.geographic_adapter === null || isGeographicAdapter(x.geographic_adapter))) return false;
+  try {
+    const states = decodeArea(x as unknown as ReachableArea);
+    const counts = new Array<number>(7).fill(0);
+    for (const state of states) counts[state] += 1;
+    return states.length === x.evaluated_cells && Object.keys(x.counts).length === 7 && counts.every((n, code) => object(x.counts) && x.counts[String(code)] === n);
+  } catch { return false; }
 }

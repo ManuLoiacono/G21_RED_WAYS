@@ -23,9 +23,10 @@ import { createMissionContext, setUpInputModeMenu, setUpSettingsMenu } from "./u
 import type { PlanResponse } from "./mission/draft";
 import { createSceneRoutes } from "./mission/sceneRoutes";
 import { createScenePois } from "./mission/scenePois";
-import { requestRecommendations } from "./mission/api";
+import { requestRecommendations, requestArea } from "./mission/api";
 import { calculationKey } from "./mission/request";
-import type { PlanRequest } from "./mission/draft";
+import type { PlanRequest, ReachableArea } from "./mission/draft";
+import { createSceneArea } from "./mission/sceneArea";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -45,6 +46,10 @@ let sceneRoutes: ReturnType<typeof createSceneRoutes> | null = null;
 let activeResponse: PlanResponse | null = null;
 let activeAlternative: string | null = null;
 let recommendationSequence = 0;
+let sceneArea: ReturnType<typeof createSceneArea> | null = null;
+let activeArea: ReachableArea | null = null;
+let areaSequence = 0;
+let areaWanted = false;
 /** Loading message on screen (re-translated on a language switch); null once loaded. */
 let loadingKey: MessageKey | null = null;
 
@@ -259,8 +264,18 @@ async function main() {
         },
       },
     },
+    {
+      id: "reachable-area", dataClass: "mission", name: "nx.area", origin: "Marswalk",
+      status: () => activeArea?.geographic_adapter ? "loaded" : "pending",
+      visibility: { get: () => sceneArea?.isVisible() ?? false, set: (on) => {
+        areaWanted = on; areaSequence += 1; sceneArea?.setVisible(on);
+        if (activeArea) updateAreaState(activeArea, on);
+      } },
+      legend: () => `<p class="ly-note">${esc(t("nx.areaLayerLegend"))}</p>`,
+    },
   ]);
   environment.onUpdate(() => layers.refresh());
+  document.addEventListener("reachable-area-change", () => layers.refresh());
   const layersBtn = document.getElementById("toggleLayers") as HTMLButtonElement;
   layersBtn.onclick = () => layers.setOpen(!layers.isOpen());
   layersBtn.disabled = false;
@@ -278,6 +293,8 @@ async function main() {
   loadingKey = null;
   hideLoading();
   sceneRoutes = createSceneRoutes(viewer);
+  sceneArea = createSceneArea(viewer);
+  if (activeArea && areaWanted) sceneArea.show(activeArea, panel.getParcel());
   sceneRoutes.setVisible(missionVisible);
   if (activeResponse) void showSceneResponse(activeResponse);
   Object.assign(window, { missionRoutes: sceneRoutes });
@@ -373,9 +390,13 @@ const sources = createSourcesPanel(document.getElementById("sourcesDialog") as H
 document.getElementById("openSources")!.onclick = () => sources.open();
 const panel = createMissionPanel(document.getElementById("missionPanel")!);
 const results = createResultsPanel(document.getElementById("resultsPanel")!);
+function updateAreaState(value: ReachableArea | string, visible: boolean) {
+  results.areaState(value, visible);
+  document.dispatchEvent(new CustomEvent("reachable-area-change"));
+}
 const context = createMissionContext(document.getElementById("hudContext")!);
 panel.onChange((request) => context.update(request));
-panel.onStale(() => { recommendationSequence += 1; activeResponse = null; activeAlternative = null; results.clear(); sceneRoutes?.clear(); });
+panel.onStale(() => { recommendationSequence += 1; areaSequence += 1; areaWanted = false; activeArea = null; sceneArea?.clear(); activeResponse = null; activeAlternative = null; results.clear(); sceneRoutes?.clear(); });
 async function showSceneResponse(response: PlanResponse) {
   try { await sceneRoutes?.show(response, panel.getParcel(), activeAlternative); }
   catch (error) { console.error(error); showToast(t("nav.sceneMismatch")); }
@@ -386,6 +407,23 @@ document.addEventListener("plan-response", (event) => {
 });
 results.onSelect((id) => { activeAlternative = id; if (activeResponse) void showSceneResponse(activeResponse); });
 document.addEventListener("compare-calculated-routes", () => panel.compare());
+document.addEventListener("toggle-reachable-area", async () => {
+  areaWanted = !areaWanted;
+  const sequence = ++areaSequence;
+  if (!areaWanted) { sceneArea?.setVisible(false); updateAreaState("", false); return; }
+  if (activeArea) { sceneArea?.show(activeArea, panel.getParcel()); updateAreaState(activeArea, true); return; }
+  const original = activeResponse;
+  if (!original) { areaWanted = false; return; }
+  updateAreaState("busy", true);
+  const result = await requestArea(original.request_echo);
+  const current = panel.getRequest();
+  if (!areaWanted || sequence !== areaSequence || activeResponse !== original || !current || calculationKey(current) !== calculationKey(original.request_echo)) return;
+  if (!result.ok) { areaWanted = false; updateAreaState(result.error, false); return; }
+  if (calculationKey(result.data.request_echo) !== calculationKey(original.request_echo) || result.data.request_echo.request_id !== original.request_echo.request_id || result.data.request_echo.revision !== original.request_echo.revision) { areaWanted = false; updateAreaState(t("mp.status.discarded"), false); return; }
+  activeArea = result.data;
+  try { sceneArea?.show(activeArea, panel.getParcel()); updateAreaState(activeArea, true); }
+  catch (error) { console.error(error); activeArea = null; areaWanted = false; sceneArea?.clear(); updateAreaState(t("nav.sceneMismatch"), false); }
+});
 document.addEventListener("request-calculated-recommendations", async () => {
   const original = activeResponse;
   if (!original) return;

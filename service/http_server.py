@@ -16,7 +16,7 @@ from .validation import PlanningInputError, loads_strict
 
 ADAPTER_VERSION = "p2-http-local-1"
 DEFAULT_ORIGINS = ("http://localhost:5173", "http://127.0.0.1:5173")
-ROUTES = {"/health": "GET", "/parcel": "GET", "/catalogs": "GET", "/plan": "POST", "/recommendations": "POST"}
+ROUTES = {"/health": "GET", "/parcel": "GET", "/catalogs": "GET", "/plan": "POST", "/recommendations": "POST", "/reachable-area": "POST"}
 # Technical resource bounds, independent of scientific/operational thresholds.
 MAX_BODY_BYTES = 65_536
 MAX_TASKS = 64
@@ -102,7 +102,8 @@ class HTTPApplication:
                 "navigation_capabilities": {"visibility": "gdal-wang-edge-bounds-mars-v1", "base_height_m": 5,
                                             "receiver_height_m": 2, "communication_is_preference": True,
                                             "criteria": ["fastest", "lowest_relative_effort", "best_geometric_visibility"],
-                                            "comparison_request": "criterion=comparison", "recommendation_cap": 3},
+                                            "comparison_request": "criterion=comparison", "recommendation_cap": 3,
+                                            "reachable_area": "p2-reachable-area-1", "area_max_cells": 2250000},
                 "registered_parcels": [{"id": p.id, "version": p.version, "fixture": p.grid.fixture}
                                        for p in self.registry.parcels]}
 
@@ -326,10 +327,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                 payload = app.health()
             elif parts.path == "/catalogs":
                 payload = export_catalogs()
-            elif parts.path == "/recommendations":
-                from .recommendations import recommendations
+            elif parts.path in ("/recommendations", "/reachable-area"):
+                if parts.path == "/recommendations":
+                    from .recommendations import recommendations as extension
+                else:
+                    from .reachability import reachable_area as extension
                 try:
-                    payload = recommendations(app.planner, self._read_payload())
+                    payload = extension(app.planner, self._read_payload())
                 except PlannerBusyError as exc:
                     raise HTTPProblem(409, "planner_busy", "planner", str(exc)) from exc
                 except PlanningInputError as exc:

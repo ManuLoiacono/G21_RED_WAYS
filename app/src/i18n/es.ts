@@ -3,6 +3,11 @@
  * Values may contain trusted inline HTML (<strong>) and `{name}` placeholders.
  */
 export const es = {
+  "nx.area": "Área alcanzable con salida y regreso",
+  "nx.showArea": "Calcular / mostrar área alcanzable",
+  "nx.hideArea": "Ocultar área alcanzable",
+  "nx.areaLegend": "Grilla analítica de {resolution} m: {feasible} celdas evaluadas como viables (verde); {timeOnly} celdas con movimiento/tiempo suficiente pero sin luz diurna confirmada (ámbar); {unknown} celdas sin datos o búsqueda inconclusa. Se muestran bloques homogéneos con margen interior; lo transparente no confirma viabilidad.",
+  "nx.areaLayerLegend": "Verde: viabilidad según el modelo evaluado. Ámbar: solo movimiento/tiempo, falta evidencia requerida. Vista conservadora; no garantiza comunicación. Otros estados transparentes.",
   "nx.compare": "Comparar tiempo, ascenso y visibilidad",
   "nx.recommend": "Evaluar sugerencias de configuración",
   "nx.bounded": "Se evaluaron {attempted} propuestas (máximo {cap}); búsqueda no exhaustiva. Se conservan tareas, reserva y carga requerida.",

@@ -1,14 +1,17 @@
 {
   "method": "real-grid-navigation-benchmark-v1",
   "timing_s": {
-    "startup": 1.1400844000163488,
-    "first_fastest": 1.6153749999939464,
-    "warm_fastest": 0.16820600000210106,
-    "first_visibility": 0.5270256999647245,
-    "warm_visibility": 0.167618399951607,
-    "comparison": 1.7771707000210881,
-    "distinct_comparison": 7.6449758999515325,
-    "recommendations": 11.282210399978794
+    "startup": 0.9468865999951959,
+    "first_fastest": 1.4929473000229336,
+    "warm_fastest": 0.155621699988842,
+    "first_visibility": 0.5184447999927215,
+    "warm_visibility": 0.1579123000265099,
+    "area_cached_search": 0.19644059997517616,
+    "area_warm": 0.20839099999284372,
+    "area_task_edit": 0.19347420003032312,
+    "comparison": 1.4727859999984503,
+    "distinct_comparison": 5.967524599982426,
+    "recommendations": 7.268404900038149
   },
   "serialized_bytes": {
     "startup": null,
@@ -16,12 +19,31 @@
     "warm_fastest": 48465,
     "first_visibility": 49594,
     "warm_visibility": 49594,
+    "area_cached_search": 1430898,
+    "area_warm": 1430898,
+    "area_task_edit": 1430898,
     "comparison": 81662,
     "distinct_comparison": 123464,
     "recommendations": 6725
   },
   "grid_cells": 2140369,
-  "directed_edges": 7591988,
+  "directed_edges": 2834284,
+  "area": {
+    "counts": {
+      "0": 0,
+      "1": 1643808,
+      "2": 359865,
+      "3": 0,
+      "4": 0,
+      "5": 136696,
+      "6": 0
+    },
+    "movement_reuse": {
+      "graph": true,
+      "base_search": true
+    },
+    "encoding": "base64-u4-low-nibble-first-row-major"
+  },
   "visibility_counts": {
     "1": 250473,
     "2": 1889896
@@ -245,6 +267,19 @@
       }
     ]
   },
-  "peak_process_rss_bytes": 774303744,
+  "peak_process_rss_bytes": 776642560,
+  "process_high_water_after_step": {
+    "startup": 145903616,
+    "first_fastest": 348934144,
+    "warm_fastest": 348934144,
+    "first_visibility": 348934144,
+    "warm_visibility": 348934144,
+    "area_cached_search": 348934144,
+    "area_warm": 348934144,
+    "area_task_edit": 348934144,
+    "comparison": 527642624,
+    "distinct_comparison": 776642560,
+    "recommendations": 776642560
+  },
   "memory_scope": "whole-process high-water RSS including native workspaces and allocator retention"
 }

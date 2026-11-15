@@ -2,6 +2,11 @@ import type { MessageKey } from "./es";
 
 /** English UI text. Same keys as `es.ts` (the compiler checks that none is missing). */
 export const en: Record<MessageKey, string> = {
+  "nx.area": "Complete-sortie reachable area",
+  "nx.showArea": "Calculate / show reachable area",
+  "nx.hideArea": "Hide reachable area",
+  "nx.areaLegend": "Analytical grid {resolution} m: {feasible} fully assessed cells (green); {timeOnly} movement/time-only cells with missing daylight (amber); {unknown} missing/inconclusive cells. Display uses conservative homogeneous blocks with an inset; transparent space is not confirmed feasible.",
+  "nx.areaLayerLegend": "Green: fully assessed model feasibility. Amber: movement/time only, required evidence missing. Conservative display; no communication guarantee. Other states are transparent.",
   "nx.compare": "Compare time, ascent and visibility",
   "nx.recommend": "Evaluate configuration suggestions",
   "nx.bounded": "Evaluated {attempted} proposals (cap {cap}); search is not exhaustive. Required tasks, reserve and payload are preserved.",

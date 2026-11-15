@@ -171,3 +171,16 @@ export interface ResolvedLocation {
   adapter_id: string;
   geographic_conversion: "available" | "unavailable";
 }
+export interface ReachableArea {
+  schema_version: "p2-reachable-area-1";
+  request_echo: PlanRequest;
+  id: string;
+  parcel_content_id: string;
+  grid: Parcel["grid"];
+  geographic_adapter: GeographicAdapter | null;
+  encoding: "base64-u4-low-nibble-first-row-major";
+  data: string;
+  counts: Record<string, number>;
+  search_status: string;
+  evaluated_cells: number;
+}
