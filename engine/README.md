@@ -69,6 +69,10 @@ Departure must be within the inclusive daylight interval. `estimated_return_s` a
 
 `no_path_in_domain` on either leg is incompatible within the evaluated model/domain. Unavailable durations/totals/margins remain null, with reasons; geometry is never invented. A known violation can coexist with an inconclusive search, which stays visible in `search_status`. This increment has no named conditional rules and never manufactures `conditional` as a substitute for failure or missing evidence.
 
+## Simulated progress reevaluation (P2-11)
+
+`engine.progress.evaluate_progress(routes, tasks, participants, progress, base_search, *, time_budget_s, reserve_s, departure, daylight, snapshot)` reevaluates a sortie from a simulated position (`SimulatedProgress(phase, vertex_index, tasks_done_s, delay_s)`) on its calculated legs. A delay does not change terrain or movement, so the remaining part of each leg is the leg's own edge evidence. Two options are evaluated with `evaluate_mission` (no new rules, no reset limits): `continue` (calculated sortie + cumulative delay) and `return_now` (travelled prefix + done tasks + delay + the fastest return from the current cell, reconstructed from the complete base search). The recommendation prefers a viable `continue`, otherwise the better-assessed or sooner-ending option. Terrain blockage is not evaluated. Tests: `engine/tests/test_progress.py`.
+
 ## Central templates and reproducible synthetic cases
 
 `MISSION_TEMPLATES` in [templates.py](templates.py) is the authoritative source of the four English IDs: `geological_observation`, `topographic_exploration`, `reconnaissance`, `environmental_measurement`. Frozen defaults contain tasks, a mission budget and reserve; callers may create edited scenarios without changing that source. Every numeric default is an **editable synthetic scenario assumption**, with no scientific task-time claim. `export_mission_templates()` exports fresh versioned, fixture-labeled JSON-compatible definitions for P1 review. Do not copy a second independently maintained set into the UI. To inspect the export:
