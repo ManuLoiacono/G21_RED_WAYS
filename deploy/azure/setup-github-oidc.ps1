@@ -31,14 +31,22 @@ $sp = az ad sp list --filter "appId eq '$appId'" --query "[0].id" -o tsv
 if (-not $sp) { $sp = az ad sp create --id $appId --query id -o tsv }
 if (-not $sp) { Fail "Could not create the service principal." }
 
-$has = az ad app federated-credential list --id $appId --query "[?name=='github-main'].name" -o tsv
-if (-not $has) {
+# GitHub may send the subject with immutable numeric IDs ("repo:owner@123/name@456:...");
+# trust both forms. The IDs come from the GitHub API (needs gh logged in).
+$ownerId = gh api "repos/$Repo" --jq ".owner.id"
+$repoId = gh api "repos/$Repo" --jq ".id"
+$owner, $name = $Repo.Split("/")
+$subjects = @{ "github-main" = "repo:${Repo}:ref:refs/heads/main" }
+if ($ownerId -and $repoId) { $subjects["github-main-ids"] = "repo:${owner}@${ownerId}/${name}@${repoId}:ref:refs/heads/main" }
+foreach ($credName in $subjects.Keys) {
+  $has = az ad app federated-credential list --id $appId --query "[?name=='$credName'].name" -o tsv
+  if ($has) { continue }
   $file = Join-Path $env:TEMP "redways-fic.json"
-  $cred = @{ name = "github-main"; issuer = "https://token.actions.githubusercontent.com";
-             subject = "repo:${Repo}:ref:refs/heads/main"; audiences = @("api://AzureADTokenExchange") }
+  $cred = @{ name = $credName; issuer = "https://token.actions.githubusercontent.com";
+             subject = $subjects[$credName]; audiences = @("api://AzureADTokenExchange") }
   [IO.File]::WriteAllText($file, ($cred | ConvertTo-Json -Compress))
   az ad app federated-credential create --id $appId --parameters "@$file" -o none
-  if ($LASTEXITCODE -ne 0) { Fail "Could not add the federated credential." }
+  if ($LASTEXITCODE -ne 0) { Fail "Could not add the federated credential $credName." }
 }
 
 $scope = az group show -n $ResourceGroup --query id -o tsv

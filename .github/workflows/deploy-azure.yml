@@ -64,13 +64,22 @@ jobs:
             --query properties.configuration.ingress.fqdn -o tsv)
           echo "SERVICE_URL=https://$fqdn" >> "$GITHUB_ENV"
 
-      - name: Wait for service health
+      - name: Wait for the new revision to serve
+        # The previous revision keeps answering /health until the new one is ready, so check
+        # that the latest revision is the ready one (a crashing image never becomes ready).
         run: |
-          for i in $(seq 1 30); do
-            if curl -fsS -m 10 "$SERVICE_URL/health" > /dev/null; then echo "healthy"; exit 0; fi
+          for i in $(seq 1 36); do
+            read -r latest ready <<< "$(az containerapp show --name "$CONTAINER_APP" --resource-group "$RESOURCE_GROUP" \
+              --query "[properties.latestRevisionName, properties.latestReadyRevisionName]" -o tsv | tr '\n' ' ')"
+            if [ -n "$latest" ] && [ "$latest" = "$ready" ] && curl -fsS -m 10 "$SERVICE_URL/health" > /dev/null; then
+              echo "Revision $latest is ready and healthy"; exit 0
+            fi
             sleep 10
           done
-          echo "Service did not become healthy" >&2; exit 1
+          echo "Revision $latest did not become ready (ready: $ready). Container logs:" >&2
+          az containerapp logs show --name "$CONTAINER_APP" --resource-group "$RESOURCE_GROUP" \
+            --revision "$latest" --type console --tail 30 >&2 || true
+          exit 1
 
       - uses: actions/setup-node@v4
         with:
