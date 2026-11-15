@@ -6,6 +6,11 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /srv
 
+# rasterio's bundled GDAL (used by the visibility layer during /plan) needs libexpat,
+# which the slim image does not ship: without it every route calculation fails with HTTP 500.
+RUN apt-get update && apt-get install -y --no-install-recommends libexpat1 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY engine/requirements.txt engine/requirements.txt
 COPY service/requirements.txt service/requirements.txt
 RUN pip install --no-cache-dir -r service/requirements.txt
