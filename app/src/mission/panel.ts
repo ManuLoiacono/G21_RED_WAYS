@@ -236,11 +236,6 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     const poiOptions = (selected: string) => m.parcel.pois.map((p) =>
       `<option value="${esc(p.id)}" ${p.id === selected ? "selected" : ""}>${esc(poiName(p.id))} · ${esc(t("wizard.hypothetical"))}</option>`).join("");
     return `
-      <fieldset class="wz-families"><legend>${esc(t("mp.family"))}</legend>
-        ${m.catalogs.mission_templates.templates.map((v) => `<button type="button" class="wz-family" data-family="${esc(v.id)}" aria-pressed="${v.id === s.mission.template_id}">
-          <span class="wz-family-icon">${familyIcon(v.id)}</span><span class="wz-family-text"><strong>${esc(templateLabel(v.id))}</strong><small>${esc(tOr(`wizard.family.${v.id}`, ""))}</small></span>
-          <span class="wz-check">${ICONS.check}</span></button>`).join("")}
-      </fieldset>
       <div class="wz-grid2">
         <label>${esc(t("mp.departFrom"))}<select name="origin">${poiOptions(s.origin.poi_id)}</select></label>
         <label>${esc(t("mp.destination"))}<select name="destination">${poiOptions(s.destination.poi_id)}</select></label>
@@ -248,6 +243,11 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
       <p class="wz-derived" data-derived="distance">${d === null ? "" : `${esc(t("wizard.mission.distance", { m: num(d, 0) }))} ${tag("derived")}`}</p>
       ${s.origin.poi_id === s.destination.poi_id ? `<p class="wz-warn">${esc(t("wizard.mission.sameplace"))}</p>` : ""}
       <button type="button" class="wz-peek-btn" data-act="peek">${esc(t("wizard.mapPeek"))}</button>
+      <fieldset class="wz-families"><legend>${esc(t("mp.family"))}</legend>
+        ${m.catalogs.mission_templates.templates.map((v) => `<button type="button" class="wz-family" data-family="${esc(v.id)}" aria-pressed="${v.id === s.mission.template_id}">
+          <span class="wz-family-icon">${familyIcon(v.id)}</span><span class="wz-family-text"><strong>${esc(templateLabel(v.id))}</strong><small>${esc(tOr(`wizard.family.${v.id}`, ""))}</small></span>
+          <span class="wz-check">${ICONS.check}</span></button>`).join("")}
+      </fieldset>
       <details data-adv="mission" class="wz-adv"><summary>${esc(t("wizard.advanced"))}${advancedModifiedBadge(s.parcel.id !== m.health.default_parcel.id || s.parcel.version !== m.health.default_parcel.version)}</summary>
         <label>${esc(t("nav.parcel"))}<select name="parcel">${m.health.registered_parcels.map((p, i) =>
           `<option value="${i}" ${p.id === s.parcel.id && p.version === s.parcel.version ? "selected" : ""}>${esc(p.id)} · ${esc(p.version)} · ${esc(t(p.fixture ? "nav.syntheticMode" : "nav.galeMode"))}</option>`).join("")}</select></label>
