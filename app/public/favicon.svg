@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- RedWays mark: a red planet with a dashed walking route between two waypoints.
+       Original artwork; contains no NASA or agency insignia. -->
+  <defs>
+    <radialGradient id="planet" cx="38%" cy="34%" r="70%">
+      <stop offset="0" stop-color="#f08a4b"/>
+      <stop offset="0.6" stop-color="#c8452a"/>
+      <stop offset="1" stop-color="#7a2216"/>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="29" fill="url(#planet)"/>
+  <path d="M15 42 C24 30, 33 46, 47 22" fill="none" stroke="#fff4ea" stroke-width="3.5"
+        stroke-linecap="round" stroke-dasharray="1 6.5"/>
+  <circle cx="15" cy="42" r="4.5" fill="#fff4ea"/>
+  <circle cx="47" cy="22" r="4.5" fill="#fff4ea"/>
+</svg>
