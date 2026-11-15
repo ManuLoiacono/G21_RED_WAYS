@@ -134,6 +134,8 @@ class HTTPApplication:
         grid = parcel.grid
         scenarios = [s for s in self.registry.scenarios if (s.parcel_id, s.parcel_version) == (parcel.id, parcel.version)]
         scenario = scenarios[0] if scenarios else None
+        instant = (loads_strict(scenario.metadata_json).get("default_instant_utc", scenario.clock.utc_epoch)
+                   if scenario and scenario.metadata_json else scenario.clock.utc_epoch if scenario else None)
         return {"schema_version": DRAFT_SCHEMA_VERSION, "contract_status": "consumer_review_pending",
                 "id": parcel.id, "version": parcel.version, "content_id": parcel.content_id,
                 "fixture": grid.fixture, "evaluation_location_id": parcel.evaluation_location_id,
@@ -146,8 +148,8 @@ class HTTPApplication:
                                "coverage": {"from_utc": s.clock.valid_from_utc, "to_utc": s.clock.valid_to_utc},
                                "environment": loads_strict(s.metadata_json) if s.metadata_json else None} for s in scenarios],
                 "planning_defaults": {"origin_poi_id": "base", "destination_poi_id": "sample",
-                                      "scenario": {"id": scenario.id, "version": scenario.version, "as_of_utc": scenario.clock.utc_epoch},
-                                      "departure_utc": scenario.clock.utc_epoch} if scenario else None,
+                                      "scenario": {"id": scenario.id, "version": scenario.version, "as_of_utc": instant},
+                                      "departure_utc": instant} if scenario else None,
                 "grid": {"shape": grid.shape, "spacing_m": grid.spacing_m,
                          "origin_center_xy_m": grid.origin_center_xy_m, "row_direction": grid.row_direction,
                          "data_version": grid.data_version, "aggregation_policy": grid.aggregation_policy},

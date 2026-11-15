@@ -1,6 +1,7 @@
 """One bounded movement context and base search, with fresh mission evaluation."""
 
 from dataclasses import asdict, dataclass
+import math
 from threading import Lock
 
 import scipy
@@ -90,7 +91,11 @@ class PreparedPlanner:
         start = resolve_location(parcel, origin, "origin")
         end = resolve_location(parcel, destination, "destination")
         members = tuple(sorted(resolve_team(CATALOG, team), key=lambda member: member.identity.profile_id))
-        selected = select_scenario(scenario, as_of_utc, departure_utc)
+        location = None
+        if parcel.geographic_adapter:
+            lon, lat = (math.degrees(v / parcel.geographic_adapter["radius_m"]) for v in start.effective_xy_m)
+            location = (lon, lat, f"analytical-origin:{identity(start.effective_xy_m)}")
+        selected = select_scenario(scenario, as_of_utc, departure_utc, evaluation_location=location)
         context = movement_context(parcel, members)
         graph_reused = self._context == context and self._graph is not None
         if not graph_reused:

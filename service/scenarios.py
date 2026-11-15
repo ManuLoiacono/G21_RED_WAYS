@@ -1,6 +1,6 @@
 """As-of record selection, separate from verification data and movement effects."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from engine import DaylightWindow, Departure, SnapshotReference
 from .prepared import FixtureClockMapping, PreparedRecord, PreparedScenario
@@ -34,7 +34,16 @@ class SelectedScenario:
     selection_rule: str = "Latest eligible issue time, then effective availability, then revision within each source/kind/series; no outcome scoring."
 
 
-def select_scenario(scenario: PreparedScenario, as_of_utc: str, departure_utc: str) -> SelectedScenario:
+def select_scenario(scenario: PreparedScenario, as_of_utc: str, departure_utc: str, *, evaluation_location=None) -> SelectedScenario:
+    from .solar import ADAPTER, METHOD
+    real = scenario.clock.adapter_id == ADAPTER
+    if real:
+        from .real_environment import solar_record
+        if evaluation_location is None:
+            raise PlanningInputError("missing_solar_location", "environment.location", "Real solar evidence requires actual analytical evaluation coordinates.")
+        derived = solar_record(scenario, departure_utc, evaluation_location)
+        scenario = replace(scenario, evaluation_location_id=evaluation_location[2],
+                           records=(*scenario.records, *((derived,) if derived else ())))
     cutoff = utc(as_of_utc, "scenario.as_of_utc")
     # Require explicit fixture mapping coverage for both the decision and departure.
     scenario.clock.departure(as_of_utc, path="scenario.as_of_utc")
@@ -43,7 +52,8 @@ def select_scenario(scenario: PreparedScenario, as_of_utc: str, departure_utc: s
     departure = scenario.clock.departure(departure_utc)
     cutoff_text = cutoff.isoformat().replace("+00:00", "Z")
     eligible, exclusions = {}, []
-    assumptions = [scenario.clock.assumption, "Synthetic record values/times do not claim archival NASA availability."]
+    assumptions = [scenario.clock.assumption]
+    assumptions.append("Derived geometric daylight uses a spherical horizontal horizon, solar center at 0 degrees; no refraction, terrain shadow or scene registration." if real else "Synthetic record values/times do not claim archival NASA availability.")
     for record in scenario.records:
         if record.kind == "verification":
             exclusions.append(RecordExclusion(record.record_id, "verification_only"))
@@ -90,12 +100,13 @@ def select_scenario(scenario: PreparedScenario, as_of_utc: str, departure_utc: s
         if record.epoch_id != scenario.clock.timeline.epoch_id or record.source_location_id != scenario.evaluation_location_id:
             raise PlanningInputError("daylight_context_mismatch", "scenario.records", "Selected solar evidence has the wrong epoch or location.")
         daylight = DaylightWindow(scenario.clock.timeline, *record.value, scenario.evaluation_location_id,
-                                  "Prepared synthetic physical-second window; no inferred solar conversion.", record.record_id, record.evidence_kind)
+                                  METHOD if real else "Prepared synthetic physical-second window; no inferred solar conversion.", record.record_id, record.evidence_kind)
     assumptions.extend(item.record.availability_assumption for item in records if item.availability_basis == "reconstructed_assumption")
     if any(item.availability_basis == "reconstructed_assumption" for item in records):
         assumptions.append("Retrospective reconstruction, not an exact reproduction of operational knowledge.")
     snapshot_id = identity({"package": scenario.content_id, "cutoff": cutoff_text,
-                            "selected": [item.record.record_id for item in records], "policy": scenario.availability_policy})
+                            "selected": [item.record.record_id for item in records], "policy": scenario.availability_policy,
+                            "departure": departure_utc, "evaluation_location": scenario.evaluation_location_id})
     available_at = max((item.effective_available_at_utc for item in records), key=lambda value: utc(value, "record.time"), default=cutoff_text)
     snapshot = SnapshotReference(scenario.id, scenario.version, snapshot_id, cutoff_text, available_at,
                                  f"{scenario.availability_policy}; exact eligible records only; empty selection attested at cutoff.",

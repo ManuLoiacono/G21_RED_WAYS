@@ -72,4 +72,6 @@ def gale_registry(path, environment_path=None):
                        evaluation_location_id=parcel.evaluation_location_id, records=(),
                        metadata_json=canonical(source_metadata(environment)),
                        content_id=identity({"parcel": parcel.content_id, "scenario": "gale-development-missing-daylight-v1", "clock": old.content_id}))
-    return PreparedRegistry((*fixtures.parcels, parcel), (*fixtures.scenarios, scenario))
+    from .real_environment import replay_scenarios
+    replay = replay_scenarios(parcel, environment)
+    return PreparedRegistry((*fixtures.parcels, parcel), (*fixtures.scenarios, *replay, scenario))

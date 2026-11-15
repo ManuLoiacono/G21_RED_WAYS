@@ -35,3 +35,38 @@ Reconstruction assumes release after all included input intervals complete, with
 zero processing/publication lag. This is an explicit retrospective assumption,
 not an archival publication timestamp. Modern revised source values cannot establish
 exact 2025 operational knowledge. Weather and RAD remain context only.
+
+## Solar and physical time
+
+`mars24-utc-msl-lmst-v1` uses physical elapsed seconds from
+`2025-10-25T00:00:00Z`, TT-UTC = 69.184 s for the supported historical window,
+and the [NASA Mars24 algorithm](https://www.giss.nasa.gov/tools/mars24/help/algorithm.html)
+(updated 2025-01-07). A mean sol is 88775.24414688 physical seconds, so an LMST
+minute is about 61.6495 physical seconds. MSL sol numbering follows the existing
+dataset convention: floor(MSD + east longitude / 360) - 49269.
+
+Source sol labels are not Earth midnight intervals. The replay is the full physical
+source-sol interval 4699 through 4739: 2025-10-24 18:11:08.102760Z inclusive through
+2025-12-05 21:14:13.112782Z exclusive. Metadata advertises these exact bounds.
+The departure's local sol determines the daylight interval. Solar geometry is
+recomputed at the resolved analytical origin cell, using unshifted longitude/latitude.
+No Cesium registration or second latitude conversion is applied. The model is a
+spherical horizontal horizon with solar center altitude zero, without refraction,
+solar radius, elevation dip or terrain shadow. This is derived geometric daylight,
+not an observation at the hypothetical base. Outside a normal nonpolar crossing,
+the adapter fails explicitly rather than fabricating a window.
+
+REMS rounded sunrise/sunset strings are independent reference checks at their
+forward-filled rover location and source sol. Three separated sols (4699, 4719,
+4739) agree within two local clock minutes in regression checks; these rounded
+source reports are not copied as base sunlight. Geometric roots are solved in
+physical seconds with microsecond-normalized output. Engine equality tolerance
+remains 1 microsecond; a 1 millisecond reserved-return overrun fails.
+
+The inspected `marstime 0.5.3` package uses TT-UTC=67.184 s in 2025 (stale leap
+table), older MSD constants and older orbital coefficients. Runtime uses the
+documented NASA update without a marstime dependency. For original RAD daily
+aggregates, `source_interval` envelopes both the corrected partition and legacy
+marstime partition (fixed 137.42 east). Its later completion is preserved as an
+input gate; no existing aggregate is silently relabeled or released two seconds early.
+The discrepancy is documented rather than treated as an exact NASA publication lag.
