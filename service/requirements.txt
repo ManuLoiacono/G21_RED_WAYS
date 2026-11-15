@@ -1,0 +1,3 @@
+# Navigation runtime. Keep the engine pins; GDAL is supplied by rasterio's wheel.
+-r ../engine/requirements.txt
+rasterio==1.4.4

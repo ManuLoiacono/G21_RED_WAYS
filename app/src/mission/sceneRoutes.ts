@@ -21,7 +21,7 @@ export function createSceneRoutes(viewer: Cesium.Viewer) {
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
       pixelOffset: new Cesium.Cartesian2(0, offset), disableDepthTestDistance: Number.POSITIVE_INFINITY };
   }
-  async function show(r: PlanResponse, parcel: Parcel | null) {
+  async function show(r: PlanResponse, parcel: Parcel | null, selectedId?: string | null) {
     clear();
     if (!r.geographic_adapter) return;
     const a = parcel?.geographic_adapter;
@@ -31,7 +31,7 @@ export function createSceneRoutes(viewer: Cesium.Viewer) {
         a.horizontal_shift_m.east !== r.geographic_adapter.horizontal_shift_m.east || a.horizontal_shift_m.north !== r.geographic_adapter.horizontal_shift_m.north) {
       throw new Error("Calculated route does not match the active registered parcel/adapter.");
     }
-    const candidate = r.alternatives[0];
+    const candidate = r.alternatives.find((alt) => alt.id === selectedId) ?? r.alternatives[0];
     if (!candidate) return;
     const current = generation;
     response = r;
@@ -48,13 +48,13 @@ export function createSceneRoutes(viewer: Cesium.Viewer) {
       if (leg.status !== "found" || leg.xy_m.length === 0) continue;
       if (name === "return" && shared) {
         source.entities.add({ id: `route:${r.request_echo.request_id}:${name}`, name: t(`nav.${name}`), show: false,
-          properties: { request_id: r.request_echo.request_id, leg: name, cells: leg.cells, xy_m: leg.xy_m, same_path_as_outbound: true } });
+          properties: { request_id: r.request_echo.request_id, alternative_id: candidate.id, leg: name, cells: leg.cells, xy_m: leg.xy_m, same_path_as_outbound: true } });
         continue;
       }
       const color = Cesium.Color.fromCssColorString(name === "outbound" ? "#3ff0ff" : "#ffb347");
       if (leg.xy_m.length === 1) {
         const entity = source.entities.add({ id: `route:${r.request_echo.request_id}:${name}`, name: t(`nav.${name}`),
-          properties: { request_id: r.request_echo.request_id, leg: name, cells: leg.cells, xy_m: leg.xy_m },
+          properties: { request_id: r.request_echo.request_id, alternative_id: candidate.id, leg: name, cells: leg.cells, xy_m: leg.xy_m },
           position: position(leg.xy_m[0], r.locations.origin.effective_elevation_m + a.vertical_offset_m),
           point: { pixelSize: name === "outbound" ? 24 : 14, color: color.withAlpha(.35), outlineColor: color, outlineWidth: 2,
             disableDepthTestDistance: Number.POSITIVE_INFINITY },
@@ -72,7 +72,7 @@ export function createSceneRoutes(viewer: Cesium.Viewer) {
         polyline: { positions, width: outbound ? 12 : 9, clampToGround: true, zIndex: outbound ? 0 : 2,
           material: Cesium.Color.BLACK.withAlpha(0.5) } });
       source.entities.add({ id: `route:${r.request_echo.request_id}:${name}`, name: t(`nav.${name}`),
-        properties: { request_id: r.request_echo.request_id, leg: name, cells: leg.cells, xy_m: leg.xy_m },
+        properties: { request_id: r.request_echo.request_id, alternative_id: candidate.id, leg: name, cells: leg.cells, xy_m: leg.xy_m },
         polyline: { positions, width: outbound ? 8 : 5.5, clampToGround: true, zIndex: outbound ? 1 : 3,
           // Animated chevrons every ~35 m, moving in the direction of travel.
           material: new FlowMaterialProperty(color, Math.max(3, lengthOf(drawn) / 35), 0.5) } });

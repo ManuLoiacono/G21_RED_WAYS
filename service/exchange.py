@@ -29,11 +29,17 @@ def decode_request(value):
         raise PlanningInputError("missing_field", "schema_version", "An explicit draft version is required.")
     if value["schema_version"] != DRAFT_SCHEMA_VERSION:
         raise PlanningInputError("unsupported_schema_version", "schema_version", "Only p2-plan-draft-1 is supported; v0 is not silently adapted.")
-    fields(value, ("schema_version", "request_id", "revision", "parcel", "scenario", "origin", "destination", "team", "mission", "criterion"))
+    fields(value, ("schema_version", "request_id", "revision", "parcel", "scenario", "origin", "destination", "team", "mission", "criterion"), ("options",))
+    if "options" in value:
+        options = fields(value["options"], (), ("visibility", "communication"), "options")
+        if "visibility" in options and type(options["visibility"]) is not bool:
+            raise PlanningInputError("invalid_structure", "options.visibility", "Expected a boolean explicit calculation option.")
+        from .visibility import settings
+        settings(options.get("communication"))
     text(value["request_id"], "request_id")
     integer(value["revision"], "revision")
-    if value["criterion"] != "fastest":
-        raise PlanningInputError("unsupported_criterion", "criterion", "Only a static time-optimized candidate is computed.")
+    if value["criterion"] not in ("fastest", "comparison"):
+        raise PlanningInputError("unsupported_criterion", "criterion", "Choose fastest or explicit comparison of time/ascent/visibility optima.")
     fields(value["parcel"], ("id", "version"), path="parcel")
     fields(value["scenario"], ("id", "version", "as_of_utc"), path="scenario")
     for group in ("parcel", "scenario"):
@@ -50,6 +56,8 @@ def decode_request(value):
     utc(mission["departure_utc"], "mission.departure_utc")
     if not isinstance(mission["tasks"], list):
         raise PlanningInputError("invalid_structure", "mission.tasks", "Expected sequential task occurrences.")
+    if len(mission["tasks"]) > 64:
+        raise PlanningInputError("task_limit", "mission.tasks", "Task count exceeds the technical limit.")
     tasks, ids = [], set()
     for index, raw in enumerate(mission["tasks"]):
         path = f"mission.tasks[{index}]"
@@ -145,19 +153,39 @@ def encode_response(request: DraftRequest, result):
         "movement_reuse": {"graph": result.graph_reused, "base_search": result.search_reused},
     }
     # Normalize tuples and verify all nested fields are finite JSON before publication.
+    if result.communication is not None:
+        response["alternatives"][0]["communication"] = result.communication
+        response["visibility"] = result.visibility
+        response["not_evaluated"] = tuple(v for v in response["not_evaluated"] if v != "communication") + ("radio_performance",)
+    candidate = response["alternatives"][0]
+    candidate.update(id=result.criteria[0], criterion=result.criteria[0], criteria=result.criteria)
+    if result.optimization is not None:
+        candidate["optimization"] = result.optimization
+    if result.candidates:
+        response["alternatives"] = []
+        for item in result.candidates:
+            encoded = encode_response(request, item)
+            alternative = encoded["alternatives"][0]
+            alternative["environment"] = encoded["environment"]
+            response["alternatives"].append(alternative)
+        response["not_evaluated"] = tuple(v for v in response["not_evaluated"] if v != "effort")
+        response["assessment_scope"] = "Top-level assessment describes the fastest candidate only; each alternative has independent checks and environment applicability."
     return json.loads(canonical(response))
 
 
-def plan_draft(planner, payload):
+def plan_draft(planner, payload, *, internal=False):
     request = decode_request(payload)
     value = loads_strict(request.canonical_json)
     mission = value["mission"]
     try:
-        result = planner.plan(parcel_id=value["parcel"]["id"], parcel_version=value["parcel"]["version"],
+        method = planner._plan if internal else planner.plan
+        result = method(parcel_id=value["parcel"]["id"], parcel_version=value["parcel"]["version"],
                               scenario_id=value["scenario"]["id"], scenario_version=value["scenario"]["version"],
                               origin=value["origin"], destination=value["destination"], team=value["team"], tasks=request.tasks,
                               time_budget_s=mission["time_budget_s"], reserve_s=mission["reserve_s"],
-                              departure_utc=mission["departure_utc"], as_of_utc=value["scenario"]["as_of_utc"])
+                              departure_utc=mission["departure_utc"], as_of_utc=value["scenario"]["as_of_utc"],
+                              communication=value.get("options", {}).get("communication"),
+                              evaluate_visibility=value.get("options", {}).get("visibility", False), criterion=value["criterion"])
     except (SelectionError, MissionInputError, GridInputError) as exc:
         raise PlanningInputError(exc.code, exc.path, str(exc)) from exc
     # Backend/reconstruction/busy errors propagate; they never become a fallback plan.

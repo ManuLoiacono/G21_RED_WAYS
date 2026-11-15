@@ -35,6 +35,8 @@ export function createRouteProfile(viewer: Cesium.Viewer, grid: ElevationGrid | 
   let parcel: Parcel | null = null;
   let points: ProfilePoint[] = [];
   let collapsed = false;
+  let selectedId: string | null = null;
+  const pick = (r: PlanResponse) => r.alternatives.find((a) => a.id === selectedId) ?? r.alternatives[0];
   let zMin = 0, zMax = 1, dTotal = 1, dOut = 0;
 
   const lang = () => getLanguage();
@@ -44,7 +46,7 @@ export function createRouteProfile(viewer: Cesium.Viewer, grid: ElevationGrid | 
 
   function build(r: PlanResponse) {
     points = [];
-    const alt = r.alternatives[0];
+    const alt = pick(r);
     if (!alt || !grid) return;
     let d = 0;
     for (const leg of ["outbound", "return"] as const) {
@@ -74,7 +76,7 @@ export function createRouteProfile(viewer: Cesium.Viewer, grid: ElevationGrid | 
     root.hidden = !response;
     root.classList.toggle("collapsed", collapsed);
     if (!response) { root.innerHTML = ""; return; }
-    const alt = response.alternatives[0];
+    const alt = pick(response);
     const head = `<header class="rp-head">
         <h2>${esc(t("profile.title"))} <span class="wz-tag" data-kind="derived">${esc(t("wizard.tag.derived"))}</span></h2>
         ${alt ? `<span class="rp-legs">
@@ -172,7 +174,8 @@ export function createRouteProfile(viewer: Cesium.Viewer, grid: ElevationGrid | 
   onLanguageChange(render);
 
   return {
-    show(r: PlanResponse, p: Parcel | null) {
+    show(r: PlanResponse, p: Parcel | null, selected: string | null = null) {
+      selectedId = selected;
       response = r.geographic_adapter && r.alternatives.length ? r : null;
       parcel = p;
       if (response) build(response);

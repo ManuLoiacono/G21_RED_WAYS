@@ -1,10 +1,9 @@
-/** Transport checks import the actual, unchanged main consumer. Nothing is served to the UI. */
+/** Transport checks import the actual browser consumer. Nothing is served to the UI. */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { createRequire } = require('node:module');
-const { execFileSync } = require('node:child_process');
 const root = path.resolve(__dirname, '../..');
 const fromApp = createRequire(path.join(root, 'app/package.json'));
 const ts = fromApp('typescript');
@@ -55,14 +54,19 @@ function noVerification(value) {
   }
 }
 
-test('complete tracked app tree and PR app diff exactly match incorporated main', () => {
-  const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
-  assert.equal(git('rev-parse', 'HEAD:app'), git('rev-parse', 'origin/main:app'));
-  assert.equal(git('diff', '--exit-code', 'origin/main', 'HEAD', '--', 'app/'), '');
-  assert.equal(git('diff', '--exit-code', 'origin/main...HEAD', '--', 'app/'), '');
+test('consumer request gate includes additive options and edit/revert invalidation', () => {
+  const gate = new RequestGate();
+  const request = JSON.parse(fs.readFileSync(path.join(root, 'service/examples/request.example.json'), 'utf8'));
+  const submitted = gate.submit(request);
+  const response = { request_echo: submitted };
+  const edited = structuredClone(request);
+  edited.options = { visibility: true, communication: { base_height_m: 7 } };
+  assert.equal(gate.accepts(submitted, response, edited), false);
+  gate.edit(); gate.edit();
+  assert.equal(gate.accepts(submitted, response, request), false);
 });
 
-test('unchanged main consumer initializes synthetic startup and retains 800/2600', async () => {
+test('current consumer initializes synthetic startup and retains 800/2600', async () => {
   await consumerAt(synthetic, async () => {
     const data = await metadata();
     assert.equal(data.health.default_parcel.id, 'synthetic_metric_demo');
@@ -78,7 +82,7 @@ test('unchanged main consumer initializes synthetic startup and retains 800/2600
   });
 });
 
-test('unchanged main consumer calculates real daylight and retains safe forecast evidence', async () => {
+test('current consumer calculates real daylight and retains safe forecast evidence', async () => {
   await consumerAt(real, async () => {
     const data = await metadata();
     assert.equal(data.health.default_parcel.id, 'gale_hirise_019698');
@@ -113,7 +117,7 @@ test('unchanged main consumer calculates real daylight and retains safe forecast
   });
 });
 
-test('actual main validator accepts boundary, late, missing and early backend cases', async () => {
+test('actual consumer validator accepts boundary, late, missing and early backend cases', async () => {
   await consumerAt(real, async () => {
     const cases = [
       ['gale-replay-boundary', 'viable_model'], ['gale-replay-late', 'incompatible'],

@@ -1,7 +1,7 @@
 import { getLanguage, onLanguageChange, t, tOr, type MessageKey } from "../i18n";
 import { esc } from "../ui/format";
 import { infoButton } from "../provenance/sources";
-import type { Alternative, Check, PlanResponse } from "./draft";
+import type { Alternative, Check, PlanResponse, Recommendations, ReachableArea } from "./draft";
 import { renderMetricPreview } from "./routes";
 import { sharesPath } from "./flowMaterial";
 
@@ -36,6 +36,11 @@ export function createResultsPanel(root: HTMLElement) {
   let response: PlanResponse | null = null;
   let collapsed = false;
   let selectedId: string | null = null;
+  let suggestions: Recommendations | null = null;
+  let suggestionStatus = "";
+  let area: ReachableArea | null = null;
+  let areaVisible = false;
+  let areaStatus = "";
   const listeners: ((id: string) => void)[] = [];
   function render() {
     const opened = new Set(Array.from(root.querySelectorAll<HTMLDetailsElement>("details[open][data-detail]"), (e) => e.dataset.detail));
@@ -45,6 +50,8 @@ export function createResultsPanel(root: HTMLElement) {
     if (!response) { root.innerHTML = ""; return; }
     const r = response;
     const geo = Boolean(r.geographic_adapter);
+    const selected = r.alternatives.find((a) => a.id === selectedId) ?? r.alternatives[0];
+    const evidence = selected?.environment ?? r.environment;
     root.innerHTML = `
       <header class="mp-head"><h2>${esc(t("rs.title"))}</h2>
         <span class="rs-head-actions">
@@ -56,21 +63,30 @@ export function createResultsPanel(root: HTMLElement) {
         <details class="rs-honesty" data-detail="honesty"><summary><span>${esc(t(geo ? "rs.honesty" : "rs.honestySynthetic"))}</span><span class="rs-info" aria-hidden="true">ⓘ</span></summary>
           <p>${esc(t("nav.engineCalculated"))} ${esc(t(geo ? "nav.realTerrain" : "nav.synthetic"))} ${infoButton("navigation_draft", t("nav.provenance"))}</p></details>
         <div class="rs-hero">
-          <span class="rs-badge rs-badge-lg" data-status="${esc(r.status)}">${esc(statusLabel(r.assessment))}</span>
+          <span class="rs-badge rs-badge-lg" data-status="${esc(selected?.assessment ?? r.status)}">${esc(statusLabel(selected ? selected.assessment : r.assessment))}</span>
           <small>${esc(t("nav.search"))}: ${esc(label("search", r.search_status))}</small>
         </div>
-        ${geo ? `<p class="rs-legend"><span class="sw sw-out"></span>${esc(t("nav.outbound"))}${r.alternatives[0] && sharesPath(r.alternatives[0].outbound, r.alternatives[0].return)
+        ${geo ? `<p class="rs-legend"><span class="sw sw-out"></span>${esc(t("nav.outbound"))}${selected && sharesPath(selected.outbound, selected.return)
           ? ` <small class="rs-same">${esc(t("rs.samePath"))}</small>` : `<span class="sw sw-ret"></span>${esc(t("nav.return"))}`}
           <small class="rs-smooth" title="${esc(t("rs.smoothedHint"))}">· ${esc(t("rs.smoothed"))}</small></p>` : ""}
         ${r.alternatives.length === 0 ? `<p>${esc(t("rs.noAlternatives"))}</p>` : ""}
         <ul class="rs-cards">${r.alternatives.map(card).join("")}</ul>
+        <div class="rs-actions">
+          <button type="button" data-act="compare">${esc(t("nx.compare"))}</button>
+          <button type="button" data-act="area" aria-pressed="${areaVisible}">${esc(t(areaVisible ? "nx.hideArea" : "nx.showArea"))}</button>
+          <button type="button" data-act="recommend" ${suggestionStatus === "busy" ? "disabled" : ""}>${esc(t("nx.recommend"))}</button>
+        </div>
+        ${areaStatus ? `<p class="rs-status" role="status">${esc(areaStatus === "busy" ? t("mp.status.calculating") : areaStatus)}</p>` : ""}
+        ${area ? `<p class="mp-hint" data-area-id="${esc(area.id)}">${esc(t("nx.areaLegend", { feasible: area.counts["5"], timeOnly: area.counts["4"], unknown: area.counts["0"] + area.counts["6"], resolution: area.grid.spacing_m[0].toFixed(3) }))}</p>` : ""}
+        ${suggestionStatus ? `<p class="rs-status" role="status">${esc(suggestionStatus === "busy" ? t("mp.status.calculating") : suggestionStatus)}</p>` : ""}
+        ${suggestions ? `<section class="rs-suggestions"><p class="mp-hint">${esc(t("nx.bounded", { attempted: suggestions.attempted, cap: suggestions.cap }))}</p>${suggestions.proposals.length ? suggestions.proposals.map((p, index) => `<article class="rs-card rs-proposal"><p><span class="rs-badge" data-status="${esc(p.assessment ?? "")}">${esc(statusLabel(p.assessment))}</span>${p.assessment !== "viable_model" ? ` · ${esc(t("nx.unproven"))}` : ""}</p><p>${esc(t("nx.proposedTeam"))}: ${p.team_summary.map((m) => `${esc(m.name)} (${m.payload_kg} kg)`).join(" · ")}</p><p>${esc(t("nav.departureUtc"))}: ${esc(p.proposed_request.mission.departure_utc)}</p><p>${esc(t("nx.delta", { time: seconds(p.delta.elapsed_s ?? null), ascent: p.delta.ascent_m ?? t("nav.unavailableValue"), interruption: seconds(p.delta.max_without_confirmed_s ?? null) }))}</p><button type="button" data-proposal="${index}">${esc(t("nx.apply"))}</button></article>`).join("") : `<p>${esc(t("nx.noSuggestion"))}</p>`}</section>` : ""}
         <details class="rs-section" data-detail="technical"><summary>${esc(t("rs.technical"))}</summary>
           <p class="mp-hint">${esc(t("rs.notEvaluated"))} ${r.not_evaluated.map((v) => esc(label("scope", v))).join(" · ")}</p>
           <details data-detail="evidence"><summary>${esc(t("nav.evidence"))}</summary>
-            <p>${esc(t("nav.missingRequired"))}: ${esc(r.environment.missing_required.join(", ") || t("nav.none"))}</p>
-            <p>${esc(t("nav.missingOptional"))}: ${esc(r.environment.missing_optional_variables.join(", ") || t("nav.none"))}</p>
+            <p>${esc(t("nav.missingRequired"))}: ${esc(evidence.missing_required.join(", ") || t("nav.none"))}</p>
+            <p>${esc(t("nav.missingOptional"))}: ${esc(evidence.missing_optional_variables.join(", ") || t("nav.none"))}</p>
             <p class="mp-hint">${esc(t("nav.evidenceHint"))}</p>
-            <pre class="nav-json">${esc(JSON.stringify(r.environment, null, 2))}</pre>
+            <pre class="nav-json">${esc(JSON.stringify(evidence, null, 2))}</pre>
           </details>
           <details data-detail="reproducibility"><summary>${esc(t("nav.reproducibility"))}</summary>
             <p>${esc(t("nav.requestIdentity", { id: r.request_echo.request_id, revision: r.request_echo.revision }))}</p>
@@ -130,7 +146,7 @@ export function createResultsPanel(root: HTMLElement) {
     const m = a.metrics;
     const important = a.checks.filter((c) => c.status === "failed" || c.status === "missing_evidence");
     return `<li><article class="rs-card ${a.id === selectedId ? "selected" : ""}" style="--alt-color:${ALT_COLORS[index % ALT_COLORS.length]}">
-      <button type="button" class="rs-select" data-alt="${esc(a.id)}" aria-pressed="${a.id === selectedId}">${esc(label("criterion", a.criterion))}</button>
+      <button type="button" class="rs-select" data-alt="${esc(a.id)}" aria-pressed="${a.id === selectedId}">${(a.criteria ?? [a.criterion]).map((c) => esc(label("criterion", c))).join(" · ")}</button>
       ${a.assessment !== response!.assessment || a.search_status !== response!.search_status
         ? `<p class="rs-sub">${esc(statusLabel(a.assessment))} · ${esc(label("search", a.search_status))}</p>` : ""}
       ${important.length ? `<ul class="rs-checks nav-important">${important.map(check).join("")}</ul>` : ""}
@@ -141,6 +157,7 @@ export function createResultsPanel(root: HTMLElement) {
       </div>
       ${timeline(a)}
       ${m.unavailable_totals_reason ? `<p>${esc(label("reason", m.unavailable_totals_reason))}</p>` : ""}
+      ${a.communication ? `<details class="rs-section" data-detail="communication:${esc(a.id)}"><summary>${esc(t("nx.visibility"))}</summary><p class="mp-hint">${esc(t("nx.antennaHint"))}</p>${a.communication.status === "evaluated" ? `<dl class="rs-metrics">${(["visible_s", "occluded_s", "unknown_s", "max_without_confirmed_s"] as const).map((key) => metric(key, `nx.${key}`, a.communication![key] ?? null)).join("")}</dl>` : esc(t("nav.unavailableValue"))}</details>` : ""}
       <details class="rs-section" data-detail="metrics:${esc(a.id)}"><summary>${esc(t("rs.allMetrics"))}</summary>
         <dl class="rs-metrics">
           ${metric("elapsed_s", "nav.elapsed", m.elapsed_s)}
@@ -175,6 +192,11 @@ export function createResultsPanel(root: HTMLElement) {
     const target = e.target as HTMLElement;
     if (target.closest('[data-act="collapse"]')) { collapsed = !collapsed; render(); }
     if (target.closest('[data-act="focus-route"]')) root.dispatchEvent(new CustomEvent("focus-calculated-route", { bubbles: true }));
+    if (target.closest('[data-act="compare"]')) root.dispatchEvent(new CustomEvent("compare-calculated-routes", { bubbles: true }));
+    if (target.closest('[data-act="area"]')) root.dispatchEvent(new CustomEvent("toggle-reachable-area", { bubbles: true }));
+    if (target.closest('[data-act="recommend"]')) root.dispatchEvent(new CustomEvent("request-calculated-recommendations", { bubbles: true }));
+    const index = target.closest<HTMLButtonElement>("button[data-proposal]")?.dataset.proposal;
+    if (index !== undefined && suggestions?.proposals[Number(index)]) root.dispatchEvent(new CustomEvent("apply-calculated-proposal", { bubbles: true, detail: suggestions.proposals[Number(index)].proposed_request }));
     const id = target.closest<HTMLButtonElement>("button[data-alt]")?.dataset.alt;
     if (id && response?.alternatives.some((a) => a.id === id)) { selectedId = id; render(); listeners.forEach((cb) => cb(id)); }
   });
@@ -182,10 +204,12 @@ export function createResultsPanel(root: HTMLElement) {
   render();
   return {
     show(r: PlanResponse) {
-      response = r; collapsed = false; selectedId = r.alternatives[0]?.id ?? null; render();
+      response = r; area = null; areaStatus = ""; areaVisible = false; suggestions = null; suggestionStatus = ""; collapsed = false; selectedId = r.alternatives[0]?.id ?? null; render();
       if (selectedId) listeners.forEach((cb) => cb(selectedId!));
     },
-    clear() { response = null; selectedId = null; render(); },
+    clear() { response = null; area = null; areaStatus = ""; areaVisible = false; suggestions = null; suggestionStatus = ""; selectedId = null; render(); },
+    areaState(value: ReachableArea | string, visible: boolean) { areaVisible = visible; if (typeof value === "string") areaStatus = value; else { area = value; areaStatus = ""; } render(); },
+    recommendationState(value: Recommendations | string) { if (typeof value === "string") suggestionStatus = value; else { suggestions = value; suggestionStatus = ""; } render(); },
     onSelect(cb: (id: string) => void) { listeners.push(cb); },
   };
 }

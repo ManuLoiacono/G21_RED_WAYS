@@ -1,0 +1,285 @@
+{
+  "method": "real-grid-navigation-benchmark-v1",
+  "timing_s": {
+    "startup": 0.9468865999951959,
+    "first_fastest": 1.4929473000229336,
+    "warm_fastest": 0.155621699988842,
+    "first_visibility": 0.5184447999927215,
+    "warm_visibility": 0.1579123000265099,
+    "area_cached_search": 0.19644059997517616,
+    "area_warm": 0.20839099999284372,
+    "area_task_edit": 0.19347420003032312,
+    "comparison": 1.4727859999984503,
+    "distinct_comparison": 5.967524599982426,
+    "recommendations": 7.268404900038149
+  },
+  "serialized_bytes": {
+    "startup": null,
+    "first_fastest": 48467,
+    "warm_fastest": 48465,
+    "first_visibility": 49594,
+    "warm_visibility": 49594,
+    "area_cached_search": 1430898,
+    "area_warm": 1430898,
+    "area_task_edit": 1430898,
+    "comparison": 81662,
+    "distinct_comparison": 123464,
+    "recommendations": 6725
+  },
+  "grid_cells": 2140369,
+  "directed_edges": 2834284,
+  "area": {
+    "counts": {
+      "0": 0,
+      "1": 1643808,
+      "2": 359865,
+      "3": 0,
+      "4": 0,
+      "5": 136696,
+      "6": 0
+    },
+    "movement_reuse": {
+      "graph": true,
+      "base_search": true
+    },
+    "encoding": "base64-u4-low-nibble-first-row-major"
+  },
+  "visibility_counts": {
+    "1": 250473,
+    "2": 1889896
+  },
+  "visibility": {
+    "base_cell": [
+      731,
+      1288
+    ],
+    "curvature": "subtract horizontal distance squared / (2 * Mars radius); no refraction",
+    "gdal_version": "3.10.3",
+    "heights": {
+      "base_height_m": 5.0,
+      "receiver_height_m": 2.0
+    },
+    "id": "7de4f6369e9e835ee5a7d7ee771d3abf43ef545655f8251eccfc33635277dad9",
+    "method": "gdal-wang-edge-bounds-mars-v1",
+    "parcel_content_id": "89841fb7875d22c00dbd9f64fb3c8ee781fc7ddbbc38a386e833eb6d0da7291a",
+    "radius_m": 3396190.0,
+    "resolution_m": [
+      2.023493589159021,
+      2.023493589159021
+    ],
+    "sampling": "GDAL Wang raster scan, edge interpolation; analytical cell centers",
+    "scope": "estimated geometric visibility; no Fresnel, link budget, range or radio coverage",
+    "uncertainty": "two scans with missing terrain filled at negative/positive 1e9 m; disagreement is unknown"
+  },
+  "communication": {
+    "max_without_confirmed_s": 0.0,
+    "method": "source-target-half-edge-v1",
+    "occluded_s": 0.0,
+    "reserve_exposure_s": 0,
+    "scope": "geometric preference only; maximum interruption evaluated, not constrained by additive search",
+    "status": "evaluated",
+    "tasks_s": 600.0,
+    "unknown_s": 0.0,
+    "visible_s": 1718.7375283296024,
+    "without_confirmed_s": 0.0
+  },
+  "baseline_metrics": {
+    "daylight_departure_margin_s": 0.4580790000036359,
+    "daylight_reserved_return_margin_s": 40531.472726670414,
+    "elapsed_s": 1718.7375283296024,
+    "estimated_return_offset_s": 89706.7375283296,
+    "mission_margin_s": 18081.262471670398,
+    "outbound_s": 539.2080915339404,
+    "participant_margins": [
+      {
+        "kind": "human",
+        "margin_s": 18081.262471670398,
+        "max_sortie_s": 21600.0,
+        "model_id": "synthetic_constant_speed_v1",
+        "participant_id": "explorer_01"
+      },
+      {
+        "kind": "robot",
+        "margin_s": 14481.262471670398,
+        "max_sortie_s": 18000.0,
+        "model_id": "synthetic_constant_speed_v1",
+        "participant_id": "support_rover"
+      }
+    ],
+    "reserve_s": 1800.0,
+    "reserved_deadline_offset_s": 91506.7375283296,
+    "reserved_total_s": 3518.7375283296024,
+    "return_s": 579.529436795662,
+    "tasks_s": 600.0,
+    "temporal_budget_limiting_constraints": [
+      "participants[1].max_sortie_s"
+    ],
+    "temporal_budget_limiting_margin_s": 14481.262471670398,
+    "temporal_budget_limiting_participant_ids": [
+      "support_rover"
+    ],
+    "time_budget_s": 21600.0,
+    "unavailable_totals_reason": null
+  },
+  "default_comparison_count": 1,
+  "distinct_comparison": [
+    {
+      "criteria": [
+        "fastest",
+        "best_geometric_visibility"
+      ],
+      "metrics": {
+        "daylight_departure_margin_s": 0.4580790000036359,
+        "daylight_reserved_return_margin_s": 41041.90947141875,
+        "elapsed_s": 1208.3007835812568,
+        "estimated_return_offset_s": 89196.30078358126,
+        "mission_margin_s": 18591.699216418743,
+        "outbound_s": 312.8294322053035,
+        "participant_margins": [
+          {
+            "kind": "human",
+            "margin_s": 18591.699216418743,
+            "max_sortie_s": 21600.0,
+            "model_id": "synthetic_constant_speed_v1",
+            "participant_id": "explorer_02"
+          }
+        ],
+        "reserve_s": 1800.0,
+        "reserved_deadline_offset_s": 90996.30078358126,
+        "reserved_total_s": 3008.300783581257,
+        "return_s": 295.47135137595336,
+        "tasks_s": 600.0,
+        "temporal_budget_limiting_constraints": [
+          "time_budget_s",
+          "participants[0].max_sortie_s"
+        ],
+        "temporal_budget_limiting_margin_s": 18591.699216418743,
+        "temporal_budget_limiting_participant_ids": [
+          "explorer_02"
+        ],
+        "time_budget_s": 21600.0,
+        "unavailable_totals_reason": null
+      },
+      "optimization": {
+        "criteria": [
+          "fastest",
+          "best_geometric_visibility"
+        ],
+        "method": "lexicographic-tight-edges-physical-time-v1",
+        "physical_travel_s": 608.3007835812568,
+        "scope": "independent unconstrained criterion optima; each complete sortie evaluated afterward",
+        "total_positive_ascent_m": 9.13519287109375,
+        "units": {
+          "best_geometric_visibility": "without_confirmed_s",
+          "fastest": "physical_travel_s",
+          "lowest_relative_effort": "positive_ascent_m"
+        },
+        "without_confirmed_s": 0.0
+      }
+    },
+    {
+      "criteria": [
+        "lowest_relative_effort"
+      ],
+      "metrics": {
+        "daylight_departure_margin_s": 0.4580790000036359,
+        "daylight_reserved_return_margin_s": 40921.753260947225,
+        "elapsed_s": 1328.4569940527867,
+        "estimated_return_offset_s": 89316.45699405279,
+        "mission_margin_s": 18471.543005947213,
+        "outbound_s": 372.9284346712292,
+        "participant_margins": [
+          {
+            "kind": "human",
+            "margin_s": 18471.543005947213,
+            "max_sortie_s": 21600.0,
+            "model_id": "synthetic_constant_speed_v1",
+            "participant_id": "explorer_02"
+          }
+        ],
+        "reserve_s": 1800.0,
+        "reserved_deadline_offset_s": 91116.45699405279,
+        "reserved_total_s": 3128.4569940527867,
+        "return_s": 355.52855938155767,
+        "tasks_s": 600.0,
+        "temporal_budget_limiting_constraints": [
+          "time_budget_s",
+          "participants[0].max_sortie_s"
+        ],
+        "temporal_budget_limiting_margin_s": 18471.543005947213,
+        "temporal_budget_limiting_participant_ids": [
+          "explorer_02"
+        ],
+        "time_budget_s": 21600.0,
+        "unavailable_totals_reason": null
+      },
+      "optimization": {
+        "criteria": [
+          "lowest_relative_effort"
+        ],
+        "method": "lexicographic-tight-edges-physical-time-v1",
+        "physical_travel_s": 728.4569940527869,
+        "scope": "independent unconstrained criterion optima; each complete sortie evaluated afterward",
+        "total_positive_ascent_m": 8.10968017578125,
+        "units": {
+          "best_geometric_visibility": "without_confirmed_s",
+          "fastest": "physical_travel_s",
+          "lowest_relative_effort": "positive_ascent_m"
+        },
+        "without_confirmed_s": 0.0
+      }
+    }
+  ],
+  "recommendations": {
+    "attempted": 2,
+    "proposals": [
+      {
+        "id": "reallocate_without_last_member",
+        "assessment": "viable_model",
+        "delta": {
+          "elapsed_s": -339.90794489764994,
+          "reserved_total_s": -339.90794489764994,
+          "mission_margin_s": 339.90794489765176,
+          "temporal_budget_limiting_margin_s": 3939.9079448976518,
+          "daylight_reserved_return_margin_s": 339.90794489764085,
+          "visible_s": -339.90794489764994,
+          "occluded_s": 0.0,
+          "unknown_s": 0.0,
+          "max_without_confirmed_s": 0.0,
+          "ascent_m": -0.1455078125
+        }
+      },
+      {
+        "id": "catalog_pace_comparison",
+        "assessment": "viable_model",
+        "delta": {
+          "elapsed_s": -495.6738615840404,
+          "reserved_total_s": -495.6738615840404,
+          "mission_margin_s": 495.6738615840404,
+          "temporal_budget_limiting_margin_s": 4095.6738615840404,
+          "daylight_reserved_return_margin_s": 495.67386158404406,
+          "visible_s": -495.6738615840402,
+          "occluded_s": 0.0,
+          "unknown_s": 0.0,
+          "max_without_confirmed_s": 0.0,
+          "ascent_m": -0.1455078125
+        }
+      }
+    ]
+  },
+  "peak_process_rss_bytes": 776642560,
+  "process_high_water_after_step": {
+    "startup": 145903616,
+    "first_fastest": 348934144,
+    "warm_fastest": 348934144,
+    "first_visibility": 348934144,
+    "warm_visibility": 348934144,
+    "area_cached_search": 348934144,
+    "area_warm": 348934144,
+    "area_task_edit": 348934144,
+    "comparison": 527642624,
+    "distinct_comparison": 776642560,
+    "recommendations": 776642560
+  },
+  "memory_scope": "whole-process high-water RSS including native workspaces and allocator retention"
+}

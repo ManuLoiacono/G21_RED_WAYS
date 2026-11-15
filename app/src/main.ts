@@ -24,6 +24,10 @@ import type { PlanResponse } from "./mission/draft";
 import { createSceneRoutes } from "./mission/sceneRoutes";
 import { createRouteProfile } from "./ui/routeProfile";
 import { createScenePois } from "./mission/scenePois";
+import { requestRecommendations, requestArea } from "./mission/api";
+import { calculationKey } from "./mission/request";
+import type { PlanRequest, ReachableArea } from "./mission/draft";
+import { createSceneArea } from "./mission/sceneArea";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -42,6 +46,12 @@ let viewer!: Cesium.Viewer;
 let sceneRoutes: ReturnType<typeof createSceneRoutes> | null = null;
 let routeProfile: ReturnType<typeof createRouteProfile> | null = null;
 let activeResponse: PlanResponse | null = null;
+let activeAlternative: string | null = null;
+let recommendationSequence = 0;
+let sceneArea: ReturnType<typeof createSceneArea> | null = null;
+let activeArea: ReachableArea | null = null;
+let areaSequence = 0;
+let areaWanted = false;
 /** Loading message on screen (re-translated on a language switch); null once loaded. */
 let loadingKey: MessageKey | null = null;
 
@@ -267,9 +277,19 @@ async function main() {
         },
       },
     },
+    {
+      id: "reachable-area", section: "analysis", dataClass: "mission", name: "nx.area", origin: "RedWays",
+      status: () => activeArea?.geographic_adapter ? "loaded" : "pending",
+      visibility: { get: () => sceneArea?.isVisible() ?? false, set: (on) => {
+        areaWanted = on; areaSequence += 1; sceneArea?.setVisible(on);
+        if (activeArea) updateAreaState(activeArea, on);
+      } },
+      legend: () => `<p class="ly-note">${esc(t("nx.areaLayerLegend"))}</p>`,
+    },
   ]);
   environment.onUpdate(() => layers.refresh());
   // The Layers panel opens and closes from its own header / collapsed pill (no HUD button).
+  document.addEventListener("reachable-area-change", () => layers.refresh());
   document.addEventListener("plan-response", () => {
     layers.refresh();
     layers.setOpen(false);
@@ -280,6 +300,8 @@ async function main() {
   loadingKey = null;
   hideLoading();
   sceneRoutes = createSceneRoutes(viewer);
+  sceneArea = createSceneArea(viewer);
+  if (activeArea && areaWanted) sceneArea.show(activeArea, panel.getParcel());
   sceneRoutes.setVisible(missionVisible);
   // Elevation profile of the calculated route (bottom dock), sampled from the local HiRISE grid.
   routeProfile = createRouteProfile(viewer, await elevationGrid);
@@ -379,17 +401,54 @@ const sources = createSourcesPanel(document.getElementById("sourcesDialog") as H
 document.getElementById("openSources")!.onclick = () => sources.open();
 const panel = createMissionPanel(document.getElementById("missionPanel")!);
 const results = createResultsPanel(document.getElementById("resultsPanel")!);
+function updateAreaState(value: ReachableArea | string, visible: boolean) {
+  results.areaState(value, visible);
+  document.dispatchEvent(new CustomEvent("reachable-area-change"));
+}
 const context = createMissionContext(document.getElementById("hudContext")!);
 panel.onChange((request) => context.update(request));
-panel.onStale(() => { activeResponse = null; results.clear(); sceneRoutes?.clear(); routeProfile?.clear(); });
+panel.onStale(() => { recommendationSequence += 1; areaSequence += 1; areaWanted = false; activeArea = null; sceneArea?.clear(); activeResponse = null; activeAlternative = null; results.clear(); sceneRoutes?.clear(); routeProfile?.clear(); });
 async function showSceneResponse(response: PlanResponse) {
-  try { await sceneRoutes?.show(response, panel.getParcel()); routeProfile?.show(response, panel.getParcel()); }
+  try { await sceneRoutes?.show(response, panel.getParcel(), activeAlternative); routeProfile?.show(response, panel.getParcel(), activeAlternative); }
   catch (error) { console.error(error); showToast(t("nav.sceneMismatch")); }
 }
 document.addEventListener("plan-response", (event) => {
   activeResponse = (event as CustomEvent<PlanResponseEvent>).detail.response;
   results.show(activeResponse);
-  void showSceneResponse(activeResponse);
+});
+results.onSelect((id) => { activeAlternative = id; if (activeResponse) void showSceneResponse(activeResponse); });
+document.addEventListener("compare-calculated-routes", () => panel.compare());
+document.addEventListener("toggle-reachable-area", async () => {
+  areaWanted = !areaWanted;
+  const sequence = ++areaSequence;
+  if (!areaWanted) { sceneArea?.setVisible(false); updateAreaState("", false); return; }
+  if (activeArea) { sceneArea?.show(activeArea, panel.getParcel()); updateAreaState(activeArea, true); return; }
+  const original = activeResponse;
+  if (!original) { areaWanted = false; return; }
+  updateAreaState("busy", true);
+  const result = await requestArea(original.request_echo);
+  const current = panel.getRequest();
+  if (!areaWanted || sequence !== areaSequence || activeResponse !== original || !current || calculationKey(current) !== calculationKey(original.request_echo)) return;
+  if (!result.ok) { areaWanted = false; updateAreaState(result.error, false); return; }
+  if (calculationKey(result.data.request_echo) !== calculationKey(original.request_echo) || result.data.request_echo.request_id !== original.request_echo.request_id || result.data.request_echo.revision !== original.request_echo.revision) { areaWanted = false; updateAreaState(t("mp.status.discarded"), false); return; }
+  activeArea = result.data;
+  try { sceneArea?.show(activeArea, panel.getParcel()); updateAreaState(activeArea, true); }
+  catch (error) { console.error(error); activeArea = null; areaWanted = false; sceneArea?.clear(); updateAreaState(t("nav.sceneMismatch"), false); }
+});
+document.addEventListener("request-calculated-recommendations", async () => {
+  const original = activeResponse;
+  if (!original) return;
+  const sequence = ++recommendationSequence;
+  results.recommendationState("busy");
+  const result = await requestRecommendations(original.request_echo);
+  const current = panel.getRequest();
+  if (sequence !== recommendationSequence || activeResponse !== original || !current || calculationKey(current) !== calculationKey(original.request_echo)) return;
+  if (!result.ok) { results.recommendationState(result.error); return; }
+  if (calculationKey(result.data.request_echo) !== calculationKey(original.request_echo) || result.data.request_echo.request_id !== original.request_echo.request_id || result.data.request_echo.revision !== original.request_echo.revision) return;
+  results.recommendationState(result.data);
+});
+document.addEventListener("apply-calculated-proposal", (event) => {
+  if (activeResponse) panel.applyRecommendation((event as CustomEvent<PlanRequest>).detail);
 });
 document.addEventListener("focus-calculated-route", () => { void sceneRoutes?.focus(); });
 main().catch((err) => {
