@@ -2,6 +2,7 @@ import * as Cesium from "cesium";
 import mastcam from "./panoramas.json";
 import navcam from "./navcam_panoramas.json";
 import { getLanguage, onLanguageChange, t } from "../i18n";
+import { roverIconUrl } from "./roverIcon";
 
 /**
  * Real 360° panoramas taken by Curiosity inside the parcel, shown as points of interest
@@ -98,12 +99,21 @@ export const PANORAMAS: Panorama[] = [...MASTCAM, ...NAVCAM];
 export const panoTitle = (p: Panorama) =>
   p.titles[getLanguage()] ?? p.titles.es ?? t("pano.navcamTitle", { sol: String(p.solStart) });
 const COLOR = { mastcam: "#c792ff", navcam: "#e2d4ff" };
+/** Rover icon per camera: color Mastcam larger with a white outline, Navcam violet with a dark one. */
+const ICON = {
+  mastcam: { url: roverIconUrl("#c792ff", "#ffffff"), size: 40 },
+  navcam: { url: roverIconUrl("#a46bff", "#2a1150"), size: 30 },
+};
+/** Scale of the icon under the pointer (selectable feedback). */
+const HOVER_SCALE = 1.3;
 /** Navcam labels only show up close, so the map does not fill with text. */
 const NAVCAM_LABEL_MAX_DISTANCE_M = 1800;
 
 export interface PanoramaLayer {
   setVisible(on: boolean): void;
   isVisible(): boolean;
+  /** Enlarges the rover under the pointer (entity id `pano:<id>`), or none with null. */
+  setHover(entityId: string | null): void;
 }
 
 /** Panorama drawn by the entity with this id (`pano:<id>`), if any. Used by the map click handler. */
@@ -130,21 +140,21 @@ export function addPanoramas(viewer: Cesium.Viewer): PanoramaLayer {
         id: `pano:${p.id}`,
         name: panoTitle(p),
         position: Cesium.Cartesian3.fromDegrees(p.lonlat[0], p.lonlat[1], p.elevGeoidM + CESIUM_MINUS_GEOID_M, Cesium.Ellipsoid.MARS),
-        point: {
-          pixelSize: p.camera === "mastcam" ? 16 : 11,
-          color: Cesium.Color.fromCssColorString(COLOR[p.camera]),
-          outlineColor: p.camera === "mastcam" ? Cesium.Color.WHITE : Cesium.Color.fromCssColorString("#5b2a99"),
-          outlineWidth: 2,
+        billboard: {
+          image: ICON[p.camera].url,
+          width: ICON[p.camera].size,
+          height: ICON[p.camera].size,
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
         },
         label: {
-          text: `◎ ${panoTitle(p)}`,
+          text: panoTitle(p),
           font: p.camera === "mastcam" ? "13px system-ui, sans-serif" : "12px system-ui, sans-serif",
           fillColor: Cesium.Color.fromCssColorString(COLOR[p.camera]),
           outlineColor: Cesium.Color.BLACK,
           outlineWidth: 3,
           style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-          pixelOffset: new Cesium.Cartesian2(0, -18),
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          pixelOffset: new Cesium.Cartesian2(0, -(ICON[p.camera].size / 2 + 2)),
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
           distanceDisplayCondition:
             p.camera === "navcam" ? new Cesium.DistanceDisplayCondition(0, NAVCAM_LABEL_MAX_DISTANCE_M) : undefined,
@@ -157,11 +167,19 @@ export function addPanoramas(viewer: Cesium.Viewer): PanoramaLayer {
       const e = entities.get(p.id);
       if (!e) continue;
       e.name = panoTitle(p);
-      if (e.label) e.label.text = new Cesium.ConstantProperty(`◎ ${panoTitle(p)}`);
+      if (e.label) e.label.text = new Cesium.ConstantProperty(panoTitle(p));
     }
   });
+  let hovered: Cesium.Entity | null = null;
   return {
     setVisible: (on) => void (source.show = on),
     isVisible: () => source.show,
+    setHover(entityId) {
+      const next = entityId ? source.entities.getById(entityId) ?? null : null;
+      if (next === hovered) return;
+      if (hovered?.billboard) hovered.billboard.scale = new Cesium.ConstantProperty(1);
+      if (next?.billboard) next.billboard.scale = new Cesium.ConstantProperty(HOVER_SCALE);
+      hovered = next;
+    },
   };
 }

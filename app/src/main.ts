@@ -17,6 +17,7 @@ import { createCursorReadout } from "./ui/readout";
 import { ElevationGrid } from "./terrain/elevationGrid";
 import { addParcelOutline } from "./terrain/parcel";
 import { addThermalLayer, LEGEND_STYLE } from "./thermal/themis";
+import { createEnvironmentLayer } from "./environment/layer";
 import { esc } from "./ui/format";
 import { createMissionContext, setUpSettingsMenu } from "./ui/hud";
 import type { PlanResponse } from "./mission/draft";
@@ -161,6 +162,9 @@ async function main() {
   // once the service reports it. Off by default.
   const thermal = addThermalLayer(viewer, panel.getParcel()?.geographic_adapter?.horizontal_shift_m);
   panel.onChange(() => thermal.setShift(panel.getParcel()?.geographic_adapter?.horizontal_shift_m));
+  // Environment of the chosen sol: REMS report for the departure date (historical, observed).
+  const environment = createEnvironmentLayer(viewer);
+  panel.onChange((request) => environment.setDeparture(request.mission.departure_utc));
 
   // Top bar: mission context (center) and the "Layers" panel (left).
   let missionVisible = true;
@@ -194,7 +198,9 @@ async function main() {
       name: "layers.rems",
       origin: "MSL · REMS",
       sourceId: "rems",
-      status: () => "pending",
+      status: () => environment.status(),
+      visibility: { get: () => environment.isVisible(), set: (on) => environment.setVisible(on) },
+      legend: () => environment.legend(),
     },
     {
       id: "themis",
@@ -246,6 +252,7 @@ async function main() {
       },
     },
   ]);
+  environment.onUpdate(() => layers.refresh());
   const layersBtn = document.getElementById("toggleLayers") as HTMLButtonElement;
   layersBtn.onclick = () => layers.setOpen(!layers.isOpen());
   layersBtn.disabled = false;
@@ -283,8 +290,9 @@ async function main() {
     const pano = panoramaForEntity(entity.id);
     if (pano) panoViewer.open(pano);
     else if (entity.id.startsWith("route:")) sources.open("navigation_draft");
+    else if (entity.id.startsWith("rems:")) sources.open("rems");
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-  showPointerOverClickables();
+  showPointerOverClickables((id) => panoLayer?.setHover(id.startsWith("pano:") ? id : null));
 
   setUpSettingsMenu((preset) => applyPreset(viewer, tilesets, preset, sun));
   document.getElementById("resetView")!.onclick = resetView;
@@ -299,8 +307,11 @@ function pickEntity(position: Cesium.Cartesian2): Cesium.Entity | undefined {
   return entity instanceof Cesium.Entity ? entity : undefined;
 }
 
-/** Hand cursor over what a click acts on (points of interest, panoramas, routes). Picks once per frame at most. */
-function showPointerOverClickables() {
+/**
+ * Hand cursor over what a click acts on (panoramas, routes, REMS marker), and `onHover` with the
+ * entity id under the pointer ("" for none). Picks once per frame at most.
+ */
+function showPointerOverClickables(onHover: (entityId: string) => void) {
   const canvas = viewer.scene.canvas;
   const handler = new Cesium.ScreenSpaceEventHandler(canvas);
   let pending: Cesium.Cartesian2 | null = null;
@@ -308,7 +319,8 @@ function showPointerOverClickables() {
     if (!pending) {
       requestAnimationFrame(() => {
         const id = pending ? pickEntity(pending)?.id ?? "" : "";
-        canvas.style.cursor = /^(pano:|route:)/.test(id) ? "pointer" : "";
+        canvas.style.cursor = /^(pano:|route:|rems:)/.test(id) ? "pointer" : "";
+        onHover(id);
         pending = null;
       });
     }

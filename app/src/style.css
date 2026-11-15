@@ -413,3 +413,13 @@ dialog.pano:not([data-state="ready"]) .pano-overview { display: none; }
 .ly-ramp-labels span:first-child { color: #ffaa28; }
 .ly-note { margin: 4px 0 0; line-height: 1.35; }
 #cursorReadout .ro-thermal dd { color: #ffaa28; }
+
+/* Environment of the chosen sol (REMS card in the Layers panel) */
+.env-card { margin-top: 4px; }
+.env-head { font-size: 12px; font-weight: 600; color: #b9a6ff; }
+.env-warn { margin-top: 2px; color: var(--ui-warn); }
+.env-card dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 5px 0 0; }
+.env-card dl > div { display: contents; }
+.env-card dt { color: var(--ui-muted); }
+.env-card dd { margin: 0; color: var(--ui-text, #e8e8ee); }
+.env-where { margin-top: 4px; }

@@ -6,6 +6,13 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "app", "run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "service",
+      "runtimeExecutable": ".venv/bin/python",
+      "runtimeArgs": ["-m", "service", "--gale-package", "data/processed/gale/analytical/manifest.json"],
+      "port": 8000,
+      "url": "http://127.0.0.1:8000"
     }
   ]
 }
