@@ -1,5 +1,6 @@
 {
-  "pois": [
+  "supersedes": "Previous 400\u2013730 m placement rejected by owner",
+  "old_pois": [
     {
       "id": "base",
       "lonlat": [
@@ -7,8 +8,7 @@
         -4.811074715231375
       ],
       "classification": "hypothetical",
-      "role": "base",
-      "distance_to_photo_marker_in_scene_m": 402.6084900321668
+      "role": "base"
     },
     {
       "id": "sample",
@@ -17,8 +17,7 @@
         -4.8134984820464455
       ],
       "classification": "hypothetical",
-      "role": "destination",
-      "distance_to_photo_marker_in_scene_m": 734.2645317823333
+      "role": "destination"
     },
     {
       "id": "control",
@@ -27,8 +26,7 @@
         -4.810835752305946
       ],
       "classification": "hypothetical",
-      "role": "destination",
-      "distance_to_photo_marker_in_scene_m": 582.4257527471738
+      "role": "destination"
     },
     {
       "id": "lookout",
@@ -37,138 +35,518 @@
         -4.814044683018855
       ],
       "classification": "hypothetical",
-      "role": "destination",
-      "distance_to_photo_marker_in_scene_m": 610.8462099453465
+      "role": "destination"
     }
   ],
+  "pois": [
+    {
+      "id": "base",
+      "lonlat": [
+        137.3817922219407,
+        -4.8137715825326515
+      ],
+      "classification": "hypothetical",
+      "role": "base",
+      "photo_id": "navcam-4861",
+      "distance_to_photo_marker_in_scene_m": 2.714716292022505,
+      "analytical_xy_m": [
+        8143264.179165239,
+        -285334.85450091
+      ]
+    },
+    {
+      "id": "sample",
+      "lonlat": [
+        137.38175808437995,
+        -4.812986418634811
+      ],
+      "classification": "hypothetical",
+      "role": "destination",
+      "photo_id": "navcam-4851",
+      "distance_to_photo_marker_in_scene_m": 47.27280453137291,
+      "analytical_xy_m": [
+        8143262.15567165,
+        -285288.3141483593
+      ]
+    },
+    {
+      "id": "control",
+      "lonlat": [
+        137.38186049706226,
+        -4.813669169850323
+      ],
+      "classification": "hypothetical",
+      "role": "destination",
+      "photo_id": "navcam-4861",
+      "distance_to_photo_marker_in_scene_m": 9.676406162957747,
+      "analytical_xy_m": [
+        8143268.226152417,
+        -285328.78402014246
+      ]
+    },
+    {
+      "id": "lookout",
+      "lonlat": [
+        137.38189463462305,
+        -4.813191243999465
+      ],
+      "classification": "hypothetical",
+      "role": "destination",
+      "photo_id": "navcam-4861",
+      "distance_to_photo_marker_in_scene_m": 37.60876837122514,
+      "analytical_xy_m": [
+        8143270.249646007,
+        -285300.4551098943
+      ]
+    }
+  ],
+  "photo_audit": [
+    {
+      "id": "pano_nevado_sajama",
+      "lonlat": [
+        137.3810041,
+        -4.80800755
+      ],
+      "analytical_xy": [
+        8143242.4634755915,
+        -285028.1932160226
+      ],
+      "cell": [
+        250,
+        626
+      ],
+      "coverage": true,
+      "slope_deg": 24.957457693283693,
+      "traversable": false,
+      "component": 323989,
+      "component_size": 1,
+      "nearest_sector_valid": {
+        "distance_m": 7.0012897219451755,
+        "index": 361987,
+        "component": 318946,
+        "xy": [
+          8143241.920735759,
+          -285021.2129945903
+        ]
+      }
+    },
+    {
+      "id": "navcam-4571",
+      "lonlat": [
+        137.382987,
+        -4.80040688
+      ],
+      "analytical_xy": [
+        8143359.999273311,
+        -284577.6658007981
+      ],
+      "cell": [
+        28,
+        684
+      ],
+      "coverage": true,
+      "slope_deg": 10.96250647154991,
+      "traversable": false,
+      "component": 37233,
+      "component_size": 1,
+      "nearest_sector_valid": {
+        "distance_m": 13.721345205523635,
+        "index": 48959,
+        "component": 43615,
+        "xy": [
+          8143351.189389573,
+          -284588.1853665103
+        ]
+      }
+    },
+    {
+      "id": "navcam-4575",
+      "lonlat": [
+        137.3821132,
+        -4.80190838
+      ],
+      "analytical_xy": [
+        8143308.205042614,
+        -284666.66675912944
+      ],
+      "cell": [
+        72,
+        659
+      ],
+      "coverage": true,
+      "slope_deg": 19.796827346931092,
+      "traversable": false,
+      "component": 93803,
+      "component_size": 1,
+      "nearest_sector_valid": {
+        "distance_m": 5.721197970288251,
+        "index": 108919,
+        "component": 96388,
+        "xy": [
+          8143304.649037022,
+          -284671.1486036658
+        ]
+      }
+    },
+    {
+      "id": "navcam-4587",
+      "lonlat": [
+        137.3807901,
+        -4.80273617
+      ],
+      "analytical_xy": [
+        8143229.778690323,
+        -284715.73376099224
+      ],
+      "cell": [
+        96,
+        620
+      ],
+      "coverage": true,
+      "slope_deg": 11.671177972777338,
+      "traversable": false,
+      "component": 124297,
+      "component_size": 1,
+      "nearest_sector_valid": {
+        "distance_m": 2.9111007520870733,
+        "index": 139606,
+        "component": 119207,
+        "xy": [
+          8143231.803267812,
+          -284713.6419690381
+        ]
+      }
+    },
+    {
+      "id": "navcam-4598",
+      "lonlat": [
+        137.3797556,
+        -4.80401601
+      ],
+      "analytical_xy": [
+        8143168.4590157345,
+        -284791.5958898704
+      ],
+      "cell": [
+        134,
+        590
+      ],
+      "coverage": true,
+      "slope_deg": 13.408157323107512,
+      "traversable": false,
+      "component": 173400,
+      "component_size": 1,
+      "nearest_sector_valid": {
+        "distance_m": 8.414367492640412,
+        "index": 192246,
+        "component": 169492,
+        "xy": [
+          8143175.145447317,
+          -284786.48773824784
+        ]
+      }
+    },
+    {
+      "id": "navcam-4616",
+      "lonlat": [
+        137.3795247,
+        -4.80545276
+      ],
+      "analytical_xy": [
+        8143154.772488075,
+        -284876.758811537
+      ],
+      "cell": [
+        176,
+        583
+      ],
+      "coverage": true,
+      "slope_deg": 30.985971630211356,
+      "traversable": false,
+      "component": 228126,
+      "component_size": 1,
+      "nearest_sector_valid": {
+        "distance_m": 9.13939576243985,
+        "index": 263924,
+        "component": 233318,
+        "xy": [
+          8143156.934005014,
+          -284885.6389241167
+        ]
+      }
+    },
+    {
+      "id": "navcam-4647",
+      "lonlat": [
+        137.3798121,
+        -4.80689063
+      ],
+      "analytical_xy": [
+        8143171.808036145,
+        -284961.9881208649
+      ],
+      "cell": [
+        218,
+        591
+      ],
+      "coverage": true,
+      "slope_deg": 50.06855525026722,
+      "traversable": false,
+      "component": 282922,
+      "component_size": 1,
+      "nearest_sector_valid": {
+        "distance_m": 19.880140042419946,
+        "index": 304894,
+        "component": 268549,
+        "xy": [
+          8143169.074966549,
+          -284942.2967446131
+        ]
+      }
+    },
+    {
+      "id": "navcam-4818",
+      "lonlat": [
+        137.3825624,
+        -4.80790359
+      ],
+      "analytical_xy": [
+        8143334.831236743,
+        -285022.031018468
+      ],
+      "cell": [
+        247,
+        672
+      ],
+      "coverage": true,
+      "slope_deg": 11.327038346855588,
+      "traversable": false,
+      "component": 320266,
+      "component_size": 1,
+      "nearest_sector_valid": {
+        "distance_m": 1.2174262467761623,
+        "index": 363496,
+        "component": 321528,
+        "xy": [
+          8143335.001440859,
+          -285023.2364881795
+        ]
+      }
+    },
+    {
+      "id": "navcam-4834",
+      "lonlat": [
+        137.3826974,
+        -4.80954314
+      ],
+      "analytical_xy": [
+        8143342.833320909,
+        -285119.2148487924
+      ],
+      "cell": [
+        295,
+        676
+      ],
+      "coverage": true,
+      "slope_deg": 10.063766089850843,
+      "traversable": false,
+      "component": 381837,
+      "component_size": 1,
+      "nearest_sector_valid": {
+        "distance_m": 3.391007946787824,
+        "index": 430797,
+        "component": 378025,
+        "xy": [
+          8143341.071921627,
+          -285116.3171932808
+        ]
+      }
+    },
+    {
+      "id": "navcam-4844",
+      "lonlat": [
+        137.3816768,
+        -4.81053581
+      ],
+      "analytical_xy": [
+        8143282.3375646155,
+        -285178.0550627829
+      ],
+      "cell": [
+        325,
+        646
+      ],
+      "coverage": true,
+      "slope_deg": 28.52773834794981,
+      "traversable": false,
+      "component": 418802,
+      "component_size": 1,
+      "nearest_sector_valid": {
+        "distance_m": 3.014392073570556,
+        "index": 477584,
+        "component": 420034,
+        "xy": [
+          8143282.390607541,
+          -285181.06898813386
+        ]
+      }
+    },
+    {
+      "id": "navcam-4851",
+      "lonlat": [
+        137.3820371,
+        -4.81201523
+      ],
+      "analytical_xy": [
+        8143303.694238133,
+        -285265.7472357928
+      ],
+      "cell": [
+        368,
+        657
+      ],
+      "coverage": true,
+      "slope_deg": 12.455239741054603,
+      "traversable": false,
+      "component": 468634,
+      "component_size": 1,
+      "nearest_sector_valid": {
+        "distance_m": 3.858504084379362,
+        "index": 536115,
+        "component": 461857,
+        "xy": [
+          8143304.649037022,
+          -285262.00873170025
+        ]
+      }
+    },
+    {
+      "id": "navcam-4861",
+      "lonlat": [
+        137.3813703,
+        -4.81322691
+      ],
+      "analytical_xy": [
+        8143264.169869824,
+        -285337.5692012878
+      ],
+      "cell": [
+        403,
+        637
+      ],
+      "coverage": true,
+      "slope_deg": 16.232599530694454,
+      "traversable": false,
+      "component": 509165,
+      "component_size": 1,
+      "nearest_sector_valid": {
+        "distance_m": 2.714716292022505,
+        "index": 588763,
+        "component": 477435,
+        "xy": [
+          8143264.179165239,
+          -285334.85450091
+        ]
+      }
+    }
+  ],
+  "default_instant_utc": "2025-10-26T00:26:33Z",
   "routes": [
     {
       "destination": "sample",
-      "team": {
-        "catalog_version": "synthetic-team-v1",
-        "humans": [
-          {
-            "profile_id": "explorer_01",
-            "payload_kg": 0
-          }
-        ],
-        "robots": [
-          {
-            "profile_id": "support_rover",
-            "payload_kg": 0
-          }
-        ]
-      },
       "assessment": "viable_model",
+      "outbound": "found",
+      "return": "found",
       "metrics": {
-        "daylight_departure_margin_s": 0.8146830000041518,
-        "daylight_reserved_return_margin_s": 38947.22387122075,
-        "elapsed_s": 3303.5953127792422,
-        "estimated_return_offset_s": 91298.59531277925,
-        "mission_margin_s": 16496.40468722076,
-        "outbound_s": 1367.6870999391656,
+        "daylight_departure_margin_s": 0.3703510000050301,
+        "daylight_reserved_return_margin_s": 41034.38707407603,
+        "elapsed_s": 1216.6894619239742,
+        "estimated_return_offset_s": 89209.68946192398,
+        "mission_margin_s": 18583.310538076024,
+        "outbound_s": 316.30779515075517,
         "participant_margins": [
           {
             "kind": "human",
-            "margin_s": 16496.40468722076,
+            "margin_s": 18583.310538076024,
             "max_sortie_s": 21600.0,
             "model_id": "synthetic_constant_speed_v1",
             "participant_id": "explorer_01"
           },
           {
             "kind": "robot",
-            "margin_s": 12896.404687220758,
+            "margin_s": 14983.310538076026,
             "max_sortie_s": 18000.0,
             "model_id": "synthetic_constant_speed_v1",
             "participant_id": "support_rover"
           }
         ],
         "reserve_s": 1800.0,
-        "reserved_deadline_offset_s": 93098.59531277925,
-        "reserved_total_s": 5103.595312779242,
-        "return_s": 1335.9082128400767,
+        "reserved_deadline_offset_s": 91009.68946192398,
+        "reserved_total_s": 3016.6894619239742,
+        "return_s": 300.381666773219,
         "tasks_s": 600.0,
         "temporal_budget_limiting_constraints": [
           "participants[1].max_sortie_s"
         ],
-        "temporal_budget_limiting_margin_s": 12896.404687220758,
+        "temporal_budget_limiting_margin_s": 14983.310538076026,
         "temporal_budget_limiting_participant_ids": [
           "support_rover"
         ],
         "time_budget_s": 21600.0,
         "unavailable_totals_reason": null
       },
-      "outbound": "found",
-      "return": "found",
-      "candidate_criteria": [
+      "criteria": [
         [
           "fastest",
+          "lowest_relative_effort",
           "best_geometric_visibility"
-        ],
-        [
-          "lowest_relative_effort"
         ]
       ]
     },
     {
       "destination": "control",
-      "team": {
-        "catalog_version": "synthetic-team-v1",
-        "humans": [
-          {
-            "profile_id": "explorer_01",
-            "payload_kg": 0
-          }
-        ],
-        "robots": [
-          {
-            "profile_id": "support_rover",
-            "payload_kg": 0
-          }
-        ]
-      },
       "assessment": "viable_model",
+      "outbound": "found",
+      "return": "found",
       "metrics": {
-        "daylight_departure_margin_s": 0.8146830000041518,
-        "daylight_reserved_return_margin_s": 40030.239578584165,
-        "elapsed_s": 2220.5796054158263,
-        "estimated_return_offset_s": 90215.57960541583,
-        "mission_margin_s": 17579.420394584173,
-        "outbound_s": 835.8624047636946,
+        "daylight_departure_margin_s": 0.3703510000050301,
+        "daylight_reserved_return_margin_s": 41593.532736222085,
+        "elapsed_s": 657.5437997779209,
+        "estimated_return_offset_s": 88650.54379977792,
+        "mission_margin_s": 19142.456200222077,
+        "outbound_s": 29.754980136962345,
         "participant_margins": [
           {
             "kind": "human",
-            "margin_s": 17579.420394584173,
+            "margin_s": 19142.456200222077,
             "max_sortie_s": 21600.0,
             "model_id": "synthetic_constant_speed_v1",
             "participant_id": "explorer_01"
           },
           {
             "kind": "robot",
-            "margin_s": 13979.420394584173,
+            "margin_s": 15542.45620022208,
             "max_sortie_s": 18000.0,
             "model_id": "synthetic_constant_speed_v1",
             "participant_id": "support_rover"
           }
         ],
         "reserve_s": 1800.0,
-        "reserved_deadline_offset_s": 92015.57960541583,
-        "reserved_total_s": 4020.5796054158263,
-        "return_s": 784.7172006521316,
+        "reserved_deadline_offset_s": 90450.54379977792,
+        "reserved_total_s": 2457.543799777921,
+        "return_s": 27.788819640958536,
         "tasks_s": 600.0,
         "temporal_budget_limiting_constraints": [
           "participants[1].max_sortie_s"
         ],
-        "temporal_budget_limiting_margin_s": 13979.420394584173,
+        "temporal_budget_limiting_margin_s": 15542.45620022208,
         "temporal_budget_limiting_participant_ids": [
           "support_rover"
         ],
         "time_budget_s": 21600.0,
         "unavailable_totals_reason": null
       },
-      "outbound": "found",
-      "return": "found",
-      "candidate_criteria": [
+      "criteria": [
         [
           "fastest",
           "lowest_relative_effort",
@@ -178,251 +556,72 @@
     },
     {
       "destination": "lookout",
-      "team": {
-        "catalog_version": "synthetic-team-v1",
-        "humans": [
-          {
-            "profile_id": "explorer_01",
-            "payload_kg": 0
-          }
-        ],
-        "robots": [
-          {
-            "profile_id": "support_rover",
-            "payload_kg": 0
-          }
-        ]
-      },
       "assessment": "viable_model",
+      "outbound": "found",
+      "return": "found",
       "metrics": {
-        "daylight_departure_margin_s": 0.8146830000041518,
-        "daylight_reserved_return_margin_s": 38556.638781892485,
-        "elapsed_s": 3694.1804021075027,
-        "estimated_return_offset_s": 91689.18040210751,
-        "mission_margin_s": 16105.819597892498,
-        "outbound_s": 1542.6750124021507,
+        "daylight_departure_margin_s": 0.3703510000050301,
+        "daylight_reserved_return_margin_s": 41144.100823579356,
+        "elapsed_s": 1106.9757124206458,
+        "estimated_return_offset_s": 89099.97571242065,
+        "mission_margin_s": 18693.024287579356,
+        "outbound_s": 260.10729059273376,
         "participant_margins": [
           {
             "kind": "human",
-            "margin_s": 16105.819597892498,
+            "margin_s": 18693.024287579356,
             "max_sortie_s": 21600.0,
             "model_id": "synthetic_constant_speed_v1",
             "participant_id": "explorer_01"
           },
           {
             "kind": "robot",
-            "margin_s": 12505.819597892498,
+            "margin_s": 15093.024287579354,
             "max_sortie_s": 18000.0,
             "model_id": "synthetic_constant_speed_v1",
             "participant_id": "support_rover"
           }
         ],
         "reserve_s": 1800.0,
-        "reserved_deadline_offset_s": 93489.18040210751,
-        "reserved_total_s": 5494.180402107502,
-        "return_s": 1551.505389705352,
+        "reserved_deadline_offset_s": 90899.97571242065,
+        "reserved_total_s": 2906.975712420646,
+        "return_s": 246.86842182791207,
         "tasks_s": 600.0,
         "temporal_budget_limiting_constraints": [
           "participants[1].max_sortie_s"
         ],
-        "temporal_budget_limiting_margin_s": 12505.819597892498,
+        "temporal_budget_limiting_margin_s": 15093.024287579354,
         "temporal_budget_limiting_participant_ids": [
           "support_rover"
         ],
         "time_budget_s": 21600.0,
         "unavailable_totals_reason": null
       },
-      "outbound": "found",
-      "return": "found",
-      "candidate_criteria": [
-        [
-          "fastest"
-        ],
-        [
-          "lowest_relative_effort"
-        ],
-        [
-          "best_geometric_visibility"
-        ]
-      ]
-    },
-    {
-      "destination": "sample",
-      "team": {
-        "catalog_version": "synthetic-team-v1",
-        "humans": [
-          {
-            "profile_id": "explorer_02",
-            "payload_kg": 0
-          }
-        ],
-        "robots": []
-      },
-      "assessment": "viable_model",
-      "metrics": {
-        "daylight_departure_margin_s": 0.8146830000041518,
-        "daylight_reserved_return_margin_s": 40163.676403372694,
-        "elapsed_s": 2087.142780627301,
-        "estimated_return_offset_s": 90082.1427806273,
-        "mission_margin_s": 17712.857219372698,
-        "outbound_s": 734.0389617661068,
-        "participant_margins": [
-          {
-            "kind": "human",
-            "margin_s": 17712.857219372698,
-            "max_sortie_s": 21600.0,
-            "model_id": "synthetic_constant_speed_v1",
-            "participant_id": "explorer_02"
-          }
-        ],
-        "reserve_s": 1800.0,
-        "reserved_deadline_offset_s": 91882.1427806273,
-        "reserved_total_s": 3887.142780627301,
-        "return_s": 753.103818861194,
-        "tasks_s": 600.0,
-        "temporal_budget_limiting_constraints": [
-          "time_budget_s",
-          "participants[0].max_sortie_s"
-        ],
-        "temporal_budget_limiting_margin_s": 17712.857219372698,
-        "temporal_budget_limiting_participant_ids": [
-          "explorer_02"
-        ],
-        "time_budget_s": 21600.0,
-        "unavailable_totals_reason": null
-      },
-      "outbound": "found",
-      "return": "found",
-      "candidate_criteria": [
-        [
-          "fastest",
-          "best_geometric_visibility"
-        ],
-        [
-          "lowest_relative_effort"
-        ]
-      ]
-    },
-    {
-      "destination": "control",
-      "team": {
-        "catalog_version": "synthetic-team-v1",
-        "humans": [
-          {
-            "profile_id": "explorer_02",
-            "payload_kg": 0
-          }
-        ],
-        "robots": []
-      },
-      "assessment": "viable_model",
-      "metrics": {
-        "daylight_departure_margin_s": 0.8146830000041518,
-        "daylight_reserved_return_margin_s": 40797.077183270594,
-        "elapsed_s": 1453.7420007294054,
-        "estimated_return_offset_s": 89448.7420007294,
-        "mission_margin_s": 18346.257999270594,
-        "outbound_s": 411.53450056849107,
-        "participant_margins": [
-          {
-            "kind": "human",
-            "margin_s": 18346.257999270594,
-            "max_sortie_s": 21600.0,
-            "model_id": "synthetic_constant_speed_v1",
-            "participant_id": "explorer_02"
-          }
-        ],
-        "reserve_s": 1800.0,
-        "reserved_deadline_offset_s": 91248.7420007294,
-        "reserved_total_s": 3253.7420007294054,
-        "return_s": 442.2075001609143,
-        "tasks_s": 600.0,
-        "temporal_budget_limiting_constraints": [
-          "time_budget_s",
-          "participants[0].max_sortie_s"
-        ],
-        "temporal_budget_limiting_margin_s": 18346.257999270594,
-        "temporal_budget_limiting_participant_ids": [
-          "explorer_02"
-        ],
-        "time_budget_s": 21600.0,
-        "unavailable_totals_reason": null
-      },
-      "outbound": "found",
-      "return": "found",
-      "candidate_criteria": [
+      "criteria": [
         [
           "fastest",
           "lowest_relative_effort",
           "best_geometric_visibility"
-        ]
-      ]
-    },
-    {
-      "destination": "lookout",
-      "team": {
-        "catalog_version": "synthetic-team-v1",
-        "humans": [
-          {
-            "profile_id": "explorer_02",
-            "payload_kg": 0
-          }
-        ],
-        "robots": []
-      },
-      "assessment": "viable_model",
-      "metrics": {
-        "daylight_departure_margin_s": 0.8146830000041518,
-        "daylight_reserved_return_margin_s": 40606.91747388737,
-        "elapsed_s": 1643.9017101126226,
-        "estimated_return_offset_s": 89638.90171011262,
-        "mission_margin_s": 18156.098289887377,
-        "outbound_s": 524.6158636504823,
-        "participant_margins": [
-          {
-            "kind": "human",
-            "margin_s": 18156.098289887377,
-            "max_sortie_s": 21600.0,
-            "model_id": "synthetic_constant_speed_v1",
-            "participant_id": "explorer_02"
-          }
-        ],
-        "reserve_s": 1800.0,
-        "reserved_deadline_offset_s": 91438.90171011262,
-        "reserved_total_s": 3443.901710112623,
-        "return_s": 519.2858464621403,
-        "tasks_s": 600.0,
-        "temporal_budget_limiting_constraints": [
-          "time_budget_s",
-          "participants[0].max_sortie_s"
-        ],
-        "temporal_budget_limiting_margin_s": 18156.098289887377,
-        "temporal_budget_limiting_participant_ids": [
-          "explorer_02"
-        ],
-        "time_budget_s": 21600.0,
-        "unavailable_totals_reason": null
-      },
-      "outbound": "found",
-      "return": "found",
-      "candidate_criteria": [
-        [
-          "fastest",
-          "best_geometric_visibility"
-        ],
-        [
-          "lowest_relative_effort"
         ]
       ]
     }
   ],
-  "reference_photo": {
-    "id": "pano_nevado_sajama",
-    "lonlat": [
-      137.3810041,
-      -4.80800755
-    ],
-    "classification": "observed, unchanged"
+  "frame_method": "Photo markers are rendered at observed lon/lat without horizontal shift. For native analytical cells, apply the inverse existing scene registration (+25 m east, -35 m north) once; render with existing -25/+35 shift once. No panorama height correction in horizontal selection. Sector is the convex hull of all 12 registered marker positions, not the parcel or a radius.",
+  "old_array_hashes": {
+    "elevation_m": "a144d35200600a003622a9d389d3128a3ddc8ca7d7075aad760007cb8f3229de",
+    "terrain_slope_deg": "b3e7b338ddbd817928769a747994ea6ca80f2d3eb4c70a5153911c4343beb1b5",
+    "coverage": "0262ea1f2fdb74cc53c91d01936e1dc1735b22b0d98a0878e71cbfa9b702c1b5",
+    "excluded": "3f319156264c9810db70d3376021f2cbc5e9daefc2d2ba22bbcdb54dfc929ae1",
+    "native_elevation_m": "e0342d9f9e31d21ff48a4676726cb9f5ae80d85f6e18e6027ef5a7b3435b6359",
+    "native_valid": "5be73edcfa104aafaf094b264f203a2a31956b75457bb61b5c7878a43291f42a"
   },
-  "distance_method": "Horizontal spherical EQC, analytical POI shifted -25 m east/+35 m north for scene registration; photo marker unchanged. Panorama height correction excluded."
+  "new_array_hashes": {
+    "elevation_m": "a144d35200600a003622a9d389d3128a3ddc8ca7d7075aad760007cb8f3229de",
+    "terrain_slope_deg": "b3e7b338ddbd817928769a747994ea6ca80f2d3eb4c70a5153911c4343beb1b5",
+    "coverage": "0262ea1f2fdb74cc53c91d01936e1dc1735b22b0d98a0878e71cbfa9b702c1b5",
+    "excluded": "3f319156264c9810db70d3376021f2cbc5e9daefc2d2ba22bbcdb54dfc929ae1",
+    "native_elevation_m": "e0342d9f9e31d21ff48a4676726cb9f5ae80d85f6e18e6027ef5a7b3435b6359",
+    "native_valid": "5be73edcfa104aafaf094b264f203a2a31956b75457bb61b5c7878a43291f42a"
+  },
+  "panorama_scope": "Approximate visual context from unchanged actual capture positions; not the view from every point along a route."
 }

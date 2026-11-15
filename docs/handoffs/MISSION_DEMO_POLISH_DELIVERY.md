@@ -1,3 +1,5 @@
+> Location correction: the original distant placement below is superseded by [PHOTO_SECTOR_LOCATION_CORRECTION.md](PHOTO_SECTOR_LOCATION_CORRECTION.md) and the current MISSION_DEMO_LOCATIONS.json. Other delivered behavior remains unchanged.
+
 # Mission demo polish delivery
 
 Branch: `p2/mission-demo-polish`. Started from fetched main `1bf5b4a` (including libexpat1). No production deployment or PR merge is authorized/performed.
