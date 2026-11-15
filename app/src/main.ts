@@ -22,6 +22,7 @@ import { esc } from "./ui/format";
 import { createMissionContext, setUpInputModeMenu, setUpSettingsMenu } from "./ui/hud";
 import type { PlanResponse } from "./mission/draft";
 import { createSceneRoutes } from "./mission/sceneRoutes";
+import { createScenePois } from "./mission/scenePois";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -276,6 +277,13 @@ async function main() {
   if (activeResponse) void showSceneResponse(activeResponse);
   Object.assign(window, { missionRoutes: sceneRoutes });
   panel.onChange(() => layers.refresh());
+
+  // Registered points are shown while the mission wizard is on its Mission step.
+  const scenePois = createScenePois(viewer);
+  let pointsVisible = false;
+  const refreshPoints = () => void scenePois.update(pointsVisible, panel.getParcel(), panel.getRequest());
+  panel.onPointsPreview((visible) => { pointsVisible = visible; refreshPoints(); });
+  panel.onChange(() => { if (pointsVisible) refreshPoints(); });
 
   // Cursor readout: position, DTM elevation and slope (highlighted above the profile's maximum).
   const readout = createCursorReadout(viewer, await elevationGrid, (lon, lat) =>

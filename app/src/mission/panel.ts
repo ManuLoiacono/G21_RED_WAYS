@@ -1,129 +1,433 @@
-import { onLanguageChange, t, tOr } from "../i18n";
+import { onLanguageChange, t, tOr, type MessageKey } from "../i18n";
 import { esc } from "../ui/format";
 import { infoButton } from "../provenance/sources";
 import { loadMetadata, loadParcel, requestPlan, type ServiceMetadata } from "./api";
 import type { CatalogEntry, Member, Parameters, Parcel, PlanRequest, PlanResponse } from "./draft";
 import { baselineRequest, RequestGate } from "./request";
+import { KG_TO_LB, TEAM_FIXTURE } from "./teamFixture";
+import { fromHhMm, toHhMm } from "./time";
+import { familyIcon, ICONS, memberIcon } from "./icons";
 
+/**
+ * "New mission" wizard (replaces the single "Plan mission" form). Five steps:
+ * Mission → Team → Tasks → Schedule → Summary. It is a presentation layer over the same
+ * PlanRequest state and request logic (RequestGate, invalidation on edit, stale responses
+ * discarded); no new fields are sent to the engine. Durations are shown as hh:mm and sent in
+ * seconds. Fictional personal data on the team cards never leaves the UI.
+ */
 export interface PlanResponseEvent { response: PlanResponse }
 export interface MissionPanel {
   selectDestination(id: string): string | null;
   onChange(cb: (request: Readonly<PlanRequest>) => void): void;
   onStale(cb: () => void): void;
+  /** Called when the registered points should be shown (wizard open on the Mission step) or hidden. */
+  onPointsPreview(cb: (visible: boolean) => void): void;
   getRequest(): PlanRequest | null;
   getParcel(): Parcel | null;
   getSlopeLimit(): number;
   setCollapsed(value: boolean): void;
 }
 export const templateLabel = (id: string) => tOr(`nav.template.${id}`, id);
+
 const PARAMETER_KEYS: (keyof Parameters)[] = ["flat_speed_m_s", "max_ascent_deg", "max_descent_deg", "carrying_limit_kg", "max_sortie_s"];
+const STEPS = ["mission", "team", "tasks", "schedule", "summary"] as const;
+type Step = 0 | 1 | 2 | 3 | 4;
+const MAX_HUMANS = 4;
+const MAX_ROBOTS = 2;
+const MAX_TASKS = 64;
+type StatusKey = "nav.ready" | "mp.status.calculating" | "mp.status.received" | "mp.status.stale" | "mp.status.discarded";
 
 export function createMissionPanel(root: HTMLElement): MissionPanel {
   let metadata: ServiceMetadata | null = null;
   let parcelLoadSequence = 0;
   let state: PlanRequest | null = null;
-  let collapsed = false;
-  let busy = false;
   let loading = true;
+  let busy = false;
   let error = "";
-  let statusKey: "nav.ready" | "mp.status.calculating" | "mp.status.received" | "mp.status.stale" | "mp.status.discarded" = "nav.ready";
+  let statusKey: StatusKey = "nav.ready";
+  let open = false;
+  let step: Step = 0;
+  let maxVisited: Step = 0;
+  let hasResult = false;
+  let showHonesty = false;
+  let peekMap = false;
+  /** Direction of the last step change, used once for the slide-in animation. */
+  let animDir: "next" | "prev" | "" = "";
+  const editing = new Set<string>();
+  /** Display names of user-added tasks (UI only; the engine receives generated ids). */
+  const taskNames = new Map<string, string>();
+  /** Field name → raw text of values that are currently invalid. */
+  const invalid = new Map<string, string>();
   const gate = new RequestGate();
   let activeRequest: PlanRequest | null = null;
   const staleListeners: (() => void)[] = [];
   const listeners: ((request: Readonly<PlanRequest>) => void)[] = [];
-  const invalid = new Map<string, string>();
+  const previewListeners: ((visible: boolean) => void)[] = [];
+
+  const wizard = document.createElement("div");
+  wizard.id = "missionWizard";
+  wizard.setAttribute("role", "dialog");
+  wizard.setAttribute("aria-labelledby", "wzTitle");
+  wizard.hidden = true;
+  document.body.appendChild(wizard);
+
+  // ---------- helpers ----------
+  const catalogEntry = (id: string) => metadata!.catalogs.catalog.entries.find((e) => e.identity.profile_id === id)!;
+  const members = (s: PlanRequest) => [...s.team.humans, ...s.team.robots];
+  const effective = (m: Member, key: keyof Parameters) => m.mission_overrides?.[key] ?? catalogEntry(m.profile_id).defaults[key];
+  const poiName = (id: string) => tOr(`nav.poi.${id}`, id);
+  const taskName = (id: string) => taskNames.get(id) ?? tOr(`nav.task.${id}`, id);
+  const num = (v: number, digits = 2) => Number(v.toFixed(digits)).toLocaleString(document.documentElement.lang || undefined);
+  const tag = (kind: "assumed" | "derived" | "fictional") => `<span class="wz-tag" data-kind="${kind}">${esc(t(`wizard.tag.${kind}`))}</span>`;
+  const paramText = (key: keyof Parameters, value: number) => key === "max_sortie_s" ? toHhMm(value) : num(value);
+  const paramUnit = (key: keyof Parameters) => ({ flat_speed_m_s: "m/s", max_ascent_deg: "°", max_descent_deg: "°", carrying_limit_kg: "kg", max_sortie_s: "" })[key];
+
+  function distanceM(s: PlanRequest): number | null {
+    const a = metadata?.parcel.pois.find((p) => p.id === s.origin.poi_id);
+    const b = metadata?.parcel.pois.find((p) => p.id === s.destination.poi_id);
+    return a && b ? Math.hypot(a.xy_m[0] - b.xy_m[0], a.xy_m[1] - b.xy_m[1]) : null;
+  }
+  function limits(s: PlanRequest) {
+    const team = members(s);
+    const minOf = (key: keyof Parameters) => {
+      const value = Math.min(...team.map((m) => effective(m, key)));
+      return { value, by: team.filter((m) => effective(m, key) === value).map((m) => m.profile_id) };
+    };
+    return team.length ? { pace: minOf("flat_speed_m_s"), up: minOf("max_ascent_deg"), down: minOf("max_descent_deg") } : null;
+  }
+  const tasksTotal = (s: PlanRequest) => s.mission.tasks.reduce((sum, task) => sum + task.duration_s, 0);
+  function advancedModified(s: PlanRequest) {
+    const d = metadata!.parcel.planning_defaults;
+    const parcel = metadata!.health.default_parcel;
+    return s.parcel.id !== parcel.id || s.parcel.version !== parcel.version || s.scenario.id !== d.scenario.id || s.scenario.as_of_utc !== d.scenario.as_of_utc;
+  }
+
+  // ---------- validation by step ----------
+  function stepErrors(i: Step, s: PlanRequest): string[] {
+    const errs: string[] = [];
+    const fieldsInvalid = (prefixes: string[]) => [...invalid.keys()].some((k) => prefixes.some((p) => k.startsWith(p)));
+    if (i === 0) {
+      if (!s.mission.template_id) errs.push(t("wizard.mission.family"));
+      if (s.origin.poi_id === s.destination.poi_id) errs.push(t("wizard.mission.sameplace"));
+    } else if (i === 1) {
+      if (!s.team.humans.length) errs.push(t("wizard.team.minHuman"));
+      if (s.team.humans.length > MAX_HUMANS || s.team.robots.length > MAX_ROBOTS) errs.push(t("wizard.team.max"));
+      if (fieldsInvalid(["payload:", "override:"])) errs.push(t("mp.status.invalid"));
+    } else if (i === 2) {
+      if (s.mission.tasks.length > MAX_TASKS) errs.push(t("wizard.tasks.max"));
+      if (fieldsInvalid(["task-", "tname-"])) errs.push(t("mp.status.invalid"));
+    } else if (i === 3) {
+      if (fieldsInvalid(["departure", "as-of", "reserve", "budget"])) errs.push(t("mp.status.invalid"));
+    } else {
+      for (const j of [0, 1, 2, 3] as Step[]) if (stepErrors(j, s).length) errs.push(t("wizard.summary.invalidStep", { step: t(`wizard.step.${STEPS[j]}`) }));
+    }
+    return errs;
+  }
+
+  // ---------- rendering ----------
+  function renderLauncher() {
+    root.classList.add("mp-launcher");
+    root.classList.remove("collapsed");
+    if (!state || !metadata) {
+      root.innerHTML = `<p class="mp-status" role="status" data-kind="${error ? "error" : "info"}">${esc(error || t(loading ? "nav.connecting" : "nav.noMetadata"))}</p>
+        ${!loading ? `<button type="button" data-act="connect">${esc(t("status.retry"))}</button>` : ""}`;
+      return;
+    }
+    root.innerHTML = hasResult
+      ? `<div class="wz-launch"><button type="button" class="wz-new" data-act="edit">${esc(t("wizard.edit"))}</button>
+         <button type="button" class="wz-new wz-secondary" data-act="new">${esc(t("wizard.open"))}</button></div>`
+      : `<div class="wz-launch"><button type="button" class="wz-new" data-act="open">${esc(t("wizard.open"))}</button></div>`;
+  }
 
   function render() {
-    const opened = new Set(Array.from(root.querySelectorAll<HTMLDetailsElement>("details[open][data-member]"), (el) => el.dataset.member));
-    const scroll = root.querySelector(".mp-body")?.scrollTop ?? 0;
-    root.classList.toggle("collapsed", collapsed);
-    root.innerHTML = `
-      <header class="mp-head"><h2>${esc(t("mp.title"))}</h2>
-        <button type="button" data-act="collapse" aria-expanded="${!collapsed}" aria-label="${esc(t(collapsed ? "mp.show" : "mp.hide"))}">${collapsed ? "+" : "−"}</button></header>
-      <form class="mp-body" novalidate>
-        ${state && metadata ? form(state, metadata) : `<p>${esc(t(loading ? "nav.connecting" : "nav.noMetadata"))}</p>`}
-        <p class="mp-status" role="status" aria-live="polite" data-kind="${error ? "error" : "info"}">${esc(error || t(statusKey))}</p>
-        ${!state && !loading ? `<button type="button" data-act="connect">${esc(t("status.retry"))}</button>` : ""}
-      </form>`;
+    renderLauncher();
+    wizard.hidden = !open || !state || !metadata;
+    wizard.classList.toggle("wz-side", step === 0);
+    wizard.classList.toggle("wz-peek", peekMap);
+    notifyPreview();
+    if (wizard.hidden) { preview(); return; }
+    const s = state!;
+    const scroll = wizard.querySelector(".wz-body")?.scrollTop ?? 0;
+    const openAdvanced = new Set(Array.from(wizard.querySelectorAll<HTMLDetailsElement>("details[open][data-adv]"), (d) => d.dataset.adv));
+    const errs = stepErrors(step, s);
+    wizard.innerHTML = `
+      <header class="wz-head">
+        <h2 id="wzTitle" tabindex="-1">${esc(t("wizard.open"))} · ${esc(templateLabel(s.mission.template_id))}</h2>
+        <ol class="wz-stepper">${STEPS.map((name, i) => {
+          const status = i === step ? "current" : stepErrors(i as Step, s).length && i <= maxVisited ? "error" : i <= maxVisited ? "complete" : "pending";
+          return `<li><button type="button" data-goto="${i}" data-status="${status}" ${i > maxVisited ? "disabled" : ""} ${i === step ? 'aria-current="step"' : ""}>
+            <span class="wz-num">${i + 1}</span><span class="wz-name">${esc(t(`wizard.step.${name}`))}</span></button></li>`;
+        }).join("")}</ol>
+        <div class="wz-progress" aria-hidden="true"><span style="width:${(100 * step / (STEPS.length - 1)).toFixed(1)}%"></span></div>
+        <button type="button" class="wz-close" data-act="close" aria-label="${esc(t("wizard.close"))}" title="${esc(t("wizard.close"))}">×</button>
+      </header>
+      <div class="wz-main">
+        <form class="wz-body" novalidate data-anim="${animDir}">${stepHeader(step)}${[missionStep, teamStep, tasksStep, scheduleStep, summaryStep][step](s)}</form>
+        ${step >= 1 && step <= 3 ? `<aside class="wz-live" aria-live="polite">${liveSummary(s)}</aside>` : ""}
+      </div>
+      <footer class="wz-foot">
+        ${errs.length && step !== 4 ? `<p class="wz-errors" role="alert">${errs.map(esc).join(" · ")}</p>` : ""}
+        <div class="wz-nav">
+          ${step > 0 ? `<button type="button" data-act="back">${esc(t("wizard.back"))}</button>` : "<span></span>"}
+          ${step < 4
+            ? `<button type="button" class="mp-primary" data-act="next" ${errs.length ? "disabled" : ""}>${esc(t("wizard.next"))}</button>`
+            : `<button type="button" class="mp-primary" data-act="calculate" ${errs.length || busy ? "disabled" : ""}>${esc(t("wizard.calculate"))}</button>`}
+        </div>
+        <div class="wz-honesty">
+          <span>${esc(t(metadata!.parcel.geographic_adapter ? "wizard.honesty.strip" : "wizard.honesty.stripSynthetic"))}</span>
+          <button type="button" class="wz-info" data-act="honesty" aria-expanded="${showHonesty}" aria-label="${esc(t("wizard.honesty.more"))}" title="${esc(t("wizard.honesty.more"))}">ⓘ</button>
+        </div>
+        ${showHonesty ? `<div class="wz-honesty-full">
+          <p>${esc(t(metadata!.parcel.geographic_adapter ? "nav.realTerrain" : "nav.synthetic"))}</p>
+          <p>${esc(t("nav.unsupported"))}</p><p>${esc(t("nav.clock"))}</p><p>${esc(t("nav.locations"))}</p>
+          <p>${esc(t("wizard.team.fictionalNote"))} ${infoButton("navigation_draft", t("nav.provenance"))}</p></div>` : ""}
+      </footer>
+      ${peekMap ? `<button type="button" class="wz-peek-back" data-act="peek">${esc(t("wizard.mapBack"))}</button>` : ""}`;
     for (const [name, value] of invalid) {
-      const input = root.querySelector<HTMLInputElement>(`[name="${name}"]`);
+      const input = wizard.querySelector<HTMLInputElement>(`[name="${name}"]`);
       if (input) { input.value = value; input.setAttribute("aria-invalid", "true"); }
     }
-    root.querySelectorAll<HTMLDetailsElement>("details[data-member]").forEach((el) => { el.open = opened.has(el.dataset.member); });
-    const body = root.querySelector(".mp-body");
-    if (body) body.scrollTop = scroll;
+    wizard.querySelectorAll<HTMLDetailsElement>("details[data-adv]").forEach((d) => { if (openAdvanced.has(d.dataset.adv)) d.open = true; });
+    const body = wizard.querySelector(".wz-body");
+    if (body && !animDir) body.scrollTop = scroll;
+    animDir = "";
     preview();
   }
-  function form(s: PlanRequest, m: ServiceMetadata) {
+
+  function stepHeader(i: Step) {
+    const icons = [ICONS.route, ICONS.team, ICONS.tasks, ICONS.clock, ICONS.check];
+    return `<div class="wz-step-head"><span class="wz-step-icon">${icons[i]}</span><div>
+      <p class="wz-eyebrow">${esc(t("wizard.stepOf", { n: i + 1, total: STEPS.length }))}</p>
+      <h3>${esc(t(`wizard.step.${STEPS[i]}`))}</h3><p class="wz-lead">${esc(t(`wizard.lead.${STEPS[i]}`))}</p></div></div>`;
+  }
+
+  function timeBar(s: PlanRequest) {
+    const tasks = tasksTotal(s);
+    const reserve = s.mission.reserve_s;
+    const budget = s.mission.time_budget_s;
+    const scale = Math.max(budget, tasks + reserve, 1);
+    const over = tasks + reserve > budget;
+    const pct = (v: number) => `${(100 * Math.max(v, 0) / scale).toFixed(2)}%`;
+    return `<div class="wz-bar ${over ? "over" : ""}" role="img" aria-label="${esc(t("wizard.summary.legend", { tasks: toHhMm(tasks), reserve: toHhMm(reserve), budget: toHhMm(budget) }))}">
+        <span class="seg-tasks" style="width:${pct(tasks)}"></span><span class="seg-reserve" style="width:${pct(reserve)}"></span>
+        ${over ? `<i class="seg-budget" style="left:${pct(budget)}"></i>` : `<span class="seg-free" style="width:${pct(budget - tasks - reserve)}"></span>`}</div>
+      <p class="wz-legend"><span class="dot tasks"></span>${esc(t("wizard.live.tasks"))} ${toHhMm(tasks)} <span class="dot reserve"></span>${esc(t("wizard.live.reserve"))} ${toHhMm(reserve)} <span class="dot free"></span>${esc(t("wizard.live.budget"))} ${toHhMm(budget)}</p>`;
+  }
+
+  /** Compact, always-current view of the mission while editing steps 2–4 (desktop side column). */
+  function liveSummary(s: PlanRequest) {
+    const d = distanceM(s);
+    const lim = limits(s);
+    const chips = members(s).map((m) => {
+      const e = catalogEntry(m.profile_id);
+      return `<span class="wz-chip" data-kind="${e.kind}">${memberIcon(e.kind, m.profile_id)}${esc(e.identity.name.split(" ")[0])}</span>`;
+    }).join("");
+    return `<p class="wz-eyebrow">${esc(t("wizard.live.title"))}</p>
+      <div class="wz-live-family"><span class="wz-live-icon">${familyIcon(s.mission.template_id)}</span><strong>${esc(templateLabel(s.mission.template_id))}</strong></div>
+      <p class="wz-live-route">${esc(poiName(s.origin.poi_id))} <span>→</span> ${esc(poiName(s.destination.poi_id))}${d === null ? "" : ` <small>≈ ${num(d, 0)} m</small>`}</p>
+      <div class="wz-live-team">${chips || `<span class="wz-warn">${esc(t("wizard.team.minHuman"))}</span>`}</div>
+      ${lim ? `<p class="wz-live-pace">${esc(t("wizard.live.pace", { speed: `${num(lim.pace.value)} m/s`, slope: `${num(Math.min(lim.up.value, lim.down.value))}°` }))}</p>` : ""}
+      ${timeBar(s)}`;
+  }
+
+  function missionStep(s: PlanRequest) {
+    const m = metadata!;
+    const d = distanceM(s);
+    const poiOptions = (selected: string) => m.parcel.pois.map((p) =>
+      `<option value="${esc(p.id)}" ${p.id === selected ? "selected" : ""}>${esc(poiName(p.id))} · ${esc(t("wizard.hypothetical"))}</option>`).join("");
     return `
-      <p class="mp-note">${esc(t(m.parcel.geographic_adapter ? "nav.realTerrain" : "nav.synthetic"))} ${infoButton("navigation_draft", t("nav.provenance"))}</p>
-      <fieldset><legend>${esc(t("mp.mission"))}</legend>
-        <label>${esc(t("nav.parcel"))}<select name="parcel">${m.health.registered_parcels.map((p, i) =>
-          `<option value="${i}" ${p.id === s.parcel.id && p.version === s.parcel.version ? "selected" : ""}>${esc(p.id)} · ${esc(p.version)} · ${esc(t(p.fixture ? "nav.syntheticMode" : "nav.galeMode"))}</option>`).join("")}</select></label>
-        <label>${esc(t("mp.family"))}<select name="template">${m.catalogs.mission_templates.templates.map((v) =>
-          `<option value="${esc(v.id)}" ${v.id === s.mission.template_id ? "selected" : ""}>${esc(templateLabel(v.id))}</option>`).join("")}</select></label>
+      <fieldset class="wz-families"><legend>${esc(t("mp.family"))}</legend>
+        ${m.catalogs.mission_templates.templates.map((v) => `<button type="button" class="wz-family" data-family="${esc(v.id)}" aria-pressed="${v.id === s.mission.template_id}">
+          <span class="wz-family-icon">${familyIcon(v.id)}</span><span class="wz-family-text"><strong>${esc(templateLabel(v.id))}</strong><small>${esc(tOr(`wizard.family.${v.id}`, ""))}</small></span>
+          <span class="wz-check">${ICONS.check}</span></button>`).join("")}
+      </fieldset>
+      <div class="wz-grid2">
         <label>${esc(t("mp.departFrom"))}<select name="origin">${poiOptions(s.origin.poi_id)}</select></label>
         <label>${esc(t("mp.destination"))}<select name="destination">${poiOptions(s.destination.poi_id)}</select></label>
-        <p class="mp-hint">${esc(t("nav.locations"))}</p>
-      </fieldset>
-      <fieldset><legend>${esc(t("mp.tasks"))}</legend>
-        ${s.mission.tasks.map((task, i) => `<div class="nav-task">
-          <label>${esc(t("nav.taskId"))}<input name="task-id-${i}" value="${esc(task.id)}" /></label>
-          <label>${esc(tOr(`nav.task.${task.id}`, task.id))} (s)
-            <input name="task-${i}" type="number" min="0" step="any" value="${task.duration_s}" /></label>
-          <button type="button" data-act="remove-task" data-index="${i}" aria-label="${esc(t("mp.task.remove", { n: i + 1 }))}">×</button>
-        </div>`).join("")}
-        <button type="button" data-act="add-task" ${s.mission.tasks.length >= 64 ? "disabled" : ""}>${esc(t("mp.task.add"))}</button>
-      </fieldset>
-      <fieldset><legend>${esc(t("nav.team"))}</legend>
-        <p class="mp-hint">${esc(t("nav.teamHint"))}</p>
-        ${m.catalogs.catalog.entries.map((entry) => memberForm(entry, s)).join("")}
-      </fieldset>
-      <fieldset><legend>${esc(t("mp.schedule"))}</legend>
-        <label>${esc(t("nav.scenario"))}<select name="scenario">
-          ${m.parcel.scenarios.map(({ id }) => `<option value="${id}" ${s.scenario.id === id ? "selected" : ""}>${esc(tOr(`nav.scenario.${id}`, id))}</option>`).join("")}
-        </select></label>
-        <label>${esc(t("nav.asOfUtc"))}<input name="as-of" type="datetime-local" step="1" value="${s.scenario.as_of_utc.replace("Z", "")}" /></label>
-        <label>${esc(t("nav.departureUtc"))}<input name="departure" type="datetime-local" step="1" value="${s.mission.departure_utc.replace("Z", "")}" /></label>
-        <div class="mp-grid">
-          <label>${esc(t("nav.reserve"))}<input name="reserve" type="number" min="0" step="1" value="${s.mission.reserve_s}" /></label>
-          <label>${esc(t("nav.budget"))}<input name="budget" type="number" min="0.001" step="1" value="${s.mission.time_budget_s}" /></label>
-        </div>
-        <p class="mp-hint">${esc(t("nav.clock"))}</p>
-      </fieldset>
-      <p class="mp-hint">${esc(t("nav.unsupported"))}</p>
-      <div class="mp-actions"><button type="button" data-act="reset">${esc(t("mp.reset"))}</button>
-        <button type="submit" class="mp-primary" ${busy ? "disabled" : ""}>${esc(t("mp.submit"))}</button></div>
-      <details class="mp-json"><summary>${esc(t("mp.json"))}</summary><pre></pre></details>`;
+      </div>
+      <p class="wz-derived" data-derived="distance">${d === null ? "" : `${esc(t("wizard.mission.distance", { m: num(d, 0) }))} ${tag("derived")}`}</p>
+      ${s.origin.poi_id === s.destination.poi_id ? `<p class="wz-warn">${esc(t("wizard.mission.sameplace"))}</p>` : ""}
+      <button type="button" class="wz-peek-btn" data-act="peek">${esc(t("wizard.mapPeek"))}</button>
+      <details data-adv="mission" class="wz-adv"><summary>${esc(t("wizard.advanced"))}${advancedModifiedBadge(s.parcel.id !== m.health.default_parcel.id || s.parcel.version !== m.health.default_parcel.version)}</summary>
+        <label>${esc(t("nav.parcel"))}<select name="parcel">${m.health.registered_parcels.map((p, i) =>
+          `<option value="${i}" ${p.id === s.parcel.id && p.version === s.parcel.version ? "selected" : ""}>${esc(p.id)} · ${esc(p.version)} · ${esc(t(p.fixture ? "nav.syntheticMode" : "nav.galeMode"))}</option>`).join("")}</select></label>
+        <p class="mp-hint">${esc(t("wizard.mission.parcelWarn"))}</p>
+      </details>`;
   }
-  function memberForm(entry: CatalogEntry, s: PlanRequest) {
+  const advancedModifiedBadge = (modified: boolean) => modified ? ` <span class="wz-tag" data-kind="modified">${esc(t("wizard.advanced.modified"))}</span>` : "";
+
+  function teamStep(s: PlanRequest) {
+    const lim = limits(s);
+    const count = members(s).length;
+    const summary = lim ? t("wizard.team.summary", {
+      speed: `${num(lim.pace.value)} m/s`, slopeUp: `${num(lim.up.value)}°`, slopeDown: `${num(lim.down.value)}°` }) : "";
+    return `
+      <p class="mp-hint">${esc(t("nav.teamHint"))}</p>
+      ${lim ? `<p class="wz-derived">${esc(summary)} ${tag("assumed")}</p>` : ""}
+      <div class="wz-cards">${metadata!.catalogs.catalog.entries.map((e) => card(e, s, lim, count)).join("")}</div>`;
+  }
+
+  function card(entry: CatalogEntry, s: PlanRequest, lim: ReturnType<typeof limits>, count: number) {
     const id = entry.identity.profile_id;
     const group = entry.kind === "human" ? s.team.humans : s.team.robots;
     const selected = group.find((p) => p.profile_id === id);
-    const lastHuman = entry.kind === "human" && selected && group.length === 1;
-    return `<section class="nav-member">
-      <label class="nav-member-toggle"><input type="checkbox" name="member:${esc(id)}" ${selected ? "checked" : ""} ${lastHuman ? "disabled" : ""} />
-        ${esc(entry.identity.name)} · ${esc(t(`nav.${entry.kind}`))}</label>
-      ${selected ? `<label>${esc(t("nav.payload"))}<input type="number" step="any" min="0" name="payload:${esc(id)}" value="${selected.payload_kg}" /></label>
-        <details data-member="${esc(id)}"><summary>${esc(t("nav.overrides"))}</summary>
-          <p class="mp-hint">${esc(t("nav.overrideHint"))}</p>
-          ${PARAMETER_KEYS.map((key) => `<label>${esc(tOr(`nav.param.${key}`, key))}
-            <input name="override:${esc(id)}:${key}" type="number" min="0" step="any" value="${selected.mission_overrides?.[key] ?? ""}" placeholder="${entry.defaults[key]}" />
-            <small>${esc(t("nav.catalogDefault", { value: entry.defaults[key] }))}</small></label>`).join("")}
-          <p class="mp-hint">${esc(t("nav.model"))}: ${esc(entry.defaults.model_id)}</p>
-        </details>` : ""}
-    </section>`;
+    const full = !selected && group.length >= (entry.kind === "human" ? MAX_HUMANS : MAX_ROBOTS);
+    const isEditing = selected && editing.has(id);
+    const fx = TEAM_FIXTURE[id];
+    const personal = !fx ? "" : fx.kind === "human"
+      ? `<li>${esc(t("wizard.person.age", { v: fx.age_years }))}</li><li>${esc(t("wizard.person.height", { v: num(fx.height_m) }))}</li>
+         <li>${esc(t("wizard.person.mass", { kg: fx.mass_kg, lb: Math.round(fx.mass_kg * KG_TO_LB) }))}</li>`
+      : `<li>${esc(t("wizard.robot.mass", { kg: fx.mass_kg, lb: Math.round(fx.mass_kg * KG_TO_LB) }))}</li>
+         <li>${esc(t("wizard.robot.size", { l: num(fx.length_m), w: num(fx.width_m) }))}</li><li>${esc(t(`wizard.robot.drive.${fx.drive}`))}</li>`;
+    const limitKey = (key: keyof Parameters) => {
+      if (!lim || count < 2 || !selected) return "";
+      const map: Partial<Record<keyof Parameters, [typeof lim.pace, MessageKey]>> = {
+        flat_speed_m_s: [lim.pace, "wizard.team.limits.pace"], max_ascent_deg: [lim.up, "wizard.team.limits.up"], max_descent_deg: [lim.down, "wizard.team.limits.down"] };
+      const hit = map[key];
+      return hit && hit[0].by.includes(id) ? `<span class="wz-limit">${esc(t(hit[1]))}</span>` : "";
+    };
+    const catalogMax = (key: keyof Parameters) => Math.max(...metadata!.catalogs.catalog.entries.map((e) => e.defaults[key]));
+    const params = PARAMETER_KEYS.map((key) => {
+      const base = entry.defaults[key];
+      const override = selected?.mission_overrides?.[key];
+      const value = override ?? base;
+      const name = `override:${id}:${key}`;
+      // Catalog labels carry the unit in parentheses; values here show their own unit (or hh:mm).
+      const label = tOr(`nav.param.${key}`, key).replace(/\s*\([^)]*\)\s*$/, "") + (isEditing ? ` (${key === "max_sortie_s" ? "hh:mm" : paramUnit(key)})` : "");
+      if (isEditing) {
+        const inputValue = key === "max_sortie_s" ? toHhMm(value) : String(value);
+        return `<li class="wz-param"><label>${esc(label)}
+            <input name="${esc(name)}" ${key === "max_sortie_s" ? 'type="text" inputmode="numeric" placeholder="hh:mm"' : 'type="number" min="0" step="any"'} value="${esc(inputValue)}" /></label>
+          ${override !== undefined ? `<small>${esc(t("wizard.team.catalog", { value: `${paramText(key, base)} ${paramUnit(key)}` }))}</small>
+            <button type="button" class="wz-mini" data-act="restore" data-member="${esc(id)}" data-param="${key}">${esc(t("wizard.team.restore"))}</button>` : ""}
+          ${limitKey(key)}</li>`;
+      }
+      const meter = `<i class="wz-meter" aria-hidden="true"><b style="width:${Math.min(100, (100 * value) / Math.max(catalogMax(key), value, 1e-9)).toFixed(0)}%"></b></i>`;
+      return `<li class="wz-param"><span>${esc(label)}</span><strong>${esc(paramText(key, value))}${paramUnit(key) === "°" ? "°" : paramUnit(key) ? ` ${esc(paramUnit(key))}` : ""}</strong>
+        ${override !== undefined ? `<span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.edited"))}</span>` : ""}${meter}${limitKey(key)}</li>`;
+    }).join("");
+    return `<article class="wz-card" data-card="${esc(id)}" data-kind="${entry.kind}" role="checkbox" tabindex="${full ? -1 : 0}"
+        aria-checked="${!!selected}" aria-disabled="${full}" ${full ? `title="${esc(t("wizard.team.max"))}"` : ""}>
+      <span class="wz-check">${ICONS.check}</span>
+      <header><span class="wz-avatar">${memberIcon(entry.kind, id)}</span>
+        <div><strong>${esc(entry.identity.name)}</strong><small>${esc(t(`nav.${entry.kind}`))}</small></div>
+        ${selected ? `<button type="button" class="wz-mini wz-pencil" data-act="edit-params" data-member="${esc(id)}" aria-pressed="${!!isEditing}"
+          aria-label="${esc(t("wizard.team.edit"))}" title="${esc(t("wizard.team.edit"))}">${ICONS.pencil}</button>` : ""}</header>
+      ${personal ? `<ul class="wz-personal">${personal}</ul><p class="wz-fict">${tag("fictional")}</p>` : ""}
+      <ul class="wz-params" data-selected="${!!selected}">${params}</ul>
+      <p class="wz-fict">${tag("assumed")}</p>
+      ${selected ? `<label class="wz-payload">${esc(t("nav.payload"))}<input name="payload:${esc(id)}" type="number" min="0" step="any" value="${selected.payload_kg}" /></label>` : ""}
+    </article>`;
   }
-  function poiOptions(selected: string) {
-    return metadata!.parcel.pois.map((p) => `<option value="${esc(p.id)}" ${p.id === selected ? "selected" : ""}>${esc(tOr(`nav.poi.${p.id}`, p.id))} · ${esc(t("nav.hypothetical"))} [${p.xy_m.map((v) => Number(v.toFixed(2))).join(", ")} m]</option>`).join("");
+
+  function tasksStep(s: PlanRequest) {
+    return `
+      <p class="wz-derived" data-derived="tasks-total">${esc(t("wizard.tasks.total", { t: toHhMm(tasksTotal(s)) }))} ${tag("derived")}</p>
+      <ul class="wz-tasks">${s.mission.tasks.map((task, i) => {
+        const fromTemplate = !taskNames.has(task.id);
+        return `<li class="wz-task">
+          ${fromTemplate ? `<span class="wz-task-name">${esc(taskName(task.id))}</span>`
+            : `<label class="wz-task-name">${esc(t("wizard.tasks.name"))}<input name="tname-${i}" type="text" value="${esc(taskNames.get(task.id) ?? "")}" /></label>`}
+          <label>${esc(t("wizard.tasks.duration"))}<input name="task-${i}" type="text" inputmode="numeric" placeholder="hh:mm" value="${esc(toHhMm(task.duration_s))}" /></label>
+          <button type="button" class="wz-mini" data-act="remove-task" data-index="${i}" aria-label="${esc(t("mp.task.remove", { n: i + 1 }))}">×</button>
+        </li>`;
+      }).join("")}</ul>
+      <button type="button" data-act="add-task" ${s.mission.tasks.length >= MAX_TASKS ? "disabled" : ""}>${esc(t("wizard.tasks.add"))}</button>`;
   }
+
+  function scheduleStep(s: PlanRequest) {
+    const d = metadata!.parcel.planning_defaults;
+    return `
+      <label>${esc(t("nav.departureUtc"))} <small>${esc(t("wizard.schedule.utc"))}</small>
+        <input name="departure" type="datetime-local" step="1" value="${s.mission.departure_utc.replace("Z", "")}" /></label>
+      <div class="wz-grid2">
+        <label>${esc(t("wizard.schedule.reserve"))}<input name="reserve" type="text" inputmode="numeric" placeholder="hh:mm" value="${toHhMm(s.mission.reserve_s)}" /></label>
+        <label>${esc(t("wizard.schedule.budget"))}<input name="budget" type="text" inputmode="numeric" placeholder="hh:mm" value="${toHhMm(s.mission.time_budget_s)}" /></label>
+      </div>
+      <p class="wz-derived" data-derived="available">${availableLine(s)}</p>
+      <details data-adv="schedule" class="wz-adv"><summary>${esc(t("wizard.advanced"))}${advancedModifiedBadge(s.scenario.id !== d.scenario.id || s.scenario.as_of_utc !== d.scenario.as_of_utc)}</summary>
+        <label>${esc(t("nav.scenario"))}<select name="scenario">
+          ${metadata!.parcel.scenarios.map(({ id }) => `<option value="${id}" ${s.scenario.id === id ? "selected" : ""}>${esc(tOr(`nav.scenario.${id}`, id))}</option>`).join("")}
+        </select></label>
+        <label>${esc(t("nav.asOfUtc"))}<input name="as-of" type="datetime-local" step="1" value="${s.scenario.as_of_utc.replace("Z", "")}" /></label>
+      </details>`;
+  }
+  function availableLine(s: PlanRequest) {
+    const left = s.mission.time_budget_s - s.mission.reserve_s - tasksTotal(s);
+    return left < 0
+      ? `<span class="wz-over">${esc(t("wizard.schedule.over"))}</span> ${tag("derived")}`
+      : `${esc(t("wizard.schedule.available", { t: toHhMm(left) }))} ${tag("derived")}`;
+  }
+
+  function summaryStep(s: PlanRequest) {
+    const d = distanceM(s);
+    const lim = limits(s);
+    const names = (ids: string[]) => ids.map((id) => catalogEntry(id).identity.name).join(", ");
+    const edited = members(s).some((m) => m.mission_overrides && Object.keys(m.mission_overrides).length);
+    const tasks = tasksTotal(s);
+    const reserve = s.mission.reserve_s;
+    const budget = s.mission.time_budget_s;
+    const scale = Math.max(budget, tasks + reserve, 1);
+    const over = tasks + reserve > budget;
+    const pct = (v: number) => `${(100 * v / scale).toFixed(2)}%`;
+    const errs = stepErrors(4, s);
+    return `
+      <button type="button" class="wz-sum" data-goto="0"><h3>${ICONS.route}${esc(t("wizard.step.mission"))}</h3>
+        <p><strong>${esc(templateLabel(s.mission.template_id))}</strong></p>
+        <p>${esc(poiName(s.origin.poi_id))} ───▶ ${esc(poiName(s.destination.poi_id))}${d === null ? "" : ` · ${esc(t("wizard.mission.distance", { m: num(d, 0) }))}`} ${tag("derived")}</p></button>
+      <button type="button" class="wz-sum" data-goto="1"><h3>${ICONS.team}${esc(t("wizard.step.team"))} (${members(s).length})</h3>
+        <p class="wz-live-team">${members(s).map((m) => `<span class="wz-chip" data-kind="${catalogEntry(m.profile_id).kind}">${memberIcon(catalogEntry(m.profile_id).kind, m.profile_id)}${esc(catalogEntry(m.profile_id).identity.name)}</span>`).join("")}</p>
+        ${lim ? `<p>${esc(t("wizard.team.summary", { speed: `${num(lim.pace.value)} m/s`, slopeUp: `${num(lim.up.value)}°`, slopeDown: `${num(lim.down.value)}°` }))}
+          ${members(s).length > 1 ? ` · ${esc(t("wizard.summary.limiting", { name: names([...new Set([...lim.pace.by, ...lim.up.by, ...lim.down.by])]) }))}` : ""} ${tag("assumed")}</p>` : ""}
+        ${edited ? `<p><span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.edited"))}</span></p>` : ""}</button>
+      <button type="button" class="wz-sum" data-goto="2"><h3>${ICONS.tasks}${esc(t("wizard.step.tasks"))}</h3>
+        <ul>${s.mission.tasks.map((task) => `<li><span>${esc(taskName(task.id))}</span><span>${toHhMm(task.duration_s)}</span></li>`).join("")}</ul>
+        <p>${esc(t("wizard.tasks.total", { t: toHhMm(tasks) }))}</p></button>
+      <button type="button" class="wz-sum" data-goto="3"><h3>${ICONS.clock}${esc(t("wizard.step.schedule"))}</h3>
+        <p>${esc(t("wizard.summary.departure", { t: s.mission.departure_utc.replace("T", " ").replace(/:\d\dZ$/, "") }))}</p></button>
+      <div class="wz-sum wz-time"><h3>${ICONS.clock}${esc(t("wizard.summary.time"))} ${tag("derived")}</h3>
+        ${timeBar(s)}
+        <p class="mp-hint">${esc(t("wizard.summary.noTravel"))}</p>
+        ${over ? `<p class="wz-over">${esc(t("wizard.schedule.over"))}</p>` : ""}</div>
+      ${advancedModified(s) ? `<p class="wz-derived"><span class="wz-tag" data-kind="modified">${esc(t("wizard.summary.advancedChanged"))}</span></p>` : ""}
+      ${errs.length ? `<p class="wz-errors" role="alert">${errs.map(esc).join(" · ")}</p>` : ""}
+      <p class="mp-status" role="status" aria-live="polite" data-kind="${error ? "error" : "info"}">${esc(error || t(statusKey))}</p>
+      <details data-adv="summary" class="wz-adv"><summary>${esc(t("wizard.advanced"))}</summary>
+        <button type="button" data-act="reset">${esc(t("mp.reset"))}</button>
+        <details class="mp-json"><summary>${esc(t("mp.json"))}</summary><pre></pre></details>
+      </details>`;
+  }
+
+  /** Updates derived lines and step validity without re-rendering inputs (keeps focus while typing). */
+  function refreshDerived() {
+    if (!state || wizard.hidden) return;
+    const set = (key: string, html: string) => { const el = wizard.querySelector(`[data-derived="${key}"]`); if (el) el.innerHTML = html; };
+    set("tasks-total", `${esc(t("wizard.tasks.total", { t: toHhMm(tasksTotal(state)) }))} ${tag("derived")}`);
+    set("available", availableLine(state));
+    const live = wizard.querySelector(".wz-live");
+    if (live) live.innerHTML = liveSummary(state);
+    const errs = stepErrors(step, state);
+    const next = wizard.querySelector<HTMLButtonElement>('[data-act="next"]');
+    if (next) next.disabled = errs.length > 0;
+    let box = wizard.querySelector<HTMLElement>(".wz-foot .wz-errors");
+    if (errs.length && !box) {
+      box = document.createElement("p"); box.className = "wz-errors"; box.setAttribute("role", "alert");
+      wizard.querySelector(".wz-foot")?.prepend(box);
+    }
+    if (box) { if (errs.length) box.textContent = errs.join(" · "); else box.remove(); }
+  }
+
   function preview() {
     if (!state) return;
     state.revision = gate.revision;
-    const pre = root.querySelector("pre");
+    const pre = wizard.querySelector(".mp-json pre");
     if (pre) pre.textContent = JSON.stringify(state, null, 2);
     Object.assign(window, { lastPlanRequest: structuredClone(state) });
     listeners.forEach((cb) => cb(state!));
+  }
+  function notifyPreview() {
+    const visible = open && !!state && step === 0;
+    previewListeners.forEach((cb) => cb(visible));
   }
   function edited() {
     gate.edit();
@@ -131,14 +435,14 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     activeRequest = null;
     error = "";
     statusKey = "mp.status.stale";
+    if (hasResult) { hasResult = false; renderLauncher(); }
     Object.assign(window, { lastPlanResponse: null });
     staleListeners.forEach((cb) => cb());
-    const submit = root.querySelector<HTMLButtonElement>('[type="submit"]');
-    if (submit) submit.disabled = false;
-    const status = root.querySelector(".mp-status");
+    const status = wizard.querySelector(".mp-status");
     if (status) { status.textContent = t(statusKey); (status as HTMLElement).dataset.kind = "info"; }
-    preview();
   }
+
+  // ---------- data ----------
   async function connect() {
     loading = true; error = ""; render();
     const result = await loadMetadata();
@@ -160,100 +464,114 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     loading = false;
     if (result.ok) {
       metadata = { ...metadata, parcel: result.data };
-      state = baselineRequest(metadata); invalid.clear();
+      state = baselineRequest(metadata); invalid.clear(); taskNames.clear(); editing.clear();
+      step = 0; maxVisited = 0;
     } else error = result.error;
     render();
   }
-  root.addEventListener("input", (event) => {
+  function resetToBaseline(keepFamily: boolean) {
+    if (!metadata) return;
+    const family = state?.mission.template_id;
+    state = baselineRequest(metadata);
+    if (keepFamily && family) applyTemplate(family);
+    invalid.clear(); taskNames.clear(); editing.clear();
+  }
+  function applyTemplate(id: string) {
+    const template = metadata!.catalogs.mission_templates.templates.find((v) => v.id === id);
+    if (!template || !state) return;
+    Object.assign(state.mission, { template_id: template.id, tasks: structuredClone(template.tasks), reserve_s: template.reserve_s, time_budget_s: template.time_budget_s });
+    taskNames.clear();
+    for (const name of [...invalid.keys()]) if (name.startsWith("task-") || name.startsWith("tname-") || name === "reserve" || name === "budget") invalid.delete(name);
+  }
+  function setOpen(value: boolean, at?: Step) {
+    open = value;
+    peekMap = false;
+    if (at !== undefined) { step = at; maxVisited = Math.max(maxVisited, at) as Step; }
+    render();
+    if (open) wizard.querySelector<HTMLElement>("#wzTitle")?.focus?.();
+  }
+  function goto(target: Step) {
+    if (!state || target > maxVisited) return;
+    animDir = target > step ? "next" : target < step ? "prev" : "";
+    step = target; peekMap = false; render();
+  }
+
+  // ---------- events ----------
+  function onInput(event: Event) {
     const el = event.target as HTMLInputElement | HTMLSelectElement;
     if (!state || !metadata || !el.name) return;
     edited(); // Invalid and reverted edits also invalidate pending work.
-    if (el.name === "parcel") {
-      void changeParcel(Number(el.value)); return;
-    } else if (el.name === "template") {
-      const template = metadata.catalogs.mission_templates.templates.find((v) => v.id === el.value)!;
-      Object.assign(state.mission, { template_id: template.id, tasks: structuredClone(template.tasks), reserve_s: template.reserve_s, time_budget_s: template.time_budget_s });
-      for (const name of invalid.keys()) if (name.startsWith("task-") || name === "reserve" || name === "budget") invalid.delete(name);
-      render();
-    } else if (el.name === "destination" || el.name === "origin") {
-      state[el.name].poi_id = el.value;
-    } else if (el.name === "scenario") {
+    const name = el.name;
+    const mark = (ok: boolean) => {
+      el.setAttribute("aria-invalid", String(!ok));
+      if (ok) invalid.delete(name); else invalid.set(name, el.value);
+      return ok;
+    };
+    if (name === "parcel") { void changeParcel(Number(el.value)); return; }
+    if (name === "origin" || name === "destination") { state[name].poi_id = el.value; render(); return; }
+    if (name === "scenario") {
       state.scenario.id = el.value;
       state.scenario.version = metadata.parcel.scenarios.find((s) => s.id === el.value)!.version;
-    } else if (el.name.startsWith("member:")) {
-      const id = el.name.slice(7);
-      const entry = metadata.catalogs.catalog.entries.find((p) => p.identity.profile_id === id)!;
-      const group = entry.kind === "human" ? state.team.humans : state.team.robots;
-      if ((el as HTMLInputElement).checked) group.push({ profile_id: id, payload_kg: 0 });
-      else group.splice(group.findIndex((p) => p.profile_id === id), 1);
-      for (const name of invalid.keys()) if (name.includes(`:${id}`)) invalid.delete(name);
-      render();
-    } else if (el.name.startsWith("task-id-")) {
-      const index = Number(el.name.slice(8));
-      state.mission.tasks[index].id = el.value;
-      if (!el.value.trim()) invalid.set(el.name, el.value); else invalid.delete(el.name);
-    } else if (el.name === "departure" || el.name === "as-of") {
-      if (!el.value || !Number.isFinite(Date.parse(el.value + "Z"))) invalid.set(el.name, el.value);
-      else {
+    } else if (name === "departure" || name === "as-of") {
+      if (mark(!!el.value && Number.isFinite(Date.parse(el.value + "Z")))) {
         const utc = new Date(el.value + "Z").toISOString().replace(".000Z", "Z");
-        if (el.name === "departure") state.mission.departure_utc = utc; else state.scenario.as_of_utc = utc;
-        invalid.delete(el.name);
+        if (name === "departure") state.mission.departure_utc = utc; else state.scenario.as_of_utc = utc;
       }
-      el.setAttribute("aria-invalid", String(invalid.has(el.name)));
-    } else {
-      const [, memberId, parameter] = el.name.split(":");
-      const member: Member | undefined = [...state.team.humans, ...state.team.robots].find((p) => p.profile_id === memberId);
-      if (el.name.startsWith("override:") && el.value === "" && !(el as HTMLInputElement).validity.badInput && member) {
-        delete member.mission_overrides?.[parameter as keyof Parameters];
-        if (!Object.keys(member.mission_overrides ?? {}).length) delete member.mission_overrides;
-        invalid.delete(el.name); el.setAttribute("aria-invalid", "false"); preview(); return;
+    } else if (name === "reserve" || name === "budget" || name.startsWith("task-")) {
+      const v = fromHhMm(el.value);
+      if (mark(v !== null && (name !== "budget" || v > 0))) {
+        if (name === "reserve") state.mission.reserve_s = v!;
+        else if (name === "budget") state.mission.time_budget_s = v!;
+        else state.mission.tasks[Number(name.slice(5))].duration_s = v!;
       }
-      const v = Number(el.value);
-      const positive = el.name === "budget" || parameter === "flat_speed_m_s" || parameter === "max_sortie_s";
-      const grade = parameter === "max_ascent_deg" || parameter === "max_descent_deg";
-      const valid = el.value !== "" && Number.isFinite(v) && (positive ? v > 0 : v >= 0) && (!grade || v < 90);
-      el.setAttribute("aria-invalid", String(!valid));
-      if (!valid) invalid.set(el.name, el.value);
-      else {
-        invalid.delete(el.name);
-        if (el.name.startsWith("task-")) state.mission.tasks[Number(el.name.slice(5))].duration_s = v;
-        else if (el.name === "reserve") state.mission.reserve_s = v;
-        else if (el.name === "budget") state.mission.time_budget_s = v;
-        else if (el.name.startsWith("payload:") && member) member.payload_kg = v;
-        else if (el.name.startsWith("override:") && member) (member.mission_overrides ??= {})[parameter as keyof Parameters] = v;
+    } else if (name.startsWith("tname-")) {
+      const task = state.mission.tasks[Number(name.slice(6))];
+      if (mark(el.value.trim() !== "")) taskNames.set(task.id, el.value);
+    } else if (name.startsWith("payload:") || name.startsWith("override:")) {
+      const [, memberId, parameter] = name.split(":");
+      const member = members(state).find((p) => p.profile_id === memberId);
+      if (!member) return;
+      if (name.startsWith("payload:")) {
+        const v = Number(el.value);
+        if (mark(el.value !== "" && Number.isFinite(v) && v >= 0)) member.payload_kg = v;
+      } else {
+        const key = parameter as keyof Parameters;
+        const base = catalogEntry(memberId).defaults[key];
+        const v = key === "max_sortie_s" ? fromHhMm(el.value) : el.value === "" ? null : Number(el.value);
+        if (el.value === "" ) { mark(true); setOverride(member, key, undefined); }
+        else {
+          const positive = key === "flat_speed_m_s" || key === "max_sortie_s";
+          const grade = key === "max_ascent_deg" || key === "max_descent_deg";
+          const ok = v !== null && Number.isFinite(v) && (positive ? v > 0 : v >= 0) && (!grade || v < 90);
+          if (mark(ok)) setOverride(member, key, v === base ? undefined : v!);
+        }
       }
     }
+    refreshDerived();
     preview();
-  });
-  root.addEventListener("click", (event) => {
-    const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-act]");
-    const act = button?.dataset.act;
-    if (act === "collapse") api.setCollapsed(!collapsed);
-    if (act === "connect") void connect();
-    if (act === "reset" && metadata) { edited(); state = baselineRequest(metadata); invalid.clear(); render(); }
-    if (act === "add-task" && state && state.mission.tasks.length < 64) {
-      edited();
-      let n = 1;
-      while (state.mission.tasks.some((v) => v.id === `task_${n}`)) n += 1;
-      state.mission.tasks.push({ id: `task_${n}`, duration_s: 0 }); render();
-    }
-    if (act === "remove-task" && state) {
-      edited();
-      const index = Number(button!.dataset.index);
-      state.mission.tasks.splice(index, 1);
-      const taskErrors = [...invalid].filter(([name]) => name.startsWith("task-"));
-      for (const [name] of taskErrors) invalid.delete(name);
-      for (const [name, value] of taskErrors) {
-        const oldIndex = Number(name.split("-").at(-1));
-        if (oldIndex !== index) invalid.set(name.replace(/\d+$/, String(oldIndex > index ? oldIndex - 1 : oldIndex)), value);
-      }
-      render();
-    }
-  });
-  root.addEventListener("submit", async (event) => {
-    event.preventDefault();
+  }
+  function setOverride(member: Member, key: keyof Parameters, value: number | undefined) {
+    if (value === undefined) {
+      delete member.mission_overrides?.[key];
+      if (member.mission_overrides && !Object.keys(member.mission_overrides).length) delete member.mission_overrides;
+    } else (member.mission_overrides ??= {})[key] = value;
+  }
+  function toggleMember(id: string) {
+    if (!state || !metadata) return;
+    const entry = catalogEntry(id);
+    const group = entry.kind === "human" ? state.team.humans : state.team.robots;
+    const index = group.findIndex((p) => p.profile_id === id);
+    if (index < 0 && group.length >= (entry.kind === "human" ? MAX_HUMANS : MAX_ROBOTS)) return;
+    edited();
+    if (index >= 0) { group.splice(index, 1); editing.delete(id); }
+    else group.push({ profile_id: id, payload_kg: 0 });
+    for (const name of [...invalid.keys()]) if (name.includes(`:${id}`)) invalid.delete(name);
+    render();
+  }
+
+  async function calculate() {
     if (!state || busy) return;
-    if (invalid.size) { error = t("mp.status.invalid"); render(); return; }
+    if (stepErrors(4, state).length) { render(); return; }
     const request = gate.submit(state);
     state.request_id = request.request_id;
     activeRequest = request;
@@ -266,10 +584,87 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     busy = false; activeRequest = null;
     if (!result.ok) { error = result.error; staleListeners.forEach((cb) => cb()); render(); return; }
     if (!gate.accepts(request, result.data, state)) { statusKey = "mp.status.discarded"; render(); return; }
-    statusKey = "mp.status.received"; render();
+    statusKey = "mp.status.received";
+    hasResult = true;
+    open = false;
+    render();
     Object.assign(window, { lastPlanResponse: result.data });
     root.dispatchEvent(new CustomEvent<PlanResponseEvent>("plan-response", { detail: { response: result.data }, bubbles: true }));
+  }
+
+  function onClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const button = target.closest<HTMLButtonElement>("[data-act], [data-goto], [data-family]");
+    if (button?.dataset.goto !== undefined) { goto(Number(button.dataset.goto) as Step); return; }
+    if (button?.dataset.family && state) {
+      if (button.dataset.family !== state.mission.template_id) { edited(); applyTemplate(button.dataset.family); render(); }
+      return;
+    }
+    const act = button?.dataset.act;
+    if (act) {
+      if (act === "connect") void connect();
+      else if (act === "open") setOpen(true);
+      else if (act === "edit") setOpen(true, 4);
+      else if (act === "new") { edited(); resetToBaseline(false); step = 0; maxVisited = 0; setOpen(true); }
+      else if (act === "close") setOpen(false);
+      else if (act === "back" && step > 0) goto((step - 1) as Step);
+      else if (act === "next" && state && !stepErrors(step, state).length && step < 4) {
+        animDir = "next"; step = (step + 1) as Step; maxVisited = Math.max(maxVisited, step) as Step; render();
+      } else if (act === "calculate") void calculate();
+      else if (act === "honesty") { showHonesty = !showHonesty; render(); }
+      else if (act === "peek") { peekMap = !peekMap; render(); }
+      else if (act === "reset" && metadata) { edited(); resetToBaseline(true); render(); }
+      else if (act === "edit-params") {
+        const id = button!.dataset.member!;
+        if (editing.has(id)) editing.delete(id); else editing.add(id);
+        render();
+      } else if (act === "restore" && state) {
+        const member = members(state).find((m) => m.profile_id === button!.dataset.member);
+        if (member) { edited(); setOverride(member, button!.dataset.param as keyof Parameters, undefined); invalid.delete(`override:${member.profile_id}:${button!.dataset.param}`); render(); }
+      } else if (act === "add-task" && state && state.mission.tasks.length < MAX_TASKS) {
+        edited();
+        let n = 1;
+        while (state.mission.tasks.some((v) => v.id === `task_${n}`)) n += 1;
+        const id = `task_${n}`;
+        state.mission.tasks.push({ id, duration_s: 0 });
+        taskNames.set(id, t("wizard.tasks.newName"));
+        render();
+      } else if (act === "remove-task" && state) {
+        edited();
+        const index = Number(button!.dataset.index);
+        const [removed] = state.mission.tasks.splice(index, 1);
+        if (removed) taskNames.delete(removed.id);
+        const taskErrors = [...invalid].filter(([name]) => name.startsWith("task-") || name.startsWith("tname-"));
+        for (const [name] of taskErrors) invalid.delete(name);
+        for (const [name, value] of taskErrors) {
+          const oldIndex = Number(name.split("-").at(-1));
+          if (oldIndex !== index) invalid.set(name.replace(/\d+$/, String(oldIndex > index ? oldIndex - 1 : oldIndex)), value);
+        }
+        render();
+      }
+      return;
+    }
+    // Card selection: clicks on inputs, labels and buttons inside a card do not toggle it.
+    if (target.closest("input, select, label, button, textarea")) return;
+    const cardEl = target.closest<HTMLElement>("[data-card]");
+    if (cardEl && cardEl.getAttribute("aria-disabled") !== "true") toggleMember(cardEl.dataset.card!);
+  }
+
+  wizard.addEventListener("input", onInput);
+  wizard.addEventListener("click", onClick);
+  wizard.addEventListener("submit", (e) => e.preventDefault());
+  wizard.addEventListener("keydown", (e) => {
+    const target = e.target as HTMLElement;
+    if (e.key === "Escape") { setOpen(false); root.querySelector<HTMLButtonElement>(".wz-new")?.focus(); return; }
+    if ((e.key === "Enter" || e.key === " ") && target.matches("[data-card]")) {
+      e.preventDefault();
+      if (target.getAttribute("aria-disabled") !== "true") toggleMember(target.dataset.card!);
+      wizard.querySelector<HTMLElement>(`[data-card="${target.dataset.card}"]`)?.focus();
+    }
+    if (e.key === "Enter" && target.tagName === "INPUT") e.preventDefault();
   });
+  root.addEventListener("click", onClick);
+
   const api: MissionPanel = {
     selectDestination(id) {
       if (!state || !metadata?.parcel.pois.some((p) => p.id === id)) return t("nav.locations");
@@ -277,14 +672,14 @@ export function createMissionPanel(root: HTMLElement): MissionPanel {
     },
     onChange(cb) { listeners.push(cb); if (state) cb(state); },
     onStale(cb) { staleListeners.push(cb); },
+    onPointsPreview(cb) { previewListeners.push(cb); },
     getRequest: () => state ? structuredClone(state) : null,
     getParcel: () => metadata ? structuredClone(metadata.parcel) : null,
     getSlopeLimit() {
       if (!metadata || !state) return Infinity;
-      return Math.min(...[...state.team.humans, ...state.team.robots].map((p) => p.mission_overrides?.max_ascent_deg ??
-        metadata!.catalogs.catalog.entries.find((e) => e.identity.profile_id === p.profile_id)!.defaults.max_ascent_deg));
+      return Math.min(...members(state).map((p) => effective(p, "max_ascent_deg")));
     },
-    setCollapsed(value) { collapsed = value; render(); },
+    setCollapsed(value) { if (value && open) setOpen(false); },
   };
   onLanguageChange(render);
   void connect();
