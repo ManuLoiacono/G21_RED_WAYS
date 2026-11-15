@@ -27,3 +27,4 @@ data/raw/
 
 # Teselas 3D generadas (se regeneran con scripts/build_hirise_tiles.py)
 data/processed/gale/tiles_hirise/
+data/processed/gale/analytical/*.npz

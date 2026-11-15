@@ -40,7 +40,7 @@ Para trabajar con Claude Code: pedir una tarea por ID («hacé P2-02») y manten
 | ID | Prio | Tarea | Criterio de cierre | Depende de |
 | --- | --- | --- | --- | --- |
 | [ ] P2-01 | P0 | **Perfiles y plantillas:** parámetros comunes, 4 plantillas editables (observación geológica, exploración topográfica, reconocimiento, medición ambiental), validador; cada parámetro con valor y fuente (Apollo/análogo o hipotético) | Una configuración incoherente se rechaza con motivo | T0-01 |
-| [ ] P2-02 | P0 | **Grafo dirigido + Dijkstra:** 8 vecinos con numpy; coste por sentido (subir ≠ bajar); no crear aristas que violen restricciones; sin cortar esquinas bloqueadas; `scipy.sparse.csgraph.dijkstra` para ida y, sobre el grafo transpuesto, para vuelta | Mapa chico con resultado conocido; una barrera bloquea; subir y bajar dan costes distintos; origen sin datos devuelve motivo | T0-02 |
+| [~] P2-02 | P0 | **Grafo dirigido + Dijkstra:** 8 vecinos con numpy; coste por sentido (subir ≠ bajar); no crear aristas que violen restricciones; sin cortar esquinas bloqueadas; `scipy.sparse.csgraph.dijkstra` para ida y, sobre el grafo transpuesto, para vuelta | Mapa chico con resultado conocido; una barrera bloquea; subir y bajar dan costes distintos; origen sin datos devuelve motivo | T0-02 |
 | [ ] P2-03 | P0 | **Servicio local:** `POST /plan`, `GET /parcel`; la grilla se carga una vez en memoria; «calcular» no consulta APIs externas | La app recibe una respuesta según el contrato | P2-02 |
 | [ ] P2-04 | P0 | **Misión completa:** ida + tareas + vuelta + reserva vs. presupuesto; **regla de luz diurna** (fin ≤ atardecer del sol elegido → si no, `conditional` o «posponer»); distinguir «ruta incompatible», «no existe ruta en el modelo» y «búsqueda inconclusa» | Un destino alcanzable se rechaza al agregar tareas o al acercarse al atardecer; cambiar una duración mueve el margen de forma coherente | P2-02, P3-06 |
 | [ ] P2-05 | P0 | **Alternativas y motivos:** criterios tiempo y esfuerzo (y enlace en P1), eliminar duplicados, ordenar, motivos generados desde métricas | Si solo hay una alternativa distinta, devuelve una; las restricciones se evalúan antes que las preferencias | P2-04 |
@@ -51,6 +51,8 @@ Para trabajar con Claude Code: pedir una tarea por ID («hacé P2-02») y manten
 | [ ] P2-10 | P1 | **Robot de apoyo en marcha conjunta:** segundo perfil, compatibilidad de ambos, ritmo del conjunto | Las diferencias de resultado surgen de la configuración | P2-01 |
 | [ ] P2-11 | P1 | **Reevaluación** desde una posición simulada con tiempo transcurrido y un evento (demora o bloqueo); no reiniciar la autonomía | La demora reduce el margen; la recomendación se explica | P2-04 |
 | [ ] P2-12 | P2 | Restricción dominante y cambios admisibles, robot repetidor, explicación con IA | — | P2-05 |
+
+P2-02 update (2026-11-14): directed metric routing, synthetic acceptance checks and measured build/search performance are implemented on `p2/directed-routing`; consumer review is pending, so the task remains in progress. See [the mission/service handoff](handoffs/P2_03_04_MISSION_SERVICE.md). Original P2-01 template defaults and P2-06 real-parcel integration remain pending.
 
 ## Persona 3 — Datos y contexto (`scripts/`, `data/`)
 
@@ -94,3 +96,24 @@ Para trabajar con Claude Code: pedir una tarea por ID («hacé P2-02») y manten
 | Domingo 14:00–18:00 | Video de 3 min y documentación |
 | Domingo 18:00–21:30 | Arranque limpio, revisión, carga |
 | Domingo 21:30–23:59 | Solo incidencias de entrega |
+
+---
+
+## ML — Modelos predictivos (hindcast) (`ml/`, rama `ml/...`)
+
+Plan: `docs/ML_PREDICCION.md`. Resultados: `docs/ML_RESULTADOS.md`. Solo toca `ml/`, `data/raw/ml/`, `data/processed/ml/`, `docs/ML_*` y `contracts/forecast.example.json` (borrador).
+
+| ID | Prio | Tarea | Criterio de cierre |
+| --- | --- | --- | --- |
+| [x] ML-00 | P0 | Estructura `ml/`, `requirements.txt`, `config.py`, README | `python -m ml.<algo>` corre desde la raíz |
+| [x] ML-01 | P0 | `sources/rems.py` + `sources/waypoints.py` con caché | Los dos crudos en `data/raw/ml/` |
+| [x] ML-02 | P0 | **DS-W** (`daily_weather.parquet`) con Ls, año marciano, `dtr_c`, elevación y presión corregida | Tabla con conteo de faltantes por columna; rango exacto de soles de la ventana de prueba |
+| [x] ML-03 | P0 | Baselines (persistencia y climatología por Ls) + validación por año marciano + métricas | `metrics.json` de los baselines |
+| [x] ML-04 | P0 | **A1 presión** | Métricas vs. baselines en validación y en la ventana final |
+| [x] ML-05 | P0 | **A2 temperatura con cuantiles** | Métricas + cobertura del p10–p90 |
+| [~] ML-06 | P0 | `export/` + `contracts/forecast.example.json` (borrador) | JSON por sol de la ventana; P1 y P2 avisados (falta avisar) |
+| [x] ML-07 | P1 | `sources/rad.py`: leer un CDF y reportar variables, unidades y calidad | Informe en `docs/ML_RESULTADOS.md` |
+| [x] ML-08 | P1 | **DS-R** + **B1 dosis de fondo** (con S6 manchas solares) | Métricas vs. media móvil |
+| [x] ML-09 | P1 | **DS-S** (DONKI 2013–2025) + **C1 evaluación** contra MAVEN y RAD | Tabla de aciertos, falsas alarmas y error en horas, con `n` (RAD completo; MAVEN solo ±3 días alrededor de alertas; FLR caído) |
+| [ ] ML-10 | P2 | B2 eventos, D-proxy polvo, C2 corrección de DONKI, A3 UV | Solo si ML-00 a ML-09 están cerrados |
+| [~] ML-11 | P0 | `docs/ML_RESULTADOS.md`: números finales para el video, con `n` y limitaciones | Revisado por otro integrante (A1–A2 listos; faltan RAD/DONKI y la revisión) |

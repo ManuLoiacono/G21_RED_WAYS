@@ -1,0 +1,134 @@
+{
+  "format": "gale-analytical-1",
+  "id": "gale_hirise_019698",
+  "version": "native2-v1",
+  "fixture": false,
+  "source": {
+    "url": "https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_019698_1750_ESP_019988_1750/DTEEC_019698_1750_019988_1750_U01.tif",
+    "product": "DTEEC_019698_1750_019988_1750_U01",
+    "mission": "MRO",
+    "instrument": "HiRISE",
+    "evidence_kind": "observed",
+    "crs_wkt": "PROJCS[\"Mars (2015) - Sphere / Ocentric / Equirectangular, clon = 0\",GEOGCS[\"Mars (2015) - Sphere / Ocentric\",DATUM[\"Mars (2015) - Sphere\",SPHEROID[\"Mars (2015) - Sphere\",3396190,0]],PRIMEM[\"Reference Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",0],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+    "native_transform": [
+      1.0117467945795104,
+      0.0,
+      8139139.287483739,
+      0.0,
+      -1.0117467945795104,
+      -280315.578653001
+    ],
+    "native_shape": [
+      18270,
+      7426
+    ],
+    "nodata": -3.4028226550889045e+38,
+    "window_with_halo": [
+      2801,
+      4155,
+      2928,
+      2928
+    ]
+  },
+  "reviewed_bounds_lonlat": {
+    "west": 137.36,
+    "south": -4.85,
+    "east": 137.41,
+    "north": -4.8
+  },
+  "bounds_lonlat": {
+    "west": 137.36002952694625,
+    "east": 137.409972778361,
+    "north": -4.800031214320459,
+    "south": -4.849974465735206
+  },
+  "reference_description": "Mars 2015 sphere; east-positive longitude, source planetocentric latitude, native equirectangular meters; east-west distortion about 0.35 percent.",
+  "grid": {
+    "shape": [
+      1463,
+      1463
+    ],
+    "spacing_m": [
+      2.023493589159021,
+      2.023493589159021
+    ],
+    "origin_center_xy_m": [
+      8141975.213748945,
+      -284521.41007806803
+    ],
+    "row_direction": "decreasing_y",
+    "cell_convention": "center",
+    "aggregation_policy": "native-central-difference-3x3-valid-max-block-mean-elevation-v1"
+  },
+  "preparation": {
+    "native_block_factor": 2,
+    "native_resolution_m": 1.0117467945795104,
+    "processing_halo_pixels": 1,
+    "slope_policy": "Central differences at native resolution; maximum over every search block; all 3x3 native stencil pixels must be valid.",
+    "elevation_policy": "Mean of unchanged native block values; no display shifts. Native values with halo retained verbatim.",
+    "coverage_policy": "All source samples and derivative stencils in a whole block valid; otherwise untraversable. No filling or neighbor snapping.",
+    "exclusion_policy": "No supplied scientific exclusion layer; explicit all-false mask. Team slope/edge limits still apply. Small rocks and material hazards are unevaluated.",
+    "command": "python -m scripts.prepare_gale --factor 2"
+  },
+  "arrays": {
+    "file": "terrain.npz",
+    "sha256": {
+      "elevation_m": "a144d35200600a003622a9d389d3128a3ddc8ca7d7075aad760007cb8f3229de",
+      "terrain_slope_deg": "b3e7b338ddbd817928769a747994ea6ca80f2d3eb4c70a5153911c4343beb1b5",
+      "coverage": "0262ea1f2fdb74cc53c91d01936e1dc1735b22b0d98a0878e71cbfa9b702c1b5",
+      "excluded": "3f319156264c9810db70d3376021f2cbc5e9daefc2d2ba22bbcdb54dfc929ae1",
+      "native_elevation_m": "e0342d9f9e31d21ff48a4676726cb9f5ae80d85f6e18e6027ef5a7b3435b6359",
+      "native_valid": "5be73edcfa104aafaf094b264f203a2a31956b75457bb61b5c7878a43291f42a"
+    }
+  },
+  "masks": {
+    "covered_cells": 2140369,
+    "excluded_cells": 0
+  },
+  "location_selection": "Hypothetical engineering locations in the eastern connected terrain for explorer_01 plus support_rover under unchanged assumed limits. Preliminary center (137.385,-4.825) has 19.90 degree block slope; (137.389,-4.827) reaches only five cells with this team. Neither was snapped or reclassified as traversable; no mask, slope, edge or corridor was modified.",
+  "pois": [
+    {
+      "id": "base",
+      "lonlat": [
+        137.404,
+        -4.825
+      ],
+      "classification": "hypothetical",
+      "role": "base"
+    },
+    {
+      "id": "sample",
+      "lonlat": [
+        137.405,
+        -4.827
+      ],
+      "classification": "hypothetical",
+      "role": "destination"
+    },
+    {
+      "id": "control",
+      "lonlat": [
+        137.406,
+        -4.826
+      ],
+      "classification": "hypothetical",
+      "role": "destination"
+    }
+  ],
+  "geographic_adapter": {
+    "id": "gale-eqc-scene-v1",
+    "projection": "spherical_equirectangular",
+    "radius_m": 3396190.0,
+    "central_meridian_deg": 0,
+    "standard_parallel_deg": 0,
+    "latitude_convention": "source_latitude_direct_to_cesium_mars",
+    "horizontal_shift_m": {
+      "east": -25.0,
+      "north": 35.0
+    },
+    "vertical_offset_m": 56.2,
+    "registration_status": "provisional_existing_p1_measurement",
+    "evidence": "scripts/build_hirise_tiles.py and CLAUDE.md: 144 points, reported height residual spread 0.9 m, 2026-11-14. Raw control samples were not delivered; fresh visual review required. Panorama +71.2 m is unrelated."
+  },
+  "content_id": "89841fb7875d22c00dbd9f64fb3c8ee781fc7ddbbc38a386e833eb6d0da7291a"
+}

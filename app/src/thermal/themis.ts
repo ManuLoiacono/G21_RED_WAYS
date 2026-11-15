@@ -1,6 +1,10 @@
 import * as Cesium from "cesium";
 import data from "./themis_nir_parcel.json";
-import { DEFAULT_SCENE_SHIFT_M } from "../terrain/parcel";
+
+type Shift = { east: number; north: number };
+/** DTM → scene shift measured on 2026-11-14 (CLAUDE.md), used until the service reports the
+ * parcel's registered display adapter (`geographic_adapter.horizontal_shift_m`). */
+const DEFAULT_SCENE_SHIFT_M: Shift = { east: -25, north: 35 };
 
 /**
  * "Loose material" warning layer (thermal class, P1) from the THEMIS nighttime infrared mosaic
@@ -43,6 +47,8 @@ export interface ThermalSample {
 export interface ThermalLayer {
   setVisible(on: boolean): void;
   isVisible(): boolean;
+  /** Moves the layer by a DTM → scene shift (null/undefined = the default measured shift). */
+  setShift(shift: Shift | null | undefined): void;
   /** THEMIS value at a DTM-frame position, or null outside the crop / nodata. */
   sample(lonDtm: number, latDtm: number): ThermalSample | null;
 }
@@ -76,16 +82,20 @@ function texture(): HTMLCanvasElement {
   return canvas;
 }
 
-export function addThermalLayer(viewer: Cesium.Viewer, shift = DEFAULT_SCENE_SHIFT_M): ThermalLayer {
-  const dLon = Cesium.Math.toDegrees(shift.east / R_MARS);
-  const dLat = Cesium.Math.toDegrees(shift.north / R_MARS);
+export function addThermalLayer(viewer: Cesium.Viewer, shift?: Shift | null): ThermalLayer {
   const b = data.bbox_lonlat;
+  const rectangle = (s: Shift) => {
+    const dLon = Cesium.Math.toDegrees(s.east / R_MARS);
+    const dLat = Cesium.Math.toDegrees(s.north / R_MARS);
+    return Cesium.Rectangle.fromDegrees(b.west + dLon, b.south + dLat, b.east + dLon, b.north + dLat);
+  };
+  let current = shift ?? DEFAULT_SCENE_SHIFT_M;
   const source = new Cesium.CustomDataSource("themis-loose-material");
-  source.entities.add({
+  const entity = source.entities.add({
     id: "themis_loose_material",
     name: "THEMIS night IR",
     rectangle: {
-      coordinates: Cesium.Rectangle.fromDegrees(b.west + dLon, b.south + dLat, b.east + dLon, b.north + dLat),
+      coordinates: rectangle(current),
       material: new Cesium.ImageMaterialProperty({ image: texture(), transparent: true }),
       classificationType: Cesium.ClassificationType.CESIUM_3D_TILE,
     },
@@ -96,6 +106,12 @@ export function addThermalLayer(viewer: Cesium.Viewer, shift = DEFAULT_SCENE_SHI
   return {
     setVisible: (on) => void (source.show = on),
     isVisible: () => source.show,
+    setShift(next) {
+      const s = next ?? DEFAULT_SCENE_SHIFT_M;
+      if (s.east === current.east && s.north === current.north) return;
+      current = s;
+      entity.rectangle!.coordinates = new Cesium.ConstantProperty(rectangle(s));
+    },
     sample(lon, lat) {
       const x = Math.floor(((lon - b.west) / (b.east - b.west)) * data.width);
       const y = Math.floor(((b.north - lat) / (b.north - b.south)) * data.height);
