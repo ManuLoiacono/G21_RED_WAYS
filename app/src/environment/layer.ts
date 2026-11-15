@@ -40,6 +40,8 @@ export interface EnvironmentLayer {
   setDeparture(utc: string | null | undefined): void;
   /** Card HTML for the Layers panel (escaped). */
   legend(): string;
+  /** One-line plain-text summary for the Layers row (sol, air temperature range, pressure). */
+  summary(): string;
   /** Called when data arrives or the chosen sol changes (to refresh the Layers panel). */
   onUpdate(cb: () => void): void;
 }
@@ -154,7 +156,21 @@ export function createEnvironmentLayer(viewer: Cesium.Viewer): EnvironmentLayer 
       </div>`;
   }
 
+  function summary(): string {
+    if (failed) return t("layers.rems.unavailable");
+    if (!data) return t("layers.rems.loading");
+    if (!match) return t("layers.rems.noReport");
+    const d = match.day;
+    return t("layers.rems.summary", {
+      sol: String(d.sol),
+      min: temp(d.minAirC),
+      max: temp(d.maxAirC),
+      pa: d.pressurePa === null ? "—" : fmtNumber(d.pressurePa, 0),
+    });
+  }
+
   return {
+    summary,
     status: () => (failed ? "missing" : !data ? "pending" : data.rems.origin === "live" ? "streaming" : "loaded"),
     isVisible: () => source.show,
     setVisible(on) {

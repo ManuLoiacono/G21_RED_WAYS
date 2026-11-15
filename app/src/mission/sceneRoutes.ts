@@ -2,6 +2,7 @@ import * as Cesium from "cesium";
 import { onLanguageChange, t } from "../i18n";
 import type { Parcel, PlanResponse, Pair } from "./draft";
 import { metricToScene } from "./geography";
+import { FlowMaterialProperty, lengthOf, sharesPath, smoothForDisplay } from "./flowMaterial";
 
 /** Owns only calculated mission entities; optical observations have their own data source. */
 export function createSceneRoutes(viewer: Cesium.Viewer) {
@@ -13,9 +14,11 @@ export function createSceneRoutes(viewer: Cesium.Viewer) {
   function clear() {
     generation += 1; response = null; labels.length = 0; source.entities.removeAll();
   }
-  function label(key: typeof labels[number]["key"], offset: number) {
-    return { text: t(key), font: "13px system-ui, sans-serif", fillColor: Cesium.Color.WHITE,
-      outlineColor: Cesium.Color.BLACK, outlineWidth: 3, style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+  function label(key: typeof labels[number]["key"], offset: number, color = "#ffffff") {
+    return { text: t(key), font: "600 13px system-ui, sans-serif", fillColor: Cesium.Color.fromCssColorString(color),
+      style: Cesium.LabelStyle.FILL, showBackground: true,
+      backgroundColor: Cesium.Color.fromCssColorString("rgba(14, 14, 18, 0.85)"), backgroundPadding: new Cesium.Cartesian2(9, 6),
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
       pixelOffset: new Cesium.Cartesian2(0, offset), disableDepthTestDistance: Number.POSITIVE_INFINITY };
   }
   async function show(r: PlanResponse, parcel: Parcel | null, selectedId?: string | null) {
@@ -36,31 +39,43 @@ export function createSceneRoutes(viewer: Cesium.Viewer) {
       const [lon, lat] = metricToScene(xy, a);
       return Cesium.Cartesian3.fromDegrees(lon, lat, h, Cesium.Ellipsoid.MARS);
     };
+    // When the return retraces the outbound cells, one animated line tells the story; drawing both
+    // stacks two halos and opposite chevrons on the same pixels. The return keeps a hidden entity
+    // with its data so nothing that reads the legs loses it.
+    const shared = sharesPath(candidate.outbound, candidate.return);
     for (const name of ["outbound", "return"] as const) {
       const leg = candidate[name];
       if (leg.status !== "found" || leg.xy_m.length === 0) continue;
+      if (name === "return" && shared) {
+        source.entities.add({ id: `route:${r.request_echo.request_id}:${name}`, name: t(`nav.${name}`), show: false,
+          properties: { request_id: r.request_echo.request_id, alternative_id: candidate.id, leg: name, cells: leg.cells, xy_m: leg.xy_m, same_path_as_outbound: true } });
+        continue;
+      }
       const color = Cesium.Color.fromCssColorString(name === "outbound" ? "#3ff0ff" : "#ffb347");
-      const entity = source.entities.add({ id: `route:${r.request_echo.request_id}:${name}`, name: t(`nav.${name}`),
-        properties: { request_id: r.request_echo.request_id, alternative_id: candidate.id, leg: name, cells: leg.cells, xy_m: leg.xy_m },
-        ...(leg.xy_m.length === 1 ? {
+      if (leg.xy_m.length === 1) {
+        const entity = source.entities.add({ id: `route:${r.request_echo.request_id}:${name}`, name: t(`nav.${name}`),
+          properties: { request_id: r.request_echo.request_id, alternative_id: candidate.id, leg: name, cells: leg.cells, xy_m: leg.xy_m },
           position: position(leg.xy_m[0], r.locations.origin.effective_elevation_m + a.vertical_offset_m),
           point: { pixelSize: name === "outbound" ? 24 : 14, color: color.withAlpha(.35), outlineColor: color, outlineWidth: 2,
             disableDepthTestDistance: Number.POSITIVE_INFINITY },
-        } : { polyline: { positions: leg.xy_m.map((xy) => position(xy)), width: name === "outbound" ? 9 : 4,
-          clampToGround: true, zIndex: name === "outbound" ? 0 : 1,
-          material: name === "outbound" ? color : new Cesium.PolylineDashMaterialProperty({ color, dashLength: 20 }),
-        } }),
-      });
-      if (leg.xy_m.length === 1) {
+        });
         entity.label = new Cesium.LabelGraphics(label(`nav.${name}`, name === "outbound" ? -55 : 50));
         labels.push({ entity, key: `nav.${name}` });
-      } else {
-        // A short final segment carries direction without replacing any analytical vertices.
-        source.entities.add({ id: `route:${r.request_echo.request_id}:${name}:arrow`,
-          polyline: { positions: leg.xy_m.slice(-5).map((xy) => position(xy)), width: name === "outbound" ? 16 : 10,
-            clampToGround: true, zIndex: name === "outbound" ? 2 : 3,
-            material: new Cesium.PolylineArrowMaterialProperty(color) } });
+        continue;
       }
+      // Drawing only: corner-cut copy of the calculated vertices (kept unchanged in `properties`).
+      const drawn = smoothForDisplay(leg.xy_m);
+      const positions = drawn.map((xy) => position(xy));
+      const outbound = name === "outbound";
+      // Dark halo under the line so it reads on bright and dark terrain.
+      source.entities.add({ id: `route:${r.request_echo.request_id}:${name}:halo`,
+        polyline: { positions, width: outbound ? 12 : 9, clampToGround: true, zIndex: outbound ? 0 : 2,
+          material: Cesium.Color.BLACK.withAlpha(0.5) } });
+      source.entities.add({ id: `route:${r.request_echo.request_id}:${name}`, name: t(`nav.${name}`),
+        properties: { request_id: r.request_echo.request_id, alternative_id: candidate.id, leg: name, cells: leg.cells, xy_m: leg.xy_m },
+        polyline: { positions, width: outbound ? 8 : 5.5, clampToGround: true, zIndex: outbound ? 1 : 3,
+          // Animated chevrons every ~35 m, moving in the direction of travel.
+          material: new FlowMaterialProperty(color, Math.max(3, lengthOf(drawn) / 35), 0.5) } });
     }
     const markers: Cesium.Entity[] = [];
     const cartos: Cesium.Cartographic[] = [];
@@ -71,9 +86,9 @@ export function createSceneRoutes(viewer: Cesium.Viewer) {
       const entity = source.entities.add({ id: `route:${name}`, name: t(key),
         position: position(location.effective_xy_m, location.effective_elevation_m + a.vertical_offset_m),
         properties: { requested_xy_m: location.requested_xy_m, effective_xy_m: location.effective_xy_m, cell: location.cell },
-        point: { pixelSize: name === "origin" ? 13 : 11, color: Cesium.Color.fromCssColorString(name === "origin" ? "#ffffff" : "#ffd166"),
-          outlineColor: Cesium.Color.BLACK, outlineWidth: 2, disableDepthTestDistance: Number.POSITIVE_INFINITY },
-        label: label(key, name === "origin" ? -25 : 28),
+        point: { pixelSize: 14, color: Cesium.Color.fromCssColorString(name === "origin" ? "#7ee787" : "#3ff0ff"),
+          outlineColor: Cesium.Color.WHITE, outlineWidth: 2.5, disableDepthTestDistance: Number.POSITIVE_INFINITY },
+        label: label(key, -14, name === "origin" ? "#7ee787" : "#3ff0ff"),
       });
       labels.push({ entity, key }); markers.push(entity);
       cartos.push(Cesium.Cartographic.fromDegrees(lon, lat));

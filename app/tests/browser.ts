@@ -34,7 +34,7 @@ await Promise.resolve(); // DataSourceCollection.add publishes on the next micro
 const panorama = createPanoramaViewer(document.getElementById("panoDialog") as HTMLDialogElement);
 createSourcesPanel(document.getElementById("sourcesDialog") as HTMLDialogElement);
 createLayersPanel(document.getElementById("layersPanel")!, [{
-  id: "panoramas", dataClass: "optica", name: "layers.panoramas", origin: "MSL Â· Mastcam Â· Navcam",
+  id: "panoramas", section: "observations", dataClass: "optica", name: "layers.panoramas", origin: "MSL Â· Mastcam Â· Navcam",
   sourceId: "rover_panoramas", status: () => "streaming",
   visibility: { get: () => markers.isVisible(), set: (on) => { markers.setVisible(on); report(); } },
   action: { label: "layers.panoramas.view", run: () => panorama.open(first) },

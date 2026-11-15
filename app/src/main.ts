@@ -22,6 +22,7 @@ import { esc } from "./ui/format";
 import { createMissionContext, setUpInputModeMenu, setUpSettingsMenu } from "./ui/hud";
 import type { PlanResponse } from "./mission/draft";
 import { createSceneRoutes } from "./mission/sceneRoutes";
+import { createRouteProfile } from "./ui/routeProfile";
 import { createScenePois } from "./mission/scenePois";
 import { requestRecommendations, requestArea } from "./mission/api";
 import { calculationKey } from "./mission/request";
@@ -43,6 +44,7 @@ Cesium.Ellipsoid.default = Cesium.Ellipsoid.MARS;
 // ---------------------------------------------------------------------------
 let viewer!: Cesium.Viewer;
 let sceneRoutes: ReturnType<typeof createSceneRoutes> | null = null;
+let routeProfile: ReturnType<typeof createRouteProfile> | null = null;
 let activeResponse: PlanResponse | null = null;
 let activeAlternative: string | null = null;
 let recommendationSequence = 0;
@@ -185,7 +187,18 @@ async function main() {
   let panoLayer: PanoramaLayer | null = null;
   const layers = createLayersPanel(document.getElementById("layersPanel")!, [
     {
+      id: "visual_terrain",
+      section: "terrain",
+      dataClass: "optica",
+      name: "layers.visualTerrain",
+      origin: "Cesium Mars · ion",
+      sourceId: "visual_terrain",
+      status: () => "streaming",
+      lockedKey: "layers.locked",
+    },
+    {
       id: "hirise",
+      section: "terrain",
       dataClass: "topografica",
       name: "layers.hirise",
       origin: "MRO · HiRISE",
@@ -197,16 +210,9 @@ async function main() {
       },
     },
     {
-      id: "visual_terrain",
-      dataClass: "optica",
-      name: "layers.visualTerrain",
-      origin: "Cesium Mars · ion",
-      sourceId: "visual_terrain",
-      status: () => "streaming",
-      lockedKey: "layers.locked",
-    },
-    {
       id: "rems",
+      section: "observations",
+      summary: () => environment.summary(),
       dataClass: "atmosferica",
       name: "layers.rems",
       origin: "MSL · REMS",
@@ -217,6 +223,7 @@ async function main() {
     },
     {
       id: "themis",
+      section: "analysis",
       dataClass: "termica",
       name: "layers.themis",
       origin: "Mars Odyssey · THEMIS",
@@ -230,6 +237,8 @@ async function main() {
     },
     {
       id: "parcel",
+      section: "terrain",
+      pendingKey: "layers.parcel.pending",
       dataClass: "mission",
       name: "layers.parcel",
       origin: "HiRISE · analytical bounds",
@@ -241,6 +250,8 @@ async function main() {
     },
     {
       id: "panoramas",
+      section: "observations",
+      pendingKey: "layers.panoramas.pending",
       dataClass: "optica",
       name: "layers.panoramas",
       origin: "MSL · Mastcam · Navcam",
@@ -251,9 +262,11 @@ async function main() {
     },
     {
       id: "mission",
+      section: "analysis",
+      pendingKey: "layers.mission.pending",
       dataClass: "mission",
       name: "layers.mission",
-      origin: "Marswalk",
+      origin: "RedWays",
       sourceId: "navigation_draft",
       status: () => activeResponse?.geographic_adapter ? "loaded" : "pending",
       visibility: {
@@ -265,7 +278,7 @@ async function main() {
       },
     },
     {
-      id: "reachable-area", dataClass: "mission", name: "nx.area", origin: "Marswalk",
+      id: "reachable-area", section: "analysis", dataClass: "mission", name: "nx.area", origin: "RedWays",
       status: () => activeArea?.geographic_adapter ? "loaded" : "pending",
       visibility: { get: () => sceneArea?.isVisible() ?? false, set: (on) => {
         areaWanted = on; areaSequence += 1; sceneArea?.setVisible(on);
@@ -275,14 +288,8 @@ async function main() {
     },
   ]);
   environment.onUpdate(() => layers.refresh());
+  // The Layers panel opens and closes from its own header / collapsed pill (no HUD button).
   document.addEventListener("reachable-area-change", () => layers.refresh());
-  const layersBtn = document.getElementById("toggleLayers") as HTMLButtonElement;
-  layersBtn.onclick = () => layers.setOpen(!layers.isOpen());
-  layersBtn.disabled = false;
-  layers.onToggle((open) => {
-    layersBtn.setAttribute("aria-expanded", String(open));
-    layersBtn.classList.toggle("active", open);
-  });
   document.addEventListener("plan-response", () => {
     layers.refresh();
     layers.setOpen(false);
@@ -296,6 +303,8 @@ async function main() {
   sceneArea = createSceneArea(viewer);
   if (activeArea && areaWanted) sceneArea.show(activeArea, panel.getParcel());
   sceneRoutes.setVisible(missionVisible);
+  // Elevation profile of the calculated route (bottom dock), sampled from the local HiRISE grid.
+  routeProfile = createRouteProfile(viewer, await elevationGrid);
   if (activeResponse) void showSceneResponse(activeResponse);
   Object.assign(window, { missionRoutes: sceneRoutes });
   panel.onChange(() => layers.refresh());
@@ -305,6 +314,8 @@ async function main() {
   let pointsVisible = false;
   const refreshPoints = () => void scenePois.update(pointsVisible, panel.getParcel(), panel.getRequest());
   panel.onPointsPreview((visible) => { pointsVisible = visible; refreshPoints(); });
+  // While the full-screen wizard covers the scene, stop redrawing it: keeps wizard scrolling smooth.
+  panel.onCoverScene((covered) => { viewer.useDefaultRenderLoop = !covered; });
   panel.onChange(() => { if (pointsVisible) refreshPoints(); });
 
   // Cursor readout: position, DTM elevation and slope (highlighted above the profile's maximum).
@@ -382,7 +393,7 @@ function trackHudHeight() {
 
 setUpLanguage();
 trackHudHeight();
-for (const id of ["toggleLayers", "resetView", "settingsBtn"]) {
+for (const id of ["resetView", "settingsBtn"]) {
   (document.getElementById(id) as HTMLButtonElement).disabled = true;
 }
 // Planning works independently of ion/terrain availability.
@@ -396,9 +407,9 @@ function updateAreaState(value: ReachableArea | string, visible: boolean) {
 }
 const context = createMissionContext(document.getElementById("hudContext")!);
 panel.onChange((request) => context.update(request));
-panel.onStale(() => { recommendationSequence += 1; areaSequence += 1; areaWanted = false; activeArea = null; sceneArea?.clear(); activeResponse = null; activeAlternative = null; results.clear(); sceneRoutes?.clear(); });
+panel.onStale(() => { recommendationSequence += 1; areaSequence += 1; areaWanted = false; activeArea = null; sceneArea?.clear(); activeResponse = null; activeAlternative = null; results.clear(); sceneRoutes?.clear(); routeProfile?.clear(); });
 async function showSceneResponse(response: PlanResponse) {
-  try { await sceneRoutes?.show(response, panel.getParcel(), activeAlternative); }
+  try { await sceneRoutes?.show(response, panel.getParcel(), activeAlternative); routeProfile?.show(response, panel.getParcel(), activeAlternative); }
   catch (error) { console.error(error); showToast(t("nav.sceneMismatch")); }
 }
 document.addEventListener("plan-response", (event) => {

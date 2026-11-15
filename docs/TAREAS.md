@@ -1,4 +1,4 @@
-# Tareas — G21 RED WAYS (Marswalk en Gale)
+# Tareas — G21 RED WAYS (RedWays en Gale)
 
 Fuente: plan v1.1 (`docs/PLAN_DESARROLLO_MARSWALK_GALE.md`). Contexto general: `CLAUDE.md`.
 

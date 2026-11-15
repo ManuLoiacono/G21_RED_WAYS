@@ -3,7 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Marswalk — Gale</title>
+    <title>RedWays</title>
+    <!-- Team patch (circle cropped, transparent corners). Files live in app/public/. -->
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <style>
       /* overflow: clip keeps focus from scrolling the page when a panel does not fit. */
       html, body, #cesiumContainer { margin: 0; width: 100%; height: 100%; overflow: clip; background: #000; }
@@ -17,13 +23,12 @@
       <div class="hud-brand">
         <span class="hud-mark" aria-hidden="true"></span>
         <div>
-          <strong>MARSWALK</strong>
+          <strong class="hud-title" aria-label="RedWays"><span class="hud-title-red">RED</span><span class="hud-title-ways">WAYS</span></strong>
           <span data-i18n="hud.place">Cráter Gale · monte Sharp</span>
         </div>
       </div>
       <div id="hudContext" class="hud-context" data-i18n-aria="hud.ctx.aria" role="status"></div>
       <div class="hud-actions">
-        <button id="toggleLayers" type="button" aria-controls="layersPanel" aria-expanded="true" data-i18n="hud.layers">Capas</button>
         <button id="resetView" type="button" data-i18n-title="hud.resetView" data-i18n-aria="hud.resetView"><span class="hud-glyph" aria-hidden="true">⟲</span><span class="hud-label" data-i18n="hud.resetView">Restablecer vista</span></button>
         <button id="openSources" type="button" aria-haspopup="dialog" data-i18n="hud.sources">Fuentes</button>
         <span id="languageSwitch" class="lang-switch" role="group" data-i18n-aria="hud.language">

@@ -1,4 +1,4 @@
-# G21 RED WAYS — Marswalk en Gale
+# G21 RED WAYS — RedWays en Gale
 
 POC para NASA Space Apps 2026 (desafío *Marswalk*): una app web que muestra en 3D una parcela real del cráter Gale. Ayuda a planificar una expedición humana a pie o con robot de apoyo: compara rutas de ida, tarea y regreso, y explica cada evaluación con datos de varias misiones de NASA (MRO/HiRISE, MSL/REMS, Mars Odyssey/THEMIS).
 
