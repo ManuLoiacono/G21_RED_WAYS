@@ -4,12 +4,12 @@
   "revision": 0,
   "parcel": {
     "id": "gale_hirise_019698",
-    "version": "native2-v1"
+    "version": "native2-photo-v2"
   },
   "scenario": {
     "id": "gale_historical_replay",
     "version": "v1",
-    "as_of_utc": "2025-10-26T00:26:28Z"
+    "as_of_utc": "2025-10-26T00:26:35Z"
   },
   "origin": {
     "type": "poi",
@@ -40,7 +40,7 @@
     ],
     "time_budget_s": 21600,
     "reserve_s": 1800,
-    "departure_utc": "2025-10-26T00:26:28Z"
+    "departure_utc": "2025-10-26T00:26:35Z"
   },
   "criterion": "comparison"
 }

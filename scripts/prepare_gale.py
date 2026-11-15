@@ -89,7 +89,7 @@ def prepare(out, factor=2):
               "north": math.degrees((t.f-row0*res)/R_SPHERE),
               "south": math.degrees((t.f-row1*res)/R_SPHERE)}
     manifest = {
-        "format": "gale-analytical-1", "id": "gale_hirise_019698", "version": "native2-v1" if factor == 2 else f"native{factor}-v1",
+        "format": "gale-analytical-1", "id": "gale_hirise_019698", "version": f"native{factor}-photo-v2",
         "fixture": False, "source": source_info, "reviewed_bounds_lonlat": dict(zip(("west", "south", "east", "north"), BBOX)),
         "bounds_lonlat": bounds, "reference_description": "Mars 2015 sphere; east-positive longitude, source planetocentric latitude, native equirectangular meters; east-west distortion about 0.35 percent.",
         "grid": {"shape": list(arrays["coverage"].shape), "spacing_m": [res*factor]*2,

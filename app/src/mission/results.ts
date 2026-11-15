@@ -174,7 +174,7 @@ export function createResultsPanel(root: HTMLElement) {
         ${kpi("elapsed_s", "demo.activity", m.elapsed_s)}
         <div class="rs-kpi"><span>${esc(t("demo.distance"))}</span><strong>${meters(a.outbound.horizontal_distance_m === null || a.return.horizontal_distance_m === null ? null : a.outbound.horizontal_distance_m + a.return.horizontal_distance_m)}</strong></div>
         <div class="rs-kpi"><span>${esc(t("demo.ascent"))}</span><strong>${meters(a.outbound.ascent_m === null || a.return.ascent_m === null ? null : a.outbound.ascent_m + a.return.ascent_m)}</strong></div>
-        ${kpi("mission_margin_s", "nav.missionMargin", m.mission_margin_s)}
+        ${kpi("temporal_budget_limiting_margin_s", "nav.temporalMargin", m.temporal_budget_limiting_margin_s)}
         ${kpi("daylight_reserved_return_margin_s", "rs.kpi.daylight", m.daylight_reserved_return_margin_s)}
       </div>
       ${timeline(a)}

@@ -1,7 +1,7 @@
 {
   "format": "gale-analytical-1",
   "id": "gale_hirise_019698",
-  "version": "native2-v1",
+  "version": "native2-photo-v2",
   "fixture": false,
   "source": {
     "url": "https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_019698_1750_ESP_019988_1750/DTEEC_019698_1750_019988_1750_U01.tif",
@@ -139,5 +139,5 @@
     "registration_status": "provisional_existing_p1_measurement",
     "evidence": "scripts/build_hirise_tiles.py and CLAUDE.md: 144 points, reported height residual spread 0.9 m, 2026-11-14. Raw control samples were not delivered; fresh visual review required. Panorama +71.2 m is unrelated."
   },
-  "content_id": "681fc43879f8f74ca04927725e9102443ff26399d77c39ba6d36049a34e75633"
+  "content_id": "59f53b78a0f5369d202d5af8bcd3dc8651620b74a09a6b3bb028faee4e1cf2e1"
 }

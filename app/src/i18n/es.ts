@@ -461,7 +461,7 @@ export const es = {
   "nav.syntheticMode": "Modo sintético de desarrollo",
   "nav.galeMode": "Modo de desarrollo sobre terreno Gale",
   "nav.hypothetical": "Ubicación hipotética",
-  "nav.poi.control": "Destino de control oriental",
+  "nav.poi.control": "Control del sector fotográfico",
   "nav.scenario.gale_development_missing_daylight": "Reloj de desarrollo supuesto · sin evidencia de luz diurna en Gale",
   "nav.provenance": "Procedencia del cálculo",
   "nav.locations": "Solo ubicaciones registradas por el servicio. Los panoramas son observaciones ópticas, no destinos de planificación.",

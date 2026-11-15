@@ -79,6 +79,7 @@ test('terrain crossing and unknown coverage are compact advisory summaries', () 
 test('duration segments reject malformed input and pasted content', () => {
   const { validDurationPart, constrainDuration } = require('../src/mission/durationInput.ts');
   for (const value of ['60', '-1', '1.5', 'aa', '2:3']) assert.equal(validDurationPart(value, true), false);
+  assert.equal(validDurationPart('100', false), false);
   for (const value of ['', '00', '59']) assert.equal(validDurationPart(value, true), true);
   const handlers = {}; constrainDuration({ addEventListener: (name, handler) => { handlers[name] = handler; } });
   let blocked = false;
