@@ -1,6 +1,7 @@
 import { onLanguageChange, t, type MessageKey } from "../i18n";
 import type { Provenance } from "../mission/response";
 import { esc } from "../ui/format";
+import themis from "../thermal/themis_nir_parcel.json";
 
 /**
  * Source registry (P1-05). Each layer, rule or value in the UI points to an entry by id
@@ -120,6 +121,21 @@ const staticSources = (): SourceEntry[] => [
       origin: "live",
       url: "https://science.nasa.gov/mission/msl-curiosity/",
       kind: "observado",
+    },
+  },
+  {
+    id: "themis_nir",
+    ...text("themis_nir", 3),
+    group: "termica",
+    provenance: {
+      class: "termica",
+      mission: "Mars Odyssey",
+      instrument: "THEMIS",
+      product: "MC-23 Aeolis nighttime IR controlled mosaic (100 m/px, CC0)",
+      url: themis.source.url,
+      origin: "cache",
+      kind: "observado",
+      fetched_at: themis.source.fetched_at,
     },
   },
   {

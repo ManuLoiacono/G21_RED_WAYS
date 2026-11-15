@@ -32,6 +32,8 @@ export interface LayerDef {
   action?: { label: MessageKey; run: () => void };
   /** Shown instead of a switch when the layer cannot be hidden. */
   lockedKey?: MessageKey;
+  /** Legend HTML shown under the row while the layer is on screen (already escaped). */
+  legend?: () => string;
 }
 
 export interface LayersPanel {
@@ -63,8 +65,10 @@ export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): Layers
     const action = layer.action
       ? `<button type="button" class="ly-action" data-action="${layer.id}">${esc(t(layer.action.label))}</button>`
       : "";
+    const active = status !== "missing" && status !== "pending" && (!layer.visibility || on);
+    const legend = active && layer.legend ? `<div class="ly-legend">${layer.legend()}</div>` : "";
     return `
-      <li class="ly-row" data-status="${status}" data-active="${status !== "missing" && status !== "pending" && (!layer.visibility || on)}">
+      <li class="ly-row" data-status="${status}" data-active="${active}">
         <div class="ly-main">
           <span class="ly-name">${esc(t(layer.name))}</span>
           ${info}
@@ -76,6 +80,7 @@ export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): Layers
           <span class="ly-origin" title="${esc(layer.origin)}">${esc(layer.origin)}</span>
           <span class="ly-status">${esc(t(`layers.status.${status}` as MessageKey))}</span>
         </div>
+        ${legend}
       </li>`;
   }
 

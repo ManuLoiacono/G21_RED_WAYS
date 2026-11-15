@@ -1,6 +1,7 @@
 import * as Cesium from "cesium";
 import { numberLocale, onLanguageChange, t } from "../i18n";
 import type { ElevationGrid, TerrainSample } from "../terrain/elevationGrid";
+import type { ThermalSample } from "../thermal/themis";
 import { esc, fmtNumber } from "./format";
 
 /**
@@ -14,7 +15,11 @@ interface Reading {
   lat: number;
   inGrid: boolean;
   sample: TerrainSample | null;
+  thermal: ThermalSample | null;
 }
+
+/** THEMIS reading at a DTM-frame position (null when the layer is off or outside the crop). */
+export type ThermalProbe = (lonDtm: number, latDtm: number) => ThermalSample | null;
 
 export interface CursorReadout {
   /** Slope above which the value is highlighted (the profile's maximum, editable in the form). */
@@ -27,7 +32,11 @@ const fmtDeg = (d: number) =>
 const fmtLat = (lat: number) => `${fmtDeg(Math.abs(lat))}° ${lat < 0 ? t("readout.south") : t("readout.north")}`;
 const fmtLon = (lon: number) => `${fmtDeg(lon)}° ${t("readout.east")}`;
 
-export function createCursorReadout(viewer: Cesium.Viewer, grid: ElevationGrid | undefined): CursorReadout {
+export function createCursorReadout(
+  viewer: Cesium.Viewer,
+  grid: ElevationGrid | undefined,
+  thermalAt: ThermalProbe = () => null,
+): CursorReadout {
   const el = document.createElement("div");
   el.id = "cursorReadout";
   el.hidden = true;
@@ -42,7 +51,12 @@ export function createCursorReadout(viewer: Cesium.Viewer, grid: ElevationGrid |
       el.hidden = true;
       return;
     }
-    const { lon, lat, inGrid, sample } = last;
+    const { lon, lat, inGrid, sample, thermal } = last;
+    const thermalRow = thermal
+      ? `<div class="ro-thermal" title="${esc(t("readout.thermal.title", { dn: String(thermal.dn) }))}">
+           <dt>${esc(t("readout.thermal"))}</dt><dd>${esc(t(`readout.thermal.${thermal.band}`))}</dd>
+         </div>`
+      : "";
     const steep = sample?.slope_deg != null && sample.slope_deg > slopeLimit;
     const coordsTitle = inGrid ? t("readout.coords.dtm") : t("readout.coords.scene");
     el.innerHTML = `
@@ -54,6 +68,7 @@ export function createCursorReadout(viewer: Cesium.Viewer, grid: ElevationGrid |
                <div title="${esc(steep ? t("readout.slope.steep", { max: fmtNumber(slopeLimit, 1) }) : t("readout.slope.title"))}" ${steep ? 'class="ro-steep"' : ""}>
                  <dt>${esc(t("readout.slope"))}</dt><dd>${sample.slope_deg == null ? "—" : `${esc(fmtNumber(sample.slope_deg, 1))}°`}</dd>
                </div>
+               ${thermalRow}
              </dl>
              <div class="ro-tag">${esc(t("readout.tag"))}</div>`
           : `<div class="ro-tag">${esc(grid ? t("readout.outside") : t("readout.noGrid"))}</div>`
@@ -84,14 +99,11 @@ export function createCursorReadout(viewer: Cesium.Viewer, grid: ElevationGrid |
     if (sample && grid) {
       // Inside the grid, show DTM coordinates: the same frame as the elevation and the engine.
       const { radius_m: R, scene_shift_m: shift } = grid.info;
-      last = {
-        lon: sceneLon - Cesium.Math.toDegrees(shift.east / R),
-        lat: sceneLat - Cesium.Math.toDegrees(shift.north / R),
-        inGrid: true,
-        sample,
-      };
+      const lon = sceneLon - Cesium.Math.toDegrees(shift.east / R);
+      const lat = sceneLat - Cesium.Math.toDegrees(shift.north / R);
+      last = { lon, lat, inGrid: true, sample, thermal: thermalAt(lon, lat) };
     } else {
-      last = { lon: sceneLon, lat: sceneLat, inGrid: false, sample: null };
+      last = { lon: sceneLon, lat: sceneLat, inGrid: false, sample: null, thermal: null };
     }
     render();
   };
