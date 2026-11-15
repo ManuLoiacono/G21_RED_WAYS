@@ -823,3 +823,50 @@ button.wz-sum { position: relative; }
 .wz-ready .mp-status { margin: 0; font-size: 12px; color: var(--ui-neutral); }
 .wz-ready .mp-status[data-kind="error"] { color: var(--ui-bad); }
 @media (max-width: 700px) { .wz-sum-grid { grid-template-columns: 1fr; } .wz-sum-route { font-size: 17px; } .wz-sum-arrow { width: 32px; } }
+
+/* Results panel: compact honesty strip, status hero, KPIs, timeline, grouped details (display only). */
+.rs-head-actions { display: inline-flex; align-items: center; gap: 6px; }
+.rs-icon-btn { width: 30px; height: 30px; padding: 5px; display: inline-grid; place-items: center; color: var(--ui-accent); background: var(--ui-accent-soft); border: 1px solid rgba(63, 240, 255, .45); border-radius: 8px; cursor: pointer; }
+.rs-icon-btn svg { width: 18px; height: 18px; }
+.rs-icon-btn:hover { background: rgba(63, 240, 255, .2); }
+.rs-honesty { margin: 10px 0 0; font-size: 11.5px; color: var(--ui-muted); }
+.rs-honesty > summary { display: flex; align-items: flex-start; gap: 6px; list-style: none; cursor: pointer; }
+.rs-honesty > summary::-webkit-details-marker { display: none; }
+.rs-honesty > summary:hover { color: var(--ui-fg); }
+.rs-info { color: var(--ui-mars); font-size: 13px; }
+.rs-honesty[open] p { margin: 6px 0 0; padding: 7px 9px; border-radius: 8px; background: rgba(255, 196, 0, .08); color: #ffd666; }
+.rs-hero { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 12px 0 8px; }
+.rs-hero small { color: var(--ui-muted); }
+.rs-badge-lg { padding: 5px 14px; font-size: 14px; font-weight: 700; border: 1px solid currentColor; background: rgba(255, 255, 255, .04); }
+.rs-legend { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; font-size: 12px; color: var(--ui-neutral); }
+.rs-legend .sw { display: inline-block; width: 26px; height: 0; margin-left: 6px; }
+.rs-legend .sw:first-child { margin-left: 0; }
+.rs-legend .sw-out { border-top: 5px solid #3ff0ff; box-shadow: 0 0 0 1px rgba(0, 0, 0, .7); }
+.rs-legend .sw-ret { border-top: 3px dashed #ffb347; }
+.rs-sub { margin: 4px 0; color: var(--ui-muted); font-size: 12px; }
+.rs-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 10px 0 8px; }
+.rs-kpi { display: flex; flex-direction: column; gap: 3px; padding: 8px 9px; border-radius: 10px; background: rgba(255, 255, 255, .04); border: 1px solid var(--ui-line); min-width: 0; }
+.rs-kpi span { font-size: 10.5px; line-height: 1.25; color: var(--ui-muted); }
+.rs-kpi strong { font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rs-kpi[data-tone="ok"] strong { color: var(--ui-ok); }
+.rs-kpi[data-tone="bad"] { border-color: rgba(255, 138, 122, .5); }
+.rs-kpi[data-tone="bad"] strong { color: var(--ui-bad); }
+.rs-kpis .rs-kpi:first-child strong { color: var(--ui-fg); }
+.rs-timeline { margin: 4px 0 8px; }
+.rs-timeline-bar { position: relative; display: flex; height: 14px; border-radius: 7px; background: rgba(0, 0, 0, .45); overflow: hidden; }
+.rs-timeline-bar > span { min-width: 2px; }
+.seg-out { background: #3ff0ff; }
+.seg-tasks { background: #c792ea; }
+.seg-ret { background: #ffb347; }
+.seg-reserve { background: repeating-linear-gradient(135deg, #ffd666 0 5px, #d9a92c 5px 10px); }
+.rs-mark { position: absolute; top: -2px; bottom: -2px; width: 2px; }
+.rs-mark-budget { background: rgba(255, 255, 255, .7); }
+.rs-mark-sun { background: #ffe58a; box-shadow: 0 0 6px #ffe58a; }
+.rs-timeline-legend { display: flex; flex-wrap: wrap; gap: 3px 10px; margin: 6px 0 0; font-size: 11px; color: var(--ui-muted); }
+.rs-timeline-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.rs-timeline-legend .dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+.rs-timeline-legend .dot-sun { background: #ffe58a; border-radius: 50%; }
+.rs-section { margin-top: 6px; border-top: 1px solid var(--ui-line); padding-top: 6px; }
+.rs-section > summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--ui-neutral); }
+.rs-section > summary:hover { color: var(--ui-fg); }
+.rs-timeline-bar { background: rgba(255, 255, 255, .08); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }

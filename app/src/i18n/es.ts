@@ -396,9 +396,9 @@ export const es = {
   "nav.noMetadata": "No se pudo cargar la configuración del servicio.",
   "nav.ready": "Listo para calcular con el motor.",
   "nav.synthetic": "Entradas sintéticas y supuestos editables; la planificación geográfica en Gale no está disponible para esta parcela.",
-  "nav.realTerrain": "Terreno HiRISE real; ubicaciones hipotéticas y equipo/reloj supuestos. Falta evidencia de luz diurna. Registro visual pendiente de revisión; no es una evaluación operativa de misión.",
-  "nav.baseResolved": "Base hipotética · centro resuelto",
-  "nav.destinationResolved": "Destino hipotético · centro resuelto",
+  "nav.realTerrain": "Terreno HiRISE real; ubicaciones hipotéticas y equipo/reloj supuestos. Registro visual pendiente de revisión; no es una evaluación operativa de misión.",
+  "nav.baseResolved": "Base (hipotética)",
+  "nav.destinationResolved": "Destino (hipotético)",
   "nav.sceneMismatch": "La ruta calculada no coincide con el registro de la parcela activa; se borró su geometría de la escena.",
   "nav.focusRoute": "Ver ruta calculada en Gale",
   "nav.sceneInspection": "Inspección de escena de desarrollo · solo diagnóstico",
@@ -620,6 +620,13 @@ export const es = {
   "wizard.summary.scheduleTime": "Horario y tiempo",
   "wizard.summary.departureBudget": "Salida {t} UTC · presupuesto {b}",
   "wizard.summary.free": "ida y vuelta: se calcula · hasta {t}",
+  "rs.honesty": "Ruta del motor sobre terreno HiRISE real · ubicaciones, equipo y reloj supuestos · no es una evaluación operativa.",
+  "rs.honestySynthetic": "Ruta del motor sobre terreno sintético de prueba · equipo y reloj supuestos · no es una evaluación operativa.",
+  "rs.kpi.daylight": "Margen de luz al regreso",
+  "rs.timeline.sunset": "fin de luz",
+  "rs.timeline.sunsetLater": "fin de luz: {t} después del presupuesto",
+  "rs.allMetrics": "Todas las métricas",
+  "rs.technical": "Detalle técnico",
 } as const;
 
 export type MessageKey = keyof typeof es;
