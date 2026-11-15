@@ -65,6 +65,7 @@ Origins must be exact `http://localhost:PORT` or `http://127.0.0.1:PORT`, withou
 | `GET /parcel?id=synthetic_metric_demo&version=v1` | Exact registered parcel metadata, metric cell-center transform, declared coverage/exclusion/aggregation policy, versions and POIs. No raster or graph/search arrays. |
 | `GET /catalogs` | The exact JSON representation of central `export_catalogs()`, including the roster and four templates. No copied defaults. |
 | `POST /plan` | Strict `p2-plan-draft-1` request to `loads_strict` and `plan_draft` on the application-owned planner. Calculated engine response only. |
+| `POST /reevaluate` | `p2-progress-1`: reevaluation from a simulated position on a calculated route (P2-11). See below. |
 | `OPTIONS` on these paths | Allowed route method (`POST` for `/plan`, `GET` for metadata) and `Content-Type`; configured browser origins only when supplied. |
 
 Missing/duplicate/unknown query fields return 422; an unregistered metadata parcel/version returns 404. Unknown paths return 404 and wrong methods return 405. Errors have `{"error":{"code":"...","path":"...","message":"..."}}`. `/health` and `/catalogs` accept no query parameters. Paths are exact and have no trailing slash alias.
@@ -72,6 +73,21 @@ Missing/duplicate/unknown query fields return 422; an unregistered metadata parc
 `POST /plan` accepts the complete [draft request](examples/request.example.json), unchanged from the [exchange documentation](EXCHANGE_DRAFT.md). Supply `Content-Type: application/json` (optionally `charset=utf-8`) and one decimal `Content-Length`. UTF-8 JSON is required. Chunked transfer, compression and other content types/parameters are unsupported. The service parses raw JSON with `loads_strict`; duplicate keys, nonfinite constants and overflowing exponents are HTTP 400. Client-supplied movement-leg durations or completed assessments are not accepted.
 
 Every successful planning response comes from the engine. Repeated compatible requests reuse the same planner's movement while evaluating the mission again. Changing the baseline task from 600 to 601 seconds changes elapsed time from 800 to 801 seconds and reduces temporal/daylight margins by one second. Technical errors never return a successful or fixed plan. Local CLI clients may omit `Origin`.
+
+### `POST /reevaluate` (simulated progress, P2-11)
+
+Body: `{"schema_version": "p2-progress-1", "request": <the unchanged plan request>, "alternative_id": "<id from the plan>", "progress": {"phase": "outbound|tasks|return", "vertex_index": <int>, "cell": [row, col], "tasks_done_s": <s>, "delay_s": <cumulative s>}}`.
+
+Optional `return_alternative_id` takes the return leg from another calculated alternative (same base, destination and team); that combination was never evaluated by `/plan`, so `planned` is its own fresh evaluation (with `planned.metrics`). Without it, both legs come from `alternative_id`.
+
+The plan is recalculated with the same inputs (cached graph/search reused), so the legs are exactly the calculated ones; `cell` must be `vertex_index` of the current leg (destination cell during `tasks`), otherwise 422 `stale_progress`. `tasks_done_s` is the time already spent on tasks (only variable during `tasks`; 0 outbound, all tasks on return). `delay_s` is the cumulative simulated delay (max 86 400 s).
+
+`engine.progress.evaluate_progress` evaluates two options with the unchanged complete-mission rules; budgets and participant limits are never reset:
+
+- `continue`: the calculated sortie plus the delay;
+- `return_now` (not offered once the return leg started): what was already travelled/done, plus the fastest path from the current cell back to the base (from the complete base search). Pending tasks are not done.
+
+The response has `elapsed_at_event_s` (edge durations up to the vertex + done tasks + delay), `planned`, `options[]` (assessment, metrics as in `/plan`, checks, `return` leg geometry) and `recommendation {option_id, reason}`. Reasons: `continue_within_limits`, `return_keeps_limits`, `return_ends_sooner`, `already_returning`, `no_better_option`. Terrain blockage events are not evaluated (`not_evaluated` includes `terrain_blockage_event`). Positions are simulated: this is not localization.
 
 ## Status and resource boundaries
 

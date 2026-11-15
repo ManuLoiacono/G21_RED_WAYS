@@ -37,7 +37,15 @@ export function createRouteProfile(viewer: Cesium.Viewer, grid: ElevationGrid | 
   let collapsed = false;
   let selectedId: string | null = null;
   const pick = (r: PlanResponse) => r.alternatives.find((a) => a.id === selectedId) ?? r.alternatives[0];
+  /** Return leg may come from another alternative while the simulated tracking follows a combination. */
+  let returnId: string | null = null;
+  const pickBack = (r: PlanResponse) => r.alternatives.find((a) => a.id === returnId) ?? pick(r);
   let zMin = 0, zMax = 1, dTotal = 1, dOut = 0;
+  /** Simulated-tracking position along the profile (metres), drawn as a moving line; null hides it. */
+  let progressD: number | null = null;
+  /** Extra controls (simulated tracking) kept below the chart across re-renders. */
+  const slot = document.createElement("div");
+  slot.className = "rp-slot";
 
   const lang = () => getLanguage();
   const m = (v: number) => `${Math.round(v).toLocaleString(lang())} m`;
@@ -46,11 +54,12 @@ export function createRouteProfile(viewer: Cesium.Viewer, grid: ElevationGrid | 
 
   function build(r: PlanResponse) {
     points = [];
-    const alt = pick(r);
+    const alt = pick(r), back = pickBack(r);
     if (!alt || !grid) return;
     let d = 0;
     for (const leg of ["outbound", "return"] as const) {
-      const xy = alt[leg].status === "found" ? alt[leg].xy_m : [];
+      const source = leg === "outbound" ? alt : back;
+      const xy = source[leg].status === "found" ? source[leg].xy_m : [];
       xy.forEach((p, i) => {
         if (i > 0) d += Math.hypot(p[0] - xy[i - 1][0], p[1] - xy[i - 1][1]);
         points.push({ d, z: grid.sampleMetric(p[0], p[1])?.elevation_m ?? null, xy: p, leg });
@@ -73,17 +82,29 @@ export function createRouteProfile(viewer: Cesium.Viewer, grid: ElevationGrid | 
   }
 
   function render() {
+    draw();
+    if (response) root.appendChild(slot);
+    drawProgress();
+  }
+  function drawProgress() {
+    const line = root.querySelector<SVGLineElement>(".rp-progress");
+    if (!line) return;
+    const visible = progressD !== null && points.length > 1;
+    line.setAttribute("visibility", visible ? "visible" : "hidden");
+    if (visible) { const x = xOf(Math.min(Math.max(progressD!, 0), dTotal)).toFixed(1); line.setAttribute("x1", x); line.setAttribute("x2", x); }
+  }
+  function draw() {
     root.hidden = !response;
     root.classList.toggle("collapsed", collapsed);
     if (!response) { root.innerHTML = ""; return; }
-    const alt = pick(response);
+    const alt = pick(response), back = pickBack(response);
     const head = `<header class="rp-head">
         <h2>${esc(t("profile.title"))} <span class="wz-tag" data-kind="derived">${esc(t("wizard.tag.derived"))}</span></h2>
         ${alt ? `<span class="rp-legs">
           <span class="rp-leg rp-out">${esc(t("nav.outbound"))} ${esc(duration(alt.metrics.outbound_s))} · ${esc(alt.outbound.horizontal_distance_m === null ? "—" : m(alt.outbound.horizontal_distance_m))}
             · ↑${esc(alt.outbound.ascent_m === null ? "—" : m(alt.outbound.ascent_m))} ↓${esc(alt.outbound.descent_m === null ? "—" : m(alt.outbound.descent_m))}</span>
-          <span class="rp-leg rp-ret">${esc(t("nav.return"))} ${esc(duration(alt.metrics.return_s))} · ${esc(alt.return.horizontal_distance_m === null ? "—" : m(alt.return.horizontal_distance_m))}
-            · ↑${esc(alt.return.ascent_m === null ? "—" : m(alt.return.ascent_m))} ↓${esc(alt.return.descent_m === null ? "—" : m(alt.return.descent_m))}</span></span>` : ""}
+          <span class="rp-leg rp-ret">${esc(t("nav.return"))} ${esc(duration(back.metrics.return_s))} · ${esc(back.return.horizontal_distance_m === null ? "—" : m(back.return.horizontal_distance_m))}
+            · ↑${esc(back.return.ascent_m === null ? "—" : m(back.return.ascent_m))} ↓${esc(back.return.descent_m === null ? "—" : m(back.return.descent_m))}</span></span>` : ""}
         <button type="button" data-act="collapse" aria-expanded="${!collapsed}" aria-label="${esc(t(collapsed ? "profile.show" : "profile.hide"))}">${collapsed ? "+" : "−"}</button>
       </header>`;
     if (!grid || points.filter((p) => p.z !== null).length < 2) {
@@ -105,6 +126,7 @@ export function createRouteProfile(viewer: Cesium.Viewer, grid: ElevationGrid | 
             <path d="${path("outbound", false)}" class="rp-line rp-line-out"/><path d="${path("return", false)}" class="rp-line rp-line-ret"/>
             <line x1="${xOf(dOut).toFixed(1)}" x2="${xOf(dOut).toFixed(1)}" y1="0" y2="${H}" class="rp-dest"/>
             <line class="rp-hover" x1="0" x2="0" y1="0" y2="${H}" visibility="hidden"/>
+            <line class="rp-progress" x1="0" x2="0" y1="0" y2="${H}" visibility="hidden"/>
           </svg>
           <span class="rp-dest-label" style="left:${(100 * dOut / dTotal).toFixed(2)}%">${esc(t("profile.destination", { t: tasks }))}</span>
           <span class="rp-tip" hidden></span>
@@ -175,14 +197,23 @@ export function createRouteProfile(viewer: Cesium.Viewer, grid: ElevationGrid | 
 
   return {
     show(r: PlanResponse, p: Parcel | null, selected: string | null = null) {
-      selectedId = selected;
+      selectedId = selected; returnId = null;
       response = r.geographic_adapter && r.alternatives.length ? r : null;
       parcel = p;
       if (response) build(response);
-      collapsed = false;
+      collapsed = false; progressD = null;
       render();
       place();
     },
-    clear() { response = null; points = []; cursor.show = false; render(); },
+    clear() { response = null; points = []; progressD = null; cursor.show = false; render(); },
+    /** Container for the simulated-tracking controls (lives inside the dock). */
+    slot,
+    /** Show the outbound of one alternative and the return of another (simulated tracking choice). */
+    setLegs(outboundId: string, backId: string) {
+      if (!response) return;
+      selectedId = outboundId; returnId = backId; progressD = null;
+      build(response); render();
+    },
+    setProgress(d: number | null) { progressD = d; drawProgress(); },
   };
 }

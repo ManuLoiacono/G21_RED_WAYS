@@ -1,4 +1,4 @@
-import { DRAFT_SCHEMA, type Catalogs, type Health, type Parcel, type PlanResponse, type Recommendations, type ReachableArea } from "./draft";
+import { DRAFT_SCHEMA, type Catalogs, type Health, type Parcel, type PlanResponse, type ProgressResponse, type Recommendations, type ReachableArea } from "./draft";
 import { decodeArea } from "./area";
 
 type Obj = Record<string, unknown>;
@@ -106,4 +106,16 @@ export function isReachableArea(x: unknown): x is ReachableArea {
     for (const state of states) counts[state] += 1;
     return states.length === x.evaluated_cells && Object.keys(x.counts).length === 7 && counts.every((n, code) => object(x.counts) && x.counts[String(code)] === n);
   } catch { return false; }
+}
+
+export function isProgressResponse(x: unknown): x is ProgressResponse {
+  const metricKeys = ["outbound_s", "return_s", "elapsed_s", "reserved_total_s", "mission_margin_s", "daylight_reserved_return_margin_s"];
+  return object(x) && finiteJson(x) && x.schema_version === "p2-progress-1" && object(x.request_echo) && str(x.alternative_id) &&
+    object(x.position) && pair(x.position.cell) && pair(x.position.xy_m) && num(x.elapsed_at_event_s) && object(x.planned) &&
+    object(x.recommendation) && ["continue", "return_now"].includes(x.recommendation.option_id as string) && str(x.recommendation.reason) &&
+    strings(x.not_evaluated) && str(x.scope) &&
+    list(x.options, (o) => ["continue", "return_now"].includes(o.id as string) && assessment(o.assessment) && typeof o.completes_tasks === "boolean" &&
+      object(o.metrics) && metricKeys.every((k) => object(o.metrics) && nullableNum(o.metrics[k])) && Array.isArray(o.checks) &&
+      object(o.return) && Array.isArray(o.return.xy_m) && o.return.xy_m.every(pair)) &&
+    Array.isArray(x.options) && x.options.length >= 1 && (x.options[0] as Obj).id === "continue";
 }

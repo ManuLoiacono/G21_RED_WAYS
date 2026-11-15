@@ -55,7 +55,8 @@ export interface LayersPanel {
 }
 
 export function createLayersPanel(root: HTMLElement, layers: LayerDef[]): LayersPanel {
-  let open = !window.matchMedia("(max-width: 900px)").matches;
+  // Starts closed (the "Layers" pill); the user opens it when needed.
+  let open = false;
   /** Rows whose details are expanded. */
   const expanded = new Set<string>();
   const toggleListeners: ((open: boolean) => void)[] = [];

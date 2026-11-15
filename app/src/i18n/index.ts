@@ -7,15 +7,18 @@ import { es, type MessageKey } from "./es";
  * All user-facing text goes through `t(key)`. Code, identifiers and comments are always English;
  * contract wire values (template ids, `class`, `kind`, …) are data and are never translated.
  *
- * The initial language comes from, in order: `?lang=` in the URL, the last choice saved in
- * localStorage, and the browser language. `setLanguage` switches it and notifies every module
+ * The initial language comes from, in order: `?lang=` in the URL, a choice made earlier in this
+ * same tab (sessionStorage, so a reload keeps it), and otherwise English. A new visit always
+ * starts in English. `setLanguage` switches it and notifies every module
  * registered with `onLanguageChange`, which re-render their own text.
  */
 
 export type Language = "es" | "en";
 export const LANGUAGES: Language[] = ["es", "en"];
 
-const STORAGE_KEY = "marswalk.lang";
+const STORAGE_KEY = "redways.lang";
+/** Previous persistent key: a Spanish choice saved there must not override the English default. */
+const LEGACY_KEY = "marswalk.lang";
 const dictionaries: Record<Language, Record<MessageKey, string>> = { es, en };
 const listeners: ((lang: Language) => void)[] = [];
 
@@ -27,12 +30,14 @@ function detectLanguage(): Language {
   const fromUrl = new URLSearchParams(location.search).get("lang");
   if (isLanguage(fromUrl)) return fromUrl;
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_KEY);
+    const saved = sessionStorage.getItem(STORAGE_KEY);
     if (isLanguage(saved)) return saved;
   } catch {
-    // Storage blocked (private window, sandbox): fall back to the browser language.
+    // Storage blocked (private window, sandbox): fall back to the default.
   }
-  return navigator.language.toLowerCase().startsWith("es") ? "es" : "en";
+  // Default is English; Spanish only when chosen (ES button, saved) or requested with ?lang=es.
+  return "en";
 }
 
 let current: Language = detectLanguage();
@@ -83,7 +88,7 @@ export function setLanguage(next: Language) {
   current = next;
   document.documentElement.lang = next;
   try {
-    localStorage.setItem(STORAGE_KEY, next);
+    sessionStorage.setItem(STORAGE_KEY, next);
   } catch {
     // Without storage the choice lasts until the page is closed.
   }
