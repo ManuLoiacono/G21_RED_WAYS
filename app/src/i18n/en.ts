@@ -2,6 +2,7 @@ import type { MessageKey } from "./es";
 
 /** English UI text. Same keys as `es.ts` (the compiler checks that none is missing). */
 export const en: Record<MessageKey, string> = {
+  "nav.poi.lookout": "Photo-sector lookout",
   "context.environment": "Environmental context",
   "context.pressure": "Pressure",
   "context.minimum": "Daily minimum temperature",

@@ -3,6 +3,7 @@
  * Values may contain trusted inline HTML (<strong>) and `{name}` placeholders.
  */
 export const es = {
+  "nav.poi.lookout": "Mirador del sector fotográfico",
   "context.environment": "Contexto ambiental",
   "context.pressure": "Presión",
   "context.minimum": "Temperatura mínima diaria",

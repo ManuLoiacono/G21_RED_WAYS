@@ -1,0 +1,357 @@
+{
+  "pois": [
+    {
+      "id": "base",
+      "lonlat": [
+        137.3751012600287,
+        -4.811074715231375
+      ],
+      "classification": "hypothetical",
+      "role": "base"
+    },
+    {
+      "id": "sample",
+      "lonlat": [
+        137.3700489010339,
+        -4.8134984820464455
+      ],
+      "classification": "hypothetical",
+      "role": "destination"
+    },
+    {
+      "id": "control",
+      "lonlat": [
+        137.371858191755,
+        -4.810835752305946
+      ],
+      "classification": "hypothetical",
+      "role": "destination"
+    },
+    {
+      "id": "lookout",
+      "lonlat": [
+        137.37267749321364,
+        -4.814044683018855
+      ],
+      "classification": "hypothetical",
+      "role": "destination"
+    }
+  ],
+  "routes": [
+    {
+      "destination": "sample",
+      "team": {
+        "catalog_version": "synthetic-team-v1",
+        "humans": [
+          {
+            "profile_id": "explorer_01",
+            "payload_kg": 0
+          }
+        ],
+        "robots": [
+          {
+            "profile_id": "support_rover",
+            "payload_kg": 0
+          }
+        ]
+      },
+      "metrics": {
+        "daylight_departure_margin_s": -6.185316999995848,
+        "daylight_reserved_return_margin_s": 38954.22387122075,
+        "elapsed_s": 3303.5953127792422,
+        "estimated_return_offset_s": 91291.59531277925,
+        "mission_margin_s": 16496.40468722076,
+        "outbound_s": 1367.6870999391656,
+        "participant_margins": [
+          {
+            "kind": "human",
+            "margin_s": 16496.40468722076,
+            "max_sortie_s": 21600.0,
+            "model_id": "synthetic_constant_speed_v1",
+            "participant_id": "explorer_01"
+          },
+          {
+            "kind": "robot",
+            "margin_s": 12896.404687220758,
+            "max_sortie_s": 18000.0,
+            "model_id": "synthetic_constant_speed_v1",
+            "participant_id": "support_rover"
+          }
+        ],
+        "reserve_s": 1800.0,
+        "reserved_deadline_offset_s": 93091.59531277925,
+        "reserved_total_s": 5103.595312779242,
+        "return_s": 1335.9082128400767,
+        "tasks_s": 600.0,
+        "temporal_budget_limiting_constraints": [
+          "participants[1].max_sortie_s"
+        ],
+        "temporal_budget_limiting_margin_s": 12896.404687220758,
+        "temporal_budget_limiting_participant_ids": [
+          "support_rover"
+        ],
+        "time_budget_s": 21600.0,
+        "unavailable_totals_reason": null
+      },
+      "outbound": "found",
+      "return": "found"
+    },
+    {
+      "destination": "control",
+      "team": {
+        "catalog_version": "synthetic-team-v1",
+        "humans": [
+          {
+            "profile_id": "explorer_01",
+            "payload_kg": 0
+          }
+        ],
+        "robots": [
+          {
+            "profile_id": "support_rover",
+            "payload_kg": 0
+          }
+        ]
+      },
+      "metrics": {
+        "daylight_departure_margin_s": -6.185316999995848,
+        "daylight_reserved_return_margin_s": 40037.239578584165,
+        "elapsed_s": 2220.5796054158263,
+        "estimated_return_offset_s": 90208.57960541583,
+        "mission_margin_s": 17579.420394584173,
+        "outbound_s": 835.8624047636946,
+        "participant_margins": [
+          {
+            "kind": "human",
+            "margin_s": 17579.420394584173,
+            "max_sortie_s": 21600.0,
+            "model_id": "synthetic_constant_speed_v1",
+            "participant_id": "explorer_01"
+          },
+          {
+            "kind": "robot",
+            "margin_s": 13979.420394584173,
+            "max_sortie_s": 18000.0,
+            "model_id": "synthetic_constant_speed_v1",
+            "participant_id": "support_rover"
+          }
+        ],
+        "reserve_s": 1800.0,
+        "reserved_deadline_offset_s": 92008.57960541583,
+        "reserved_total_s": 4020.5796054158263,
+        "return_s": 784.7172006521316,
+        "tasks_s": 600.0,
+        "temporal_budget_limiting_constraints": [
+          "participants[1].max_sortie_s"
+        ],
+        "temporal_budget_limiting_margin_s": 13979.420394584173,
+        "temporal_budget_limiting_participant_ids": [
+          "support_rover"
+        ],
+        "time_budget_s": 21600.0,
+        "unavailable_totals_reason": null
+      },
+      "outbound": "found",
+      "return": "found"
+    },
+    {
+      "destination": "lookout",
+      "team": {
+        "catalog_version": "synthetic-team-v1",
+        "humans": [
+          {
+            "profile_id": "explorer_01",
+            "payload_kg": 0
+          }
+        ],
+        "robots": [
+          {
+            "profile_id": "support_rover",
+            "payload_kg": 0
+          }
+        ]
+      },
+      "metrics": {
+        "daylight_departure_margin_s": -6.185316999995848,
+        "daylight_reserved_return_margin_s": 38563.638781892485,
+        "elapsed_s": 3694.1804021075027,
+        "estimated_return_offset_s": 91682.18040210751,
+        "mission_margin_s": 16105.819597892498,
+        "outbound_s": 1542.6750124021507,
+        "participant_margins": [
+          {
+            "kind": "human",
+            "margin_s": 16105.819597892498,
+            "max_sortie_s": 21600.0,
+            "model_id": "synthetic_constant_speed_v1",
+            "participant_id": "explorer_01"
+          },
+          {
+            "kind": "robot",
+            "margin_s": 12505.819597892498,
+            "max_sortie_s": 18000.0,
+            "model_id": "synthetic_constant_speed_v1",
+            "participant_id": "support_rover"
+          }
+        ],
+        "reserve_s": 1800.0,
+        "reserved_deadline_offset_s": 93482.18040210751,
+        "reserved_total_s": 5494.180402107502,
+        "return_s": 1551.505389705352,
+        "tasks_s": 600.0,
+        "temporal_budget_limiting_constraints": [
+          "participants[1].max_sortie_s"
+        ],
+        "temporal_budget_limiting_margin_s": 12505.819597892498,
+        "temporal_budget_limiting_participant_ids": [
+          "support_rover"
+        ],
+        "time_budget_s": 21600.0,
+        "unavailable_totals_reason": null
+      },
+      "outbound": "found",
+      "return": "found"
+    },
+    {
+      "destination": "sample",
+      "team": {
+        "catalog_version": "synthetic-team-v1",
+        "humans": [
+          {
+            "profile_id": "explorer_02",
+            "payload_kg": 0
+          }
+        ],
+        "robots": []
+      },
+      "metrics": {
+        "daylight_departure_margin_s": -6.185316999995848,
+        "daylight_reserved_return_margin_s": 40170.676403372694,
+        "elapsed_s": 2087.142780627301,
+        "estimated_return_offset_s": 90075.1427806273,
+        "mission_margin_s": 17712.857219372698,
+        "outbound_s": 734.0389617661068,
+        "participant_margins": [
+          {
+            "kind": "human",
+            "margin_s": 17712.857219372698,
+            "max_sortie_s": 21600.0,
+            "model_id": "synthetic_constant_speed_v1",
+            "participant_id": "explorer_02"
+          }
+        ],
+        "reserve_s": 1800.0,
+        "reserved_deadline_offset_s": 91875.1427806273,
+        "reserved_total_s": 3887.142780627301,
+        "return_s": 753.103818861194,
+        "tasks_s": 600.0,
+        "temporal_budget_limiting_constraints": [
+          "time_budget_s",
+          "participants[0].max_sortie_s"
+        ],
+        "temporal_budget_limiting_margin_s": 17712.857219372698,
+        "temporal_budget_limiting_participant_ids": [
+          "explorer_02"
+        ],
+        "time_budget_s": 21600.0,
+        "unavailable_totals_reason": null
+      },
+      "outbound": "found",
+      "return": "found"
+    },
+    {
+      "destination": "control",
+      "team": {
+        "catalog_version": "synthetic-team-v1",
+        "humans": [
+          {
+            "profile_id": "explorer_02",
+            "payload_kg": 0
+          }
+        ],
+        "robots": []
+      },
+      "metrics": {
+        "daylight_departure_margin_s": -6.185316999995848,
+        "daylight_reserved_return_margin_s": 40804.077183270594,
+        "elapsed_s": 1453.7420007294054,
+        "estimated_return_offset_s": 89441.7420007294,
+        "mission_margin_s": 18346.257999270594,
+        "outbound_s": 411.53450056849107,
+        "participant_margins": [
+          {
+            "kind": "human",
+            "margin_s": 18346.257999270594,
+            "max_sortie_s": 21600.0,
+            "model_id": "synthetic_constant_speed_v1",
+            "participant_id": "explorer_02"
+          }
+        ],
+        "reserve_s": 1800.0,
+        "reserved_deadline_offset_s": 91241.7420007294,
+        "reserved_total_s": 3253.7420007294054,
+        "return_s": 442.2075001609143,
+        "tasks_s": 600.0,
+        "temporal_budget_limiting_constraints": [
+          "time_budget_s",
+          "participants[0].max_sortie_s"
+        ],
+        "temporal_budget_limiting_margin_s": 18346.257999270594,
+        "temporal_budget_limiting_participant_ids": [
+          "explorer_02"
+        ],
+        "time_budget_s": 21600.0,
+        "unavailable_totals_reason": null
+      },
+      "outbound": "found",
+      "return": "found"
+    },
+    {
+      "destination": "lookout",
+      "team": {
+        "catalog_version": "synthetic-team-v1",
+        "humans": [
+          {
+            "profile_id": "explorer_02",
+            "payload_kg": 0
+          }
+        ],
+        "robots": []
+      },
+      "metrics": {
+        "daylight_departure_margin_s": -6.185316999995848,
+        "daylight_reserved_return_margin_s": 40613.91747388737,
+        "elapsed_s": 1643.9017101126226,
+        "estimated_return_offset_s": 89631.90171011262,
+        "mission_margin_s": 18156.098289887377,
+        "outbound_s": 524.6158636504823,
+        "participant_margins": [
+          {
+            "kind": "human",
+            "margin_s": 18156.098289887377,
+            "max_sortie_s": 21600.0,
+            "model_id": "synthetic_constant_speed_v1",
+            "participant_id": "explorer_02"
+          }
+        ],
+        "reserve_s": 1800.0,
+        "reserved_deadline_offset_s": 91431.90171011262,
+        "reserved_total_s": 3443.901710112623,
+        "return_s": 519.2858464621403,
+        "tasks_s": 600.0,
+        "temporal_budget_limiting_constraints": [
+          "time_budget_s",
+          "participants[0].max_sortie_s"
+        ],
+        "temporal_budget_limiting_margin_s": 18156.098289887377,
+        "temporal_budget_limiting_participant_ids": [
+          "explorer_02"
+        ],
+        "time_budget_s": 21600.0,
+        "unavailable_totals_reason": null
+      },
+      "outbound": "found",
+      "return": "found"
+    }
+  ]
+}
