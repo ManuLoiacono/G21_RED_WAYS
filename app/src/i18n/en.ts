@@ -21,7 +21,7 @@ export const en: Record<MessageKey, string> = {
   "hud.input.mouse.hint": "Wheel = zoom",
   "hud.input.trackpad": "Touchpad",
   "hud.input.trackpad.hint": "Pinch = zoom · two fingers = tilt and turn",
-  "hud.input.keys": "WASD move · Q/E turn · Shift faster · right-click and drag: rotate",
+  "hud.input.keys": "WASD move · Q/E orbit the center · Shift faster · right-click and drag: rotate",
   "hud.ctx.aria": "Mission being planned",
   "hud.ctx.destination": "Chosen destination",
   "hud.ctx.noDestination": "no destination",

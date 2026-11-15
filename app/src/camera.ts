@@ -307,7 +307,8 @@ export function keepCameraAboveGround(viewer: Cesium.Viewer, minClearance_m = 30
 
 /**
  * Keyboard flight: W/S forward and back, A/D sideways (parallel to the ground, following the view
- * heading), Q/E turn left and right in place. Shift moves faster. Speed grows with the height above
+ * heading), Q/E orbit left and right around the terrain point at the center of the view (same pivot
+ * as the touchpad turn). Shift moves faster. Speed grows with the height above
  * the terrain. Keys are ignored while typing in a form field or when a dialog is open.
  */
 export interface KeyboardMoveOptions {
@@ -323,7 +324,7 @@ export interface KeyboardMoveOptions {
 
 const MOVE_KEYS = new Set(["KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE"]);
 
-export function installKeyboardMove(viewer: Cesium.Viewer, opts: KeyboardMoveOptions = {}) {
+export function installKeyboardMove(viewer: Cesium.Viewer, orbit: Orbit, opts: KeyboardMoveOptions = {}) {
   const speedPerClearance = opts.speedPerClearance ?? 0.8;
   const minSpeed = opts.minSpeed_mps ?? 15;
   const maxSpeed = opts.maxSpeed_mps ?? 4000;
@@ -356,11 +357,13 @@ export function installKeyboardMove(viewer: Cesium.Viewer, opts: KeyboardMoveOpt
       const forward = (pressed.has("KeyW") ? 1 : 0) - (pressed.has("KeyS") ? 1 : 0);
       const right = (pressed.has("KeyD") ? 1 : 0) - (pressed.has("KeyA") ? 1 : 0);
       const turn = (pressed.has("KeyE") ? 1 : 0) - (pressed.has("KeyQ") ? 1 : 0);
-      const heading = camera.heading + turn * turnRate * dt;
+      // E turns the view to the right (heading increases) by orbiting around the view center.
+      if (turn) orbit.nudge(-turn * turnRate * dt, 0);
+      const heading = camera.heading;
       const pitch = camera.pitch;
 
-      let destination = Cesium.Cartesian3.clone(camera.positionWC);
       if (forward || right) {
+        let destination = Cesium.Cartesian3.clone(camera.positionWC);
         // Horizontal axes from the local east-north-up frame and the camera heading.
         const enu = Cesium.Transforms.eastNorthUpToFixedFrame(camera.positionWC);
         const east = Cesium.Matrix4.getColumn(enu, 0, new Cesium.Cartesian4());
@@ -387,11 +390,12 @@ export function installKeyboardMove(viewer: Cesium.Viewer, opts: KeyboardMoveOpt
         // Keep the same height above the ellipsoid; keepCameraAboveGround lifts it over hills.
         const next = ellipsoid.cartesianToCartographic(destination);
         if (next) {
-          next.height = carto.height;
+          const height = ellipsoid.cartesianToCartographic(camera.positionWC)?.height ?? carto.height;
+          next.height = height;
           destination = ellipsoid.cartographicToCartesian(next);
         }
+        camera.setView({ destination, orientation: { heading, pitch, roll: 0 } });
       }
-      camera.setView({ destination, orientation: { heading, pitch, roll: 0 } });
     }
     frame = requestAnimationFrame(tick);
   };

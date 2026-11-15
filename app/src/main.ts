@@ -126,7 +126,7 @@ async function main() {
   viewer.scene.primitives.add(tileset);
   const orbit = installOrbit(viewer);
   installWheelZoom(viewer, { orbit, inputMode: setUpInputModeMenu() });
-  installKeyboardMove(viewer);
+  installKeyboardMove(viewer, orbit);
   keepCameraAboveGround(viewer);
   // For debugging from the browser console (available even if loading never finishes).
   Object.assign(window, { viewer, tileset, Cesium });

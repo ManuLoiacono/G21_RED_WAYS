@@ -22,7 +22,7 @@ export const es = {
   "hud.input.mouse.hint": "Rueda = zoom",
   "hud.input.trackpad": "Pad táctil",
   "hud.input.trackpad.hint": "Pellizco = zoom · dos dedos = inclinar y girar",
-  "hud.input.keys": "WASD mover · Q/E girar · Shift más rápido · clic derecho y arrastrar: rotar",
+  "hud.input.keys": "WASD mover · Q/E girar alrededor del centro · Shift más rápido · clic derecho y arrastrar: rotar",
   "hud.ctx.aria": "Misión en preparación",
   "hud.ctx.destination": "Destino elegido",
   "hud.ctx.noDestination": "sin destino",
