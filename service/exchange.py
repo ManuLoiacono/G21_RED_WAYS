@@ -164,6 +164,8 @@ def encode_response(request: DraftRequest, result):
         response["not_evaluated"] = tuple(v for v in response["not_evaluated"] if v != "communication") + ("radio_performance",)
     candidate = response["alternatives"][0]
     candidate.update(id=result.criteria[0], criterion=result.criteria[0], criteria=result.criteria)
+    from .material import evaluate_material
+    candidate["terrain_context"] = evaluate_material(result.parcel, result.routes, mission.tasks_s)
     if result.optimization is not None:
         candidate["optimization"] = result.optimization
     if result.candidates:
