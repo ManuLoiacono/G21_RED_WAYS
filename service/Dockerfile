@@ -14,6 +14,7 @@ COPY engine/ engine/
 COPY service/ service/
 COPY data/processed/gale/analytical/ data/processed/gale/analytical/
 COPY data/processed/gale/environment/ data/processed/gale/environment/
+COPY data/processed/gale/material/ data/processed/gale/material/
 COPY data/processed/ml/forecasts/ data/processed/ml/forecasts/
 
 # ALLOWED_ORIGIN: the exact HTTPS origin of the hosted app (e.g. https://name.z13.web.core.windows.net).

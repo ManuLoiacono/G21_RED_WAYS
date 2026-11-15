@@ -60,6 +60,10 @@ const communication = (x: unknown) => object(x) && (x.status === "unevaluated" |
   x.status === "evaluated" && ["visible_s", "occluded_s", "unknown_s", "max_without_confirmed_s"].every((k) => num(x[k]) && (x[k] as number) >= 0));
 const environment = (e: unknown) => object(e) && strings(e.missing_required) && strings(e.missing_optional_variables) &&
   Array.isArray(e.decision_records) && e.decision_records.every(object) && object(e.clock_mapping) && object(e.snapshot);
+const terrain = (v: unknown) => object(v) && typeof v.warning === "boolean" && (v.status === "unevaluated" ? str(v.reason) :
+  ["evaluated", "partial"].includes(v.status as string) && num(v.pixel_m) && (v.pixel_m as number) > 0 && object(v.categories) &&
+  ["looser", "intermediate", "firmer", "unknown"].every((band) => object(v.categories) && object(v.categories[band]) &&
+    ["distance_m", "travel_s"].every((unit) => object(v.categories) && object(v.categories[band]) && num(v.categories[band][unit]) && (v.categories[band][unit] as number) >= 0)));
 
 /** Validate all nested values read by the UI; null metrics stay unavailable. */
 export function isDraftResponse(x: unknown): x is PlanResponse {
@@ -73,7 +77,7 @@ export function isDraftResponse(x: unknown): x is PlanResponse {
     (x.input_provenance.geographic_conversion === "available" ? isGeographicAdapter(x.geographic_adapter) : x.input_provenance.geographic_conversion === "unavailable" && x.geographic_adapter === null) &&
     list(x.alternatives, (a) => str(a.id) && str(a.criterion) && assessment(a.assessment) && str(a.search_status) && a.coordinate_frame === "parcel_metric" &&
       leg(a.outbound) && leg(a.return) && metrics(a.metrics) && list(a.checks, check) && (a.communication === undefined || communication(a.communication)) &&
-      (a.environment === undefined || environment(a.environment)) && (a.criteria === undefined || strings(a.criteria)) && (a.optimization === undefined || object(a.optimization) && ["total_positive_ascent_m", "without_confirmed_s", "physical_travel_s"].every((k) => object(a.optimization) && nullableNum(a.optimization[k])))) &&
+      (a.terrain_context === undefined || terrain(a.terrain_context)) && (a.environment === undefined || environment(a.environment)) && (a.criteria === undefined || strings(a.criteria)) && (a.optimization === undefined || object(a.optimization) && ["total_positive_ascent_m", "without_confirmed_s", "physical_travel_s"].every((k) => object(a.optimization) && nullableNum(a.optimization[k])))) &&
     list(x.resolved_team, (p) => str(p.kind) && identity(p.identity) && parameters(p.parameters) && num(p.payload_kg)) &&
     environment(e) &&
     object(locations) && ["origin", "destination"].every((k) => object(locations[k]) && pair(locations[k].effective_xy_m) &&
