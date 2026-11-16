@@ -12,7 +12,7 @@ export function baselineRequest(metadata: ServiceMetadata): PlanRequest {
     schema_version: DRAFT_SCHEMA, request_id: crypto.randomUUID(), revision: 0,
     parcel: { id: parcel.id, version: parcel.version }, scenario: structuredClone(defaults.scenario),
     origin: { type: "poi", poi_id: defaults.origin_poi_id }, destination: { type: "poi", poi_id: defaults.destination_poi_id },
-    team: { ...structuredClone(baseline.team), catalog_version: catalogs.catalog.version },
+    team: { ...structuredClone(defaults.team ?? baseline.team), catalog_version: catalogs.catalog.version },
     mission: { template_id: template.id, template_version: catalogs.mission_templates.version, tasks: structuredClone(template.tasks), time_budget_s: template.time_budget_s, reserve_s: template.reserve_s, departure_utc: defaults.departure_utc },
     criterion: "comparison",
   };

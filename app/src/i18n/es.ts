@@ -3,7 +3,7 @@
  * Values may contain trusted inline HTML (<strong>) and `{name}` placeholders.
  */
 export const es = {
-  "nav.poi.lookout": "Mirador del sector fotográfico",
+  "nav.poi.lookout": "Parada sol 4571 · larga",
   "demo.duplicate": "Nombre de tarea duplicado: {name}",
   "demo.selection": "Inicialmente se selecciona la ruta calculada más rápida. Compara ascenso, visibilidad geométrica y márgenes antes de elegir otra ruta.",
   "demo.activity": "Duración de actividad",
@@ -461,7 +461,7 @@ export const es = {
   "nav.syntheticMode": "Modo sintético de desarrollo",
   "nav.galeMode": "Modo de desarrollo sobre terreno Gale",
   "nav.hypothetical": "Ubicación hipotética",
-  "nav.poi.control": "Control del sector fotográfico",
+  "nav.poi.control": "Parada sol 4844 · media",
   "nav.scenario.gale_development_missing_daylight": "Reloj de desarrollo supuesto · sin evidencia de luz diurna en Gale",
   "nav.provenance": "Procedencia del cálculo",
   "nav.locations": "Solo ubicaciones registradas por el servicio. Los panoramas son observaciones ópticas, no destinos de planificación.",
@@ -485,8 +485,8 @@ export const es = {
   "nav.task.terrain_survey": "Relevamiento del terreno",
   "nav.task.visual_reconnaissance": "Reconocimiento visual",
   "nav.task.environment_recording": "Registro ambiental",
-  "nav.poi.base": "Base",
-  "nav.poi.sample": "Muestra",
+  "nav.poi.base": "Base · Nevado Sajama",
+  "nav.poi.sample": "Parada sol 4818 · corta",
   "nav.poi.far_target": "Objetivo lejano",
   "nav.poi.missing": "Sin cobertura (prueba de error)",
   "nav.poi.excluded": "Celda excluida (prueba de error)",

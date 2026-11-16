@@ -4,7 +4,7 @@
   "revision": 0,
   "parcel": {
     "id": "gale_hirise_019698",
-    "version": "native2-photo-v3"
+    "version": "native2-photo-v4"
   },
   "scenario": {
     "id": "gale_historical_replay",
@@ -23,13 +23,13 @@
     "catalog_version": "synthetic-team-v1",
     "humans": [
       {
-        "profile_id": "explorer_01",
+        "profile_id": "explorer_02",
         "payload_kg": 0
       }
     ],
     "robots": [
       {
-        "profile_id": "support_rover",
+        "profile_id": "transport_rover",
         "payload_kg": 0
       }
     ]
