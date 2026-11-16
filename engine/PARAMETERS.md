@@ -7,7 +7,7 @@ All values in the catalog are **scenario assumptions for deterministic developme
 | Parameter | Scope | Unit | Current assumption | Limitation |
 | --- | --- | --- | --- | --- |
 | `flat_speed_m_s` | Per participant | m/s | Four humans: 0.40, 0.50, 0.35, 0.45; two robots: 0.30, 0.38 | Constant reference speed only; no terrain or load effect is claimed. |
-| `max_ascent_deg`, `max_descent_deg` | Per participant, directed edge | degrees | Humans: 14/14, 15/15, 13/13, 16/16; robots: 8/8, 10/10 | Synthetic traversal gates, not injury, rollover, or hardware limits. |
+| `max_ascent_deg`, `max_descent_deg` | Per participant, directed edge | degrees | Humans: 14/14, 15/15, 13/13, 17/17; robots: 8/8, 15/15 | Synthetic traversal gates, not injury, rollover, or hardware limits. The 15–17 degree profiles (Morgan, Jordan, Transport Rover) let the Gale terrain around Nevado Sajama connect: references are the Mark III suit test at 30 % grade (~16.7 degrees, Earth) and Curiosity's own traverse of these stops; not Mars operational limits. |
 | `carrying_limit_kg` | Additional assigned payload per participant | kg | Humans: 10, 9, 14, 8; robots: 20, 40 | Excludes body mass, suit and fixed equipment. No load-to-speed model. |
 | `max_sortie_s` | Complete sortie per participant | s | Humans: 21600; robots: 18000 | Planning availability only; not an oxygen, battery, or fatigue estimate. |
 | Directional speed coefficients | Synthetic movement strategies | per degree | Human ascent 0.03, descent 0.01; robot ascent 0.02, descent 0.04 | `speed_m_s = flat_speed_m_s / (1 + coefficient * abs(signed_grade_deg))`; assumed response, not measured performance. |

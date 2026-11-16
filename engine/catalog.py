@@ -55,9 +55,9 @@ CATALOG = Catalog(
         CatalogEntry("human", Identity("explorer_01", "Avery Stone", "explorer_01", "geology", ("steady pace",), 34, "female", 1.70, 68.0), OperationalDefaults(0.40, 14.0, 14.0, 10.0, 21600.0)),
         CatalogEntry("human", Identity("explorer_02", "Morgan Vale", "explorer_02", "topography", ("faster pace",), 38, "male", 1.78, 76.0), OperationalDefaults(0.50, 15.0, 15.0, 9.0, 21600.0)),
         CatalogEntry("human", Identity("explorer_03", "Riley Chen", "explorer_03", "environmental measurement", ("greater carrying capacity",), 31, "nonbinary", 1.74, 72.0), OperationalDefaults(0.35, 13.0, 13.0, 14.0, 21600.0)),
-        CatalogEntry("human", Identity("explorer_04", "Jordan Reed", "explorer_04", "reconnaissance", ("moderate pace",), 42, "female", 1.66, 64.0), OperationalDefaults(0.45, 16.0, 16.0, 8.0, 21600.0)),
+        CatalogEntry("human", Identity("explorer_04", "Jordan Reed", "explorer_04", "reconnaissance", ("moderate pace",), 42, "female", 1.66, 64.0), OperationalDefaults(0.45, 17.0, 17.0, 8.0, 21600.0)),
         CatalogEntry("robot", Identity("support_rover", "Light Support Rover", "support_rover", "support", ("narrow grade range",)), OperationalDefaults(0.30, 8.0, 8.0, 20.0, 18000.0)),
-        CatalogEntry("robot", Identity("transport_rover", "Transport Rover", "transport_rover", "transport", ("greater carrying capacity",)), OperationalDefaults(0.38, 10.0, 10.0, 40.0, 18000.0)),
+        CatalogEntry("robot", Identity("transport_rover", "Transport Rover", "transport_rover", "transport", ("greater carrying capacity",)), OperationalDefaults(0.38, 15.0, 15.0, 40.0, 18000.0)),
     ),
 )
 

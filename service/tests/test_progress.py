@@ -57,7 +57,8 @@ class ProgressServiceTests(unittest.TestCase):
             self.skipTest("Verified ignored real archive is unavailable.")
         planner = PreparedPlanner(gale_registry(manifest))
         plan = plan_draft(planner, _json.loads(Path("service/examples/gale-comparison.request.json").read_text()))
-        fast, ascent = plan["alternatives"]
+        fast = next(a for a in plan["alternatives"] if "fastest" in a["criteria"])
+        ascent = next(a for a in plan["alternatives"] if "lowest_relative_effort" in a["criteria"])
         payload = {**body(plan, index=0), "alternative_id": fast["id"], "return_alternative_id": ascent["id"]}
         result = reevaluate(planner, payload)
         expected = fast["metrics"]["outbound_s"] + fast["metrics"]["tasks_s"] + ascent["metrics"]["return_s"]

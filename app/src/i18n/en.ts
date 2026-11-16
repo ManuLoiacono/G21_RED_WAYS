@@ -2,7 +2,7 @@ import type { MessageKey } from "./es";
 
 /** English UI text. Same keys as `es.ts` (the compiler checks that none is missing). */
 export const en: Record<MessageKey, string> = {
-  "nav.poi.lookout": "Photo-sector lookout",
+  "nav.poi.lookout": "Sol 4571 stop · long",
   "demo.duplicate": "Duplicate task name: {name}",
   "demo.selection": "The fastest calculated route is selected initially. Compare ascent, geometric visibility and limiting margins before choosing another route.",
   "demo.activity": "Activity duration",
@@ -458,7 +458,7 @@ export const en: Record<MessageKey, string> = {
   "nav.syntheticMode": "Synthetic development mode",
   "nav.galeMode": "Gale terrain development mode",
   "nav.hypothetical": "Hypothetical location",
-  "nav.poi.control": "Photo-sector control",
+  "nav.poi.control": "Sol 4844 stop · medium",
   "nav.scenario.gale_development_missing_daylight": "Assumed development clock · no Gale daylight evidence",
   "nav.provenance": "Calculation provenance",
   "nav.locations": "Only service-registered locations. Panoramas are optical observations, not planning destinations.",
@@ -482,8 +482,8 @@ export const en: Record<MessageKey, string> = {
   "nav.task.terrain_survey": "Terrain survey",
   "nav.task.visual_reconnaissance": "Visual reconnaissance",
   "nav.task.environment_recording": "Environmental recording",
-  "nav.poi.base": "Base",
-  "nav.poi.sample": "Sample",
+  "nav.poi.base": "Base · Nevado Sajama",
+  "nav.poi.sample": "Sol 4818 stop · short",
   "nav.poi.far_target": "Far target",
   "nav.poi.missing": "Missing coverage (error case)",
   "nav.poi.excluded": "Excluded cell (error case)",

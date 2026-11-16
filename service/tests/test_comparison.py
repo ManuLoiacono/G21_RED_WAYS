@@ -24,14 +24,18 @@ class ComparisonServiceTests(unittest.TestCase):
         planner = PreparedPlanner(gale_registry(manifest))
         payload = json.loads(Path("service/examples/gale-comparison.request.json").read_text())
         response = plan_draft(planner, payload)
-        self.assertEqual(len(response["alternatives"]), 2)
-        fast, ascent = response["alternatives"]
+        # Distinct geometries depend on the destination; compare the time and ascent optima by criterion.
+        self.assertGreaterEqual(len(response["alternatives"]), 2)
+        fast = next(a for a in response["alternatives"] if "fastest" in a["criteria"])
+        ascent = next(a for a in response["alternatives"] if "lowest_relative_effort" in a["criteria"])
+        self.assertIsNot(fast, ascent)
         self.assertLess(fast["metrics"]["elapsed_s"], ascent["metrics"]["elapsed_s"])
         end = next(x["record"]["valid_to_utc"] for x in fast["environment"]["decision_records"] if x["record"]["kind"] == "forecast")
         departure = utc(end, "target") - timedelta(seconds=fast["metrics"]["reserved_total_s"] + (ascent["metrics"]["reserved_total_s"] - fast["metrics"]["reserved_total_s"]) / 2)
         payload["mission"]["departure_utc"] = departure.isoformat().replace("+00:00", "Z")
         response = plan_draft(planner, payload)
-        fast, ascent = response["alternatives"]
+        fast = next(a for a in response["alternatives"] if "fastest" in a["criteria"])
+        ascent = next(a for a in response["alternatives"] if "lowest_relative_effort" in a["criteria"])
         count = lambda a: sum(x["record"]["kind"] == "forecast" for x in a["environment"]["decision_records"])
         self.assertEqual(count(fast), 4)
         self.assertLess(count(ascent), count(fast))

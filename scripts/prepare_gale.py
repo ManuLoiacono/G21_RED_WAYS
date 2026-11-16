@@ -89,7 +89,7 @@ def prepare(out, factor=2):
               "north": math.degrees((t.f-row0*res)/R_SPHERE),
               "south": math.degrees((t.f-row1*res)/R_SPHERE)}
     manifest = {
-        "format": "gale-analytical-1", "id": "gale_hirise_019698", "version": f"native{factor}-photo-v3",
+        "format": "gale-analytical-1", "id": "gale_hirise_019698", "version": f"native{factor}-photo-v4",
         "fixture": False, "source": source_info, "reviewed_bounds_lonlat": dict(zip(("west", "south", "east", "north"), BBOX)),
         "bounds_lonlat": bounds, "reference_description": "Mars 2015 sphere; east-positive longitude, source planetocentric latitude, native equirectangular meters; east-west distortion about 0.35 percent.",
         "grid": {"shape": list(arrays["coverage"].shape), "spacing_m": [res*factor]*2,
@@ -103,8 +103,9 @@ def prepare(out, factor=2):
                         "command": f"python -m scripts.prepare_gale --factor {factor}"},
         "arrays": {"file": "terrain.npz", "sha256": hashes},
         "masks": {"covered_cells": int(arrays["coverage"].sum()), "excluded_cells": 0},
-        "location_selection": 'Inside the convex footprint of all 12 unchanged registered photo markers, using native cells in one unchanged-default-team strongly connected component. Exact photo cells exceed the rover 8-degree block limit. Base is 2.715 m from Navcam sol 4861; all selected points are at most 47.273 m from their nearest marker. Scene registration is inverted once for analytical selection; no distant-region fallback.',
-        "pois": [{'id': 'base', 'lonlat': [137.3817922219407, -4.8137715825326515], 'classification': 'hypothetical', 'role': 'base'}, {'id': 'sample', 'lonlat': [137.38175808437995, -4.812986418634811], 'classification': 'hypothetical', 'role': 'destination'}, {'id': 'control', 'lonlat': [137.38186049706226, -4.813669169850323], 'classification': 'hypothetical', 'role': 'destination'}, {'id': 'lookout', 'lonlat': [137.38189463462305, -4.813191243999465], 'classification': 'hypothetical', 'role': 'destination'}],
+        "location_selection": "Base at the closest valid cell to the Nevado Sajama panorama (Mastcam, sol 4714-4741) that joins the connected terrain for 15-degree teams (46.2 m). Destinations at Navcam 360 stops: sample = sol 4818 (0.8 m, short), control = sol 4844 (3.0 m, medium), lookout = sol 4571 (0.8 m, long). Selected with the default team (Morgan Vale + Transport Rover, 15 degrees); teams limited below 15 degrees cannot connect here (8-degree rover: no route). Scene registration inverted once (+25 m east, -35 m north); photo coordinates unchanged.",
+        "pois": [{'id': 'base', 'lonlat': [137.3819629097446, -4.80916301182794], 'classification': 'hypothetical', 'role': 'base'}, {'id': 'sample', 'lonlat': [137.38298703656787, -4.808480260612428], 'classification': 'hypothetical', 'role': 'destination'}, {'id': 'control', 'lonlat': [137.3820994599877, -4.8111771279137026], 'classification': 'hypothetical', 'role': 'destination'}, {'id': 'lookout', 'lonlat': [137.38339668729716, -4.8010041348025645], 'classification': 'hypothetical', 'role': 'destination'}],
+        "planning_team": {'humans': [{'profile_id': 'explorer_02', 'payload_kg': 0}], 'robots': [{'profile_id': 'transport_rover', 'payload_kg': 0}]},
         "geographic_adapter": {"id": "gale-eqc-scene-v1", "projection": "spherical_equirectangular",
                                "radius_m": R_SPHERE, "central_meridian_deg": 0, "standard_parallel_deg": 0,
                                "latitude_convention": "source_latitude_direct_to_cesium_mars",
